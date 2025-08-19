@@ -9,11 +9,42 @@ export default function signUpForm(){
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        // Handle sign-up logic here
-        console.log({ email, password, confirmPassword, username, firstName, lastName });
-    };
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+    try {
+    const res = await fetch("/api/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        firstName,
+        lastName,
+        username,
+        email,
+        password,
+        confirmPassword,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      // Server returned an error
+      alert(data.error || "Failed to create user");
+      return;
+    }
+
+    // Success
+    alert("User created successfully!");
+    } catch (error) {
+    console.error(error);
+    alert("Request failed. Please try again.");
+  }
+};
+
+
 
     return (
         <div className="sign-up-container">
