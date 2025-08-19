@@ -36,12 +36,16 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 ## Prisma set up 
 
-To set up prisma
+Run:
 npm install prisma --save-dev
 npm install @prisma/client
 
-Change the .env file to:
-# To connect to the database, replace with the actual password
+
+Important: Change the password in the .env file to the one provided in discord!
 DIRECT_URL="postgresql://postgres.noendwgwvonqjilcbqwf:passwordindiscord@aws-1-ap-southeast-2.pooler.supabase.com:5432/postgres?connect_timeout=30"
 
+
 Run -> npx prisma generate
+
+This should sync up the prisma client. 
+
