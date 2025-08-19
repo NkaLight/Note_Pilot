@@ -1,26 +1,124 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: linear-gradient(to bottom, #A3C5FF, white);
+  color: white;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.nav-container{
+  display: flex;
+  justify-content: space-between;
+  margin: 3em 5em;
+  border-radius: 4em;
+  padding:1em;
+  background-color: white;
+  color:black;
+  border-bottom: #0a0a0a none;
+  box-shadow: 0 1em 1em -1em rgba(0, 0, 0, 0.3);
+}
+
+.nav-links-container >a{
+  margin-left: 2em;
+
+}
+.nav-links-container >a:hover{
+  text-decoration: underline;
+}
+
+.nav-account-section >a{
+  padding: 0.5em 1em;
+  margin-right: 1em;
+  width: 100px;
+  color:black;
+  text-align: center;
+  background-color: white;
+  border-radius: 4em;
+  cursor: pointer;
+}
+.nav-account-section >a:hover{
+  padding: 0.5em 1em;
+  margin-right: 1em;
+  width: 100px;
+  color:white;
+  text-align: center;
+  background-color: black;
+  border-radius: 4em;
+  animation: normal;
+  transition: 1s;
+  animation-fill-mode:both;
+}
+.nav-modal-open{
+      position: fixed;
+      top:0;
+      left:0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 1;
+      transition: opacity 0.4s ease-in-out; /* Fade duration */
+      z-index: 1000;
+      margin: 0px auto;
+}
+  .nav-modal-closed{
+    position: fixed;
+    width: 100%;
+    top:0;
+    left:0;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    display: none;
+    transition: opacity 0.4s ease-in-out; /* Fade duration */
+    z-index: 1000;
+    margin: 0px auto;
+
+  }
+  .sign-up-container{
+    padding:2em 3em;
+    background-color: white;
+    border-radius: 2em;
+    color:black;
+    width:100%;
+  }
+
+.sign-in-container{
+    padding:2em 3em;
+    background-color: white;
+    border-radius: 2em;
+    color:black;
+  }
+  .sign-up-container >h3{
+    text-align: center;
+  }
+
+
+.landing-page-sections-container{
+  color:black;
+  padding:4em;
+  border-radius: 3em;
+  box-shadow: 5em 5em 5em -5em rgba(0.3, 0.5, 0.3, 0.3);
+  width:50%;
+  
+
+}
+.landing-page-sections-container>h1{
+  font-size: 3em;
+  font-weight: bold;
+  text-shadow: 2px 2px #adb3b5;
+}
+.landing-page-sections-container>p{
+  font-size: 1em;
+  color:rgb(56, 56, 56);
+}
+
+.footer-section{
+  text-align: center;
+  color:black;
+  background-color: pink;
+
 }
