@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       data: {
         username: body.username,
         email: body.email,
-        password: body.password,
+        password: body.password
       },
     });
 
@@ -23,3 +23,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+// user_id            Int                  @id @default(autoincrement())
+//   username           String               @unique @db.VarChar(20)
+//   password           String
+//   email              String               @unique @db.VarChar(255)
+//   date_of_creation   DateTime?            @default(now()) @db.Timestamp(6)
+//   paper              paper[]
+//   preferences        preferences?
+//   session            session[]
+//   twofactorauthtoken twofactorauthtoken[]

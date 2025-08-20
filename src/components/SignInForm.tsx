@@ -4,10 +4,43 @@ import { useState } from "react";
 export default function signInForm(){
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+    try {
+    const res = await fetch("/api/signin", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      // Server returned an error
+      alert(data.error || "Failed to sign in");
+      return;
+    }
+
+    // Success
+    alert("Sign in successful");
+    console.log(res.json)
+    } catch (error) {
+    console.error(error);
+    alert("Request failed. Please try again.");
+  }
+};
+
     return (
         <div className="sign-in-container">
             <h3>Sign In</h3>
-             <form className="space-y-4">
+             <form className="space-y-4" onSubmit={handleSubmit}>
                 <div>
                     <label htmlFor="email" className="block text-sm font-medium">
                         Email

@@ -6,8 +6,6 @@ export default function signUpForm(){
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [username, setUsername] = useState("");
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -19,8 +17,6 @@ const handleSubmit = async (e: React.FormEvent) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        firstName,
-        lastName,
         username,
         email,
         password,
@@ -37,7 +33,8 @@ const handleSubmit = async (e: React.FormEvent) => {
     }
 
     // Success
-    alert("User created successfully!");
+    alert("User logged in successfully!");
+    console.log(res.json)
     } catch (error) {
     console.error(error);
     alert("Request failed. Please try again.");
@@ -51,32 +48,6 @@ const handleSubmit = async (e: React.FormEvent) => {
             <h3>Sign Up form</h3>
              <form onSubmit={handleSubmit} className="space-y-4">
                 <div style={{display:"inline-block"}}>
-                    <div>
-                        <label htmlFor="firstName" className="block text-sm font-medium">
-                        First Name
-                        </label>
-                        <input
-                        id="firstName"
-                        type="text"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                        placeholder="Enter your email"
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="lastName" className="block text-sm font-medium">
-                        Last Name
-                        </label>
-                        <input
-                        id="lastName"
-                        type="text"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        className="mt-1 block w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                        placeholder="Enter your email"
-                        />
-                    </div>
                 </div>
                 <div>
                     <label htmlFor="username" className="block text-sm font-medium">
@@ -88,7 +59,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="mt-1 block w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                    placeholder="Enter your email"
+                    placeholder="Enter your username"
                     />
                 </div>
                 <div>

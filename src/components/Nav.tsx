@@ -45,11 +45,6 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
             <Modal isOpen={activeForm == "signin"} onClose={() => setActiveForm(null)}>
                 <SignInForm />
             </Modal>
-
-            {/* Sign Up Modal */}
-            <Modal isOpen={activeForm == "signup"} onClose={() => setActiveForm(null)}>
-                <SignUpForm />
-            </Modal>
         </>
     );
 }
