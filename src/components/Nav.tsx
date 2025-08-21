@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import SignInForm from "@/components/SignInForm";
 import SignUpForm from "@/components/SignUpForm";
@@ -21,7 +21,7 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
         <nav className="nav-container">
         <div>NOTE_PILOT LOGO</div>
         <div className="nav-links-container">
-            <a href="">Dashboard</a>
+        <Link href="/ai/dashboard">Dashboard</Link>
             <a href="">About us</a>
             <a href="">Pricing</a>
         </div>
@@ -32,7 +32,7 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
             <nav className="nav-container">
                 <div>NOTE_PILOT LOGO</div>
                 <div className="nav-links-container" >
-                    <a href="">Dashboard</a>
+                <Link href="/ai/dashboard">Dashboard</Link>
                     <a href="">About use</a>
                     <a href="">Pricing</a>
                 </div>
