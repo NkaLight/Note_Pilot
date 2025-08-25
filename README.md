@@ -49,3 +49,7 @@ Run -> npx prisma generate
 
 This should sync up the prisma client. 
 
+## Python set up
+
+For the pdf handling, ensure Python is installed and the python interpreter is setup correctly.
+npm run setup_python will install PyPDF2
