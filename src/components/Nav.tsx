@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import SignInForm from "@/components/SignInForm";
-import SignUpForm from "@/components/SignUpForm";
 import Modal from "@/components/Modal"; // reusable modal from earlier
 
 export default function Nav({ showAuth = true }: { showAuth?: boolean }) {

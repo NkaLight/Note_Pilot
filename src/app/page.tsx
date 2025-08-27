@@ -1,11 +1,14 @@
 "use client";
 
 export default function LandingPage() {
+
+
   return (
-    <div className="min-h-screen flex flex-col items-center p-6">
+    <div className="flex flex-col items-center p-2 my-0">
       <div className="landing-page-sections-container">
-        <h1>Study smarter not harder with AI</h1>
-        <p>Have a specialised AI study assistant to assist you with all your study needs</p>
+        <h1>Study smarter not,harder. With AI by your side</h1>
+        <p>Summarize lectures, generate flashcards, and create practice problems—in minutes.</p>
+        <a className="landing-cta-btn"  href="/signUp">Try for free</a>
       </div>
       <div>
       </div>
