@@ -10,8 +10,6 @@ export default function LandingPage() {
         <p>Summarize lectures, generate flashcards, and create practice problems—in minutes.</p>
         <a className="landing-cta-btn"  href="/signUp">Try for free</a>
       </div>
-      <div>
-      </div>
     </div>
   );
 }
