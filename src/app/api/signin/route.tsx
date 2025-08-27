@@ -13,6 +13,7 @@ const signInSchema = z.object({
 export async function POST(request: Request) {
     
   try {
+    //Find the valid user and validate password with input
     const body = await request.json();
     const parsed = signInSchema.parse(body); // Validate the input against our schema
     const user = await prisma.application_user.findUnique({
@@ -25,8 +26,33 @@ export async function POST(request: Request) {
     }
     if(user){
         console.log(user)
-        return NextResponse.json({ user });
     }
+
+    //Generate and store session storage in DB
+    const token = crypto.randomBytes(32).toString("hex");
+
+    // store session in DB
+    await prisma.session.create({
+      data: {
+        user_id: user.user_id,
+        token,
+        expires_at: new Date(Date.now() + 1000 * 60 * 60 * 1), // 24h
+        last_active_at: new Date(),
+      },
+    });
+
+    // set cookie
+    (await cookies()).set({
+      name: "session_token",
+      value: token,
+      httpOnly: true,
+      path: "/",
+      maxAge: 60 * 60 * 24,
+    });
+    
+    console.log(`user ${user.username} created password: ${user.password}`)
+    return NextResponse.json({ user: { id: user.user_id, email: user.email } });
+
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({ error: error.message }, { status: 500 });
