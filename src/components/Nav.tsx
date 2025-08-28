@@ -10,7 +10,6 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
     const [mounted, setMounted] = useState(false)
 
     const {user} = useSession();
-    console.log(user)
 
     // Only show modals/buttons if the page allows it
     if (!showAuth) return null;
@@ -18,6 +17,24 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
         useEffect(() => {
             setMounted(true);
         }, []);
+    
+    const handleLogout = async () => {
+        try { 
+            console.log("Removing session")
+            const res = await fetch("/api/remove_session", { method: "GET"});
+            if (res.ok) {
+                // Update session state to null
+                // Maybe redirect to home page
+                alert("Logged out successfully")
+
+            } else {
+                alert("Failed to log out.");
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
 
   // Don’t render modal content on server
   if (!mounted) return (
@@ -32,21 +49,40 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
     );
     return (
         <>
-            <nav className="nav-container">
-                <div>NOTE_PILOT LOGO</div>
-                <div className="nav-links-container" >
-                    <a href="">About us</a>
-                    <a href="">Pricing</a>
-                </div>
-                <div className="nav-account-section">
-                    <a onClick={() => setActiveForm("signin")}>Login</a>
-                    <a href="signUp">Sign Up</a>
-                </div>
-            </nav>
-            {/* Sign In Modal */}
-            <Modal isOpen={activeForm == "signin"} onClose={() => setActiveForm(null)}>
-                <SignInForm />
-            </Modal>
+            {user? (
+            
+                    <nav className="nav-container">
+                        <div>Welcome back {user.username}</div>
+                        <div className="nav-links-container" >
+                            <a href="">Courses</a>
+                            <a href="">Summaries</a>
+                        </div>
+                        <div className="nav-account-section">
+                            <a onClick={handleLogout}>Logout</a>
+                            <a href="signUp">Account</a>
+                        </div>
+                    </nav>
+                )
+                :(
+                    <>
+                        <nav className="nav-container">
+                            <div>NOTE_PILOT LOGO</div>
+                            <div className="nav-links-container" >
+                                <a href="">About us</a>
+                                <a href="">Pricing</a>
+                            </div>
+                            <div className="nav-account-section">
+                                <a onClick={() => setActiveForm("signin")}>Login</a>
+                                <a href="signUp">Sign Up</a>
+                            </div>
+                        </nav>
+                        {/* Sign In Modal */}
+                        <Modal isOpen={activeForm == "signin"} onClose={() => setActiveForm(null)}>
+                            <SignInForm />
+                        </Modal>
+                    </>
+                )
+            }
         </>
     );
 }

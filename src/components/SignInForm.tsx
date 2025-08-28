@@ -1,9 +1,13 @@
 "use client";
 import { useState } from "react";
+import Image from "next/image"; // for provider logos
+import {useRouter} from "next/navigation"
 
 export default function signInForm(){
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const router = useRouter();
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -29,7 +33,10 @@ export default function signInForm(){
     }
 
     // Success
+    
     alert("Sign in successful");
+    router.refresh();
+
     console.log(res.json)
     } catch (error) {
     console.error(error);
@@ -73,6 +80,31 @@ export default function signInForm(){
                 >
                     Sign In
                 </button>
+                {/* Divider */}
+                <div className="my-2 flex items-center">
+                    <div className="flex-grow border-t border-gray-300"></div>
+                    <span className="px-3 text-sm text-gray-500">or continue with</span>
+                    <div className="flex-grow border-t border-gray-300"></div>
+                </div>
+    
+                {/* OAuth Buttons */}
+                <div className="flex gap-3">
+                    <button
+                    type="button"
+                    onClick={() => alert("Google auth not implemented yet")}
+                    className="flex-1 flex items-center justify-center"
+                    >
+                    <Image src="/icons/icons8-google.svg" alt="Google" width={32} height={32} />
+                    </button>
+    
+                    <button
+                    type="button"
+                    onClick={() => alert("Apple auth not implemented yet")}
+                    className="flex-1 flex items-center justify-center"
+                    >
+                    <Image src="/icons/icons8-apple-inc.svg" alt="Apple" width={32} height={32} />
+                    </button>
+                </div>
             </form>
         </div>
     )

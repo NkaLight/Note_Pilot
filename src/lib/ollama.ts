@@ -1,6 +1,6 @@
 // src/lib/ollama.ts
 import ollama from "ollama";
-const DEFAULT_MODEL = "llama3.2:1b";
+const DEFAULT_MODEL = "gemma:2b";
 
 export async function summarizeWithOllama(text: string, model = DEFAULT_MODEL) {
   const prompt = `Summarize the following text in clear bullet points:\n\n${text}`;

@@ -4,10 +4,7 @@ import { prisma } from "@/lib/prisma";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-
-    if (body.password !== body.confirmPassword) {
-      return NextResponse.json({ error: "Passwords do not match" }, { status: 400 });
-    }
+    
 
     const user = await prisma.application_user.create({
       data: {
@@ -16,6 +13,7 @@ export async function POST(request: Request) {
         password: body.password
       },
     });
+    
 
     return NextResponse.json({ user });
   } catch (error: any) {
