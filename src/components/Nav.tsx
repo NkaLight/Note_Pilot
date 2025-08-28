@@ -3,10 +3,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import SignInForm from "@/components/SignInForm";
 import Modal from "@/components/Modal"; // reusable modal from earlier
+import { useSession } from "@/context/SessionContext";
 
 export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
     const [activeForm, setActiveForm] = useState<"signin" | "signup" | null>(null);
     const [mounted, setMounted] = useState(false)
+
+    const {user} = useSession();
+    console.log(user)
 
     // Only show modals/buttons if the page allows it
     if (!showAuth) return null;
@@ -31,8 +35,7 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
             <nav className="nav-container">
                 <div>NOTE_PILOT LOGO</div>
                 <div className="nav-links-container" >
-                <Link href="/ai/dashboard">Dashboard</Link>
-                    <a href="">About use</a>
+                    <a href="">About us</a>
                     <a href="">Pricing</a>
                 </div>
                 <div className="nav-account-section">

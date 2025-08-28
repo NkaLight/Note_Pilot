@@ -1,7 +1,7 @@
 // src/app/ai/dashboard/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import ChatUI from "@/components/DashBoard/ChatUI";
 import Summary from "@/components/DashBoard/Summary";
 import Upload from "@/components/DashBoard/Upload";
@@ -12,7 +12,7 @@ type SummaryItem = { id: string; title: string | null; summaryText: string; crea
 export default function DashboardPage() {
   const [items, setItems] = useState<SummaryItem[]>([]);
   const [loading, setLoading] = useState(false);
-
+  
   async function fetchSummaries() {
     setLoading(true);
     try {

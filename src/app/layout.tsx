@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Nav from "@/components/Nav";
 import "./globals.css";
 import Footer from "@/components/Footer";
+import { SessionProvider } from "@/context/SessionContext";
 
 export const metadata: Metadata = {
   title: "Note Pilot",
@@ -17,11 +18,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Nav/>
-        <main>
-          {children}
-        </main>
-        <Footer/>
+        <SessionProvider>
+          <Nav/>
+          <main>
+            {children}
+          </main>
+          <Footer/>
+        </SessionProvider>
       </body>
     </html>
   );
