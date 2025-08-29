@@ -1,7 +1,32 @@
 // src/app/ai/dashboard/layout.tsx
 import type { ReactNode } from "react";
+import {redirect} from "next/navigation";
+import { cookies } from "next/headers";
 
-export default function AIPageLayout({ children }: { children: ReactNode }) {
+export default async function AIPageLayout({ children }: { children: ReactNode }) {
+
+  const cookieStore = cookies()
+  //Validate session 
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/validate_session`, {
+    headers: {
+      Cookie: cookieStore.toString(), // 🔥 forward session cookies
+    },
+    cache: "no-store", // don't cache session checks
+  })
+  console.log(res.body)
+  if(!res.ok){ //check valid response
+    console.log("Response not okay")
+    console.log(res.json)
+    redirect("/") //In the future we can direct the user to a 404 page, depends
+  }
+
+  const { user } = await res.json();
+  console.log("USER: ", user)
+
+  if (!user) { //check valid user.
+    redirect("/")
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Nav is a client component; importing in a server layout is fine */}

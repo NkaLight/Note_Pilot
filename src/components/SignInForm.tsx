@@ -2,11 +2,18 @@
 import { useState } from "react";
 import Image from "next/image"; // for provider logos
 import {useRouter} from "next/navigation"
+import { useSession } from "@/context/SessionContext";
 
-export default function signInForm(){
+// Define the type for the props
+interface SignInFormProps {
+  closeForm: () => void;
+}
+
+export default function signInForm({closeForm}: SignInFormProps){
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const router = useRouter();
+    const {setUser} = useSession()
+
 
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -33,11 +40,10 @@ export default function signInForm(){
     }
 
     // Success
+    setUser(data)
+    closeForm()
     
-    alert("Sign in successful");
-    router.refresh();
-
-    console.log(res.json)
+    
     } catch (error) {
     console.error(error);
     alert("Request failed. Please try again.");

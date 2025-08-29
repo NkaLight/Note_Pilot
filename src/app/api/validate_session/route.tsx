@@ -35,6 +35,7 @@ export async function GET(){
             email: session.application_user.email,
             username: session.application_user.username,
         }
+        console.log("Data to return: ", user)
         return NextResponse.json({user: user}) //Return the user object
     }catch (err){
         console.log(err)

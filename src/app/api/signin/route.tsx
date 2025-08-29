@@ -24,9 +24,6 @@ export async function POST(request: Request) {
     if(!user || user.password !== parsed.password){
         throw new Error(`Invalid credentials ${user}`);
     }
-    if(user){
-        console.log(user)
-    }
 
     //Generate and store session storage in DB
     const token = crypto.randomBytes(32).toString("hex");
@@ -49,8 +46,6 @@ export async function POST(request: Request) {
       path: "/",
       maxAge: 60 * 60 * 24,
     });
-    
-    console.log(`user ${user.username} created password: ${user.password}`)
     return NextResponse.json({ user: { id: user.user_id, email: user.email } });
 
   } catch (error: any) {
