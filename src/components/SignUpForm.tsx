@@ -32,8 +32,6 @@ const handleSubmit = async (e: React.FormEvent) => {
     }
 
     // Success
-    alert("User logged in successfully!");
-    console.log(res.json)
     } catch (error) {
     console.error(error);
     alert("Request failed. Please try again.");

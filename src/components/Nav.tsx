@@ -5,6 +5,7 @@ import SignInForm from "@/components/SignInForm";
 import Modal from "@/components/Modal"; // reusable modal from earlier
 import { useSession } from "@/context/SessionContext";
 import {useRouter} from "next/navigation"
+import Image from "next/image"; // for provider logos
 
 
 
@@ -27,7 +28,7 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
             console.log("Removing session")
             const res = await fetch("/api/remove_session", { method: "GET"});
             if (res.ok) {
-                // Update session state to null
+                // Update session state to null & redirect home.
                 console.log("redirected to home page");
                 setUser(null)
                 router.push("/")
@@ -49,17 +50,6 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
     }
 
 
-  // Don’t render modal content on server
-  if (!mounted) return (
-        <nav className="nav-container">
-        <div>NOTE_PILOT LOGO</div>
-        <div className="nav-links-container">
-        <Link href="/ai/dashboard">Dashboard</Link>
-            <a href="">About us</a>
-            <a href="">Pricing</a>
-        </div>
-        </nav>
-    );
     return (
         <>
             {user? (
@@ -79,7 +69,7 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
                 :(
                     <>
                         <nav className="nav-container">
-                            <div>NOTE_PILOT LOGO</div>
+                            <Image src="/icons/Note_Pilot_logo.svg" alt="Note Pilot Logo" width={48} height={48} className="nav-logo"/>
                             <div className="nav-links-container" >
                                 <a href="">About us</a>
                                 <a href="">Pricing</a>
