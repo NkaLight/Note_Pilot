@@ -28,7 +28,10 @@ body {
   border-bottom: #0a0a0a none;
   box-shadow: 0 1em 1em -1em rgba(0, 0, 0, 0.3);
 }
-
+.nav-links-container >span{
+  color:black;
+  background-color: black;
+}
 .nav-links-container >a{
   margin-left: 2em;
 
@@ -87,8 +90,14 @@ body {
     transition: opacity 0.4s ease-in-out; /* Fade duration */
     z-index: 1000;
     margin: 0px auto;
-
   }
+.nav-dot-menu{
+  display: flex;
+  justify-content: center;
+  margin: 3em 5em;
+  margin-bottom: 0em;
+  padding:0em;
+}
 
 .sign-in-container{
     padding:2em 3em;
