@@ -6,6 +6,7 @@ import Modal from "@/components/Modal"; // reusable modal from earlier
 import { useSession } from "@/context/SessionContext";
 import {useRouter} from "next/navigation"
 import Image from "next/image"; // for provider logos
+import SignUpForm from "@/components/SignUpForm";
 
 // -------------------------
 // Animations
@@ -15,6 +16,12 @@ const navFadeIn = {
   animate: { opacity: 1, y: 0, transition: { duration: 0.5 } },
   exit: { opacity: 0, y: -20, transition: { duration: 0.3 } },
 };
+
+const guestNavFadeIn = {
+    initial: { opacity: 1, y: 0 },
+    animate: { opacity: 1, y: 0, transition: { duration: 5 } },
+    exit: { opacity: 0, y: 0, transition: { duration: 0.3 } },
+}
 
 const dotFade = {
   initial: { opacity: 0, scale: 0.5 },
@@ -29,7 +36,7 @@ const dotFade = {
 const BarebonesNav = () => (
   <nav className="nav-container">
     {/* Empty div so layout stays consistent */}
-    <div className="nav-links-container h-12" />
+    <div className="nav-links-container h-10" />
   </nav>
 );
 
@@ -74,10 +81,10 @@ const UserNav = ({
   </motion.nav>
 );
 
-const GuestNav = ({ onLoginClick }: { onLoginClick: () => void }) => (
+const GuestNav = ({ onLoginClick, onSignUpClick }: { onLoginClick: () => void, onSignUpClick: () => void }) => (
   <motion.nav
     className="nav-container flex items-center justify-between"
-    variants={navFadeIn}
+    variants={guestNavFadeIn}
     initial="initial"
     animate="animate"
     exit="exit"
@@ -95,7 +102,7 @@ const GuestNav = ({ onLoginClick }: { onLoginClick: () => void }) => (
     </div>
     <div className="nav-account-section flex gap-2">
       <a onClick={onLoginClick}>Login</a>
-      <a href="signUp">Sign Up</a>
+      <a onClick={onSignUpClick}>Sign Up</a>
     </div>
   </motion.nav>
 );
@@ -114,7 +121,7 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
 
 // Track inactivity → collapse after 5s without user activity
 useEffect(() => {
-  if (!showAuth || loading) return;
+  if (!showAuth || loading || !user) return;
 
   let timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -180,17 +187,29 @@ useEffect(() => {
         </AnimatePresence>
       ) : (
         <>
-          <GuestNav key={"guest"} onLoginClick={() => setActiveForm("signin")} />
+          <GuestNav key={"guest"} onLoginClick={() => setActiveForm("signin")} onSignUpClick={() => setActiveForm("signup")} />
           {/* Animate Presence for sign/sign up modals */}
           <AnimatePresence mode="wait" initial={false}>
             {activeForm === "signin" && (
                 <Modal
                 isOpen={activeForm === "signin"}
                 onClose={() => setActiveForm(null)}
+                key={"signin"}
             >
                     <SignInForm closeForm={closeSignInModal} />
                 </Modal>
             )
+            }
+            {
+            activeForm === "signup" &&(
+                <Modal
+                    isOpen={activeForm === "signup"}
+                    onClose={() => setActiveForm(null)}
+                    key={"signup"}
+                >
+                        <SignUpForm closeForm={closeSignInModal} />
+                    </Modal>
+                )
             }
             </AnimatePresence>
         </>

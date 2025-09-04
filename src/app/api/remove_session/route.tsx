@@ -36,7 +36,6 @@ export async function GET(){
                 is_used: true
             }
         });
-        console.log(operation)
 
 
         return NextResponse.json({user: null}) //Return the user object

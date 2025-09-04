@@ -82,7 +82,7 @@ export default function signInForm({closeForm}: SignInFormProps){
                 </div>
                 <button
                     type="submit"
-                    className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+                    className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition cursor-pointer"
                 >
                     Sign In
                 </button>
@@ -98,7 +98,7 @@ export default function signInForm({closeForm}: SignInFormProps){
                     <button
                     type="button"
                     onClick={() => alert("Google auth not implemented yet")}
-                    className="flex-1 flex items-center justify-center"
+                    className="flex-1 flex items-center justify-center cursor-pointer"
                     >
                     <Image src="/icons/icons8-google.svg" alt="Google" width={32} height={32} />
                     </button>
@@ -106,7 +106,7 @@ export default function signInForm({closeForm}: SignInFormProps){
                     <button
                     type="button"
                     onClick={() => alert("Apple auth not implemented yet")}
-                    className="flex-1 flex items-center justify-center"
+                    className="flex-1 flex items-center justify-center cursor-pointer"
                     >
                     <Image src="/icons/icons8-apple-inc.svg" alt="Apple" width={32} height={32} />
                     </button>

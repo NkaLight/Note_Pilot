@@ -1,5 +1,5 @@
 "use client";
-
+import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 
 type ModalProps = {
@@ -23,15 +23,18 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
   if (!show) return null;
 
   return (
-    <div
+    <motion.div
       onClick={onClose}
       className={isOpen ? "nav-modal-open" : "nav-modal-closed"}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
       >
         {children}
       </div>
-    </div>
+    </motion.div>
   );
 }

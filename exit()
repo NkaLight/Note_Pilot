@@ -1,0 +1,219 @@
+[33mcommit d43467a36557cffd1d10ee178bbb58ab8d8f1d3b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: Nkanyiso <ndlnk218@student.otago.ac.nz>
+Date:   Tue Sep 2 01:20:30 2025 +1200
+
+    implement some navbar animations using framer-motion references #3
+
+[33mcommit 0e7c745bdc8c79f8db2aa7a1463c50b858d8c99e[m
+Author: Nkanyiso <ndlnk218@student.otago.ac.nz>
+Date:   Sat Aug 30 21:41:28 2025 +1200
+
+    removing uneeded comments references #4
+
+[33mcommit 385c297706c48cb3d83e79c3c2723b0af88bb5f6[m
+Author: Nkanyiso <ndlnk218@student.otago.ac.nz>
+Date:   Sat Aug 30 00:14:26 2025 +1200
+
+    removing console debugs references #4
+
+[33mcommit 55a08ea7811c285b4aadc55a1ec7cb8f00d3375c[m
+Author: Nkanyiso <ndlnk218@student.otago.ac.nz>
+Date:   Sat Aug 30 00:12:43 2025 +1200
+
+    Navbar references user logged in/out references #4
+
+[33mcommit 902273849bd606722fcf33987b3e18ed599b4e62[m
+Author: Nkanyiso <ndlnk218@student.otago.ac.nz>
+Date:   Fri Aug 29 01:26:44 2025 +1200
+
+    upadate DB session row references #4
+
+[33mcommit 66e00b7298f26e0306b153d086263814ab1683dd[m
+Author: Nkanyiso <ndlnk218@student.otago.ac.nz>
+Date:   Thu Aug 28 12:25:24 2025 +1200
+
+    references #3
+
+[33mcommit 09d2e039e84d6d47b302055a1256fdf596975cb5[m
+Merge: e65eac2 1f8316c
+Author: Nkanyiso <ndlnk218@student.otago.ac.nz>
+Date:   Thu Aug 28 11:32:25 2025 +1200
+
+    Merge https://isgb.otago.ac.nz/cosc345/git/ndlnk218/Group_15
+
+[33mcommit 1f8316cdf78712a71bc848ee5f1494041c0d5b58[m
+Author: hubda444 <hubda444@student.otago.ac.nz>
+Date:   Thu Aug 28 08:46:26 2025 +1200
+
+    reference code for amazon s3 file storage, unimplemented
+
+[33mcommit e65eac2b6a3dc1dc235bec017bd5fae78c79a2b2[m
+Author: Nkanyiso <ndlnk218@student.otago.ac.nz>
+Date:   Wed Aug 27 17:45:28 2025 +1200
+
+    fixed the minor bug that resulted with background-color pattern repeating.
+
+[33mcommit 76fa406303d9766d3f7216d0d6a7724b05653c25[m
+Merge: 5863687 620a7bb
+Author: Nkanyiso <ndlnk218@student.otago.ac.nz>
+Date:   Wed Aug 27 17:23:50 2025 +1200
+
+    Merge https://isgb.otago.ac.nz/cosc345/git/ndlnk218/Group_15
+
+[33mcommit 586368792bba764fcfffc329c702c42bda4feeeb[m
+Author: Nkanyiso <ndlnk218@student.otago.ac.nz>
+Date:   Wed Aug 27 17:05:37 2025 +1200
+
+    implemented session storage
+
+[33mcommit 0373eb7a0c4c427f446b266961d4cf1108b5312e[m
+Author: Nkanyiso <ndlnk218@student.otago.ac.nz>
+Date:   Wed Aug 27 17:02:59 2025 +1200
+
+    SignUp form UI v2
+
+[33mcommit 620a7bb33ca82fa3933f63492d7c154e9dd6d07c[m
+Author: hubda444 <hubda444@student.otago.ac.nz>
+Date:   Mon Aug 25 18:46:51 2025 +1200
+
+    fix typo in script and update readme
+
+[33mcommit 641878baf078c361cdf203091574b0b98e563aac[m
+Author: hubda444 <hubda444@student.otago.ac.nz>
+Date:   Mon Aug 25 18:38:56 2025 +1200
+
+    PDF Handling for summarization using the PyPDF2 library
+
+[33mcommit b6303159201e1caeaed436f86b2cba1bf2871bca[m
+Author: HaroldPonce22 <ponha312@student.otago.ac.nz>
+Date:   Thu Aug 21 22:54:38 2025 +1200
+
+    added a connection to the dashboard for testing
+
+[33mcommit 71644fe0f5d246613dbc7a46f8e376c184a013c5[m
+Author: HaroldPonce22 <ponha312@student.otago.ac.nz>
+Date:   Thu Aug 21 22:52:37 2025 +1200
+
+    feat(ui) a loading indicator when uploading text
+
+[33mcommit 4be41cd33d3f8d2836153d14672f478cb8aa6d7a[m
+Author: HaroldPonce22 <ponha312@student.otago.ac.nz>
+Date:   Thu Aug 21 22:51:04 2025 +1200
+
+    feat(ai): wire Ollama helper to gemma3:4b with error surfacing
+
+[33mcommit a20b9d8b898c181ccc99f3382f964bfc5f2f2253[m
+Author: HaroldPonce22 <ponha312@student.otago.ac.nz>
+Date:   Thu Aug 21 22:50:32 2025 +1200
+
+    chore(db): add shared Prisma client helper for @/lib/ollama, also remove if you find a better way to use a route handler
+
+[33mcommit 5631a4bd8cae32debdb55ca03a5e1adfc5c8f4c1[m
+Author: HaroldPonce22 <ponha312@student.otago.ac.nz>
+Date:   Thu Aug 21 22:49:01 2025 +1200
+
+    feat(ui): add Summary styling to match dashboard
+
+[33mcommit 90052813996425ecb99b6547459049230b13e250[m
+Author: HaroldPonce22 <ponha312@student.otago.ac.nz>
+Date:   Thu Aug 21 22:48:40 2025 +1200
+
+    feat(ui): add Upload client component with labeled file button
+
+[33mcommit a88c18ebcb0680610a164411fb8bd0eec5c7f64b[m
+Author: HaroldPonce22 <ponha312@student.otago.ac.nz>
+Date:   Thu Aug 21 22:48:32 2025 +1200
+
+    feat(ui): add ChatUI client component for text summaries
+
+[33mcommit 7bf26c9dada185cf8270261ee850ef21210b8f41[m
+Author: HaroldPonce22 <ponha312@student.otago.ac.nz>
+Date:   Thu Aug 21 22:48:10 2025 +1200
+
+    feat(api): add upload route to summarize .txt files
+
+[33mcommit 205fde1e7e5bfa7f330af347281c9458dd73e409[m
+Author: HaroldPonce22 <ponha312@student.otago.ac.nz>
+Date:   Thu Aug 21 22:48:00 2025 +1200
+
+    feat(api): add summarize route handler (App Router)
+
+[33mcommit 264ba99af8d68ca0e3b8213bab90e57495a4055c[m
+Author: HaroldPonce22 <ponha312@student.otago.ac.nz>
+Date:   Thu Aug 21 22:47:42 2025 +1200
+
+    feat(ai): add dashboard page with chat, upload and list
+
+[33mcommit ef195e62efaf6370344878c1154900c8b7d9e96b[m
+Author: HaroldPonce22 <ponha312@student.otago.ac.nz>
+Date:   Thu Aug 21 22:47:04 2025 +1200
+
+    feat(ai): add dashboard layout shell (server component)
+
+[33mcommit 08a575f4b3f7c68e8476c36710f8e81234199434[m
+Merge: 84e3914 d87e3d8
+Author: Nkanyiso <ndlnk218@student.otago.ac.nz>
+Date:   Wed Aug 20 17:10:30 2025 +1200
+
+    Merge https://isgb.otago.ac.nz/cosc345/git/ndlnk218/Group_15
+
+[33mcommit 84e3914e95d387e0fd0c0c22f25a9e55245026cf[m
+Author: Nkanyiso <ndlnk218@student.otago.ac.nz>
+Date:   Wed Aug 20 17:10:05 2025 +1200
+
+    current SignIn
+
+[33mcommit d87e3d833f55cd6d090c73dec0bdb3362fdcd06a[m
+Author: hubda444 <hubda444@student.otago.ac.nz>
+Date:   Tue Aug 19 20:54:39 2025 +1200
+
+    change database url to match university postgres server and add schema to the repo
+
+[33mcommit aacfb2f5089ef31648abb37e216fa67f7609e17e[m[33m ([m[1;32mmaster[m[33m)[m
+Author: hubda444 <hubda444@student.otago.ac.nz>
+Date:   Tue Aug 19 17:45:14 2025 +1200
+
+    fix readme
+
+[33mcommit bd5f3cc6e0c2787a614a1d61092bacb8439a7b26[m
+Author: hubda444 <hubda444@student.otago.ac.nz>
+Date:   Tue Aug 19 17:17:11 2025 +1200
+
+    database setup using prisma and supabase, rudimentary sign up operations
+
+[33mcommit 4ec7c4d38422e420901b1cbe56807d4c5ba68901[m
+Merge: 337c917 cb04269
+Author: Nkanyiso <ndlnk218@student.otago.ac.nz>
+Date:   Tue Aug 19 13:21:05 2025 +1200
+
+    Merge https://isgb.otago.ac.nz/cosc345/git/ndlnk218/Group_15
+
+[33mcommit 337c917cadd85972e3ddb3b2a5c1e331266fee56[m
+Author: Nkanyiso <ndlnk218@student.otago.ac.nz>
+Date:   Tue Aug 19 13:12:27 2025 +1200
+
+    Nav component
+
+[33mcommit b953bbc217dd30a5774e76bc44c9770e67465ae0[m
+Author: Nkanyiso <ndlnk218@student.otago.ac.nz>
+Date:   Fri Aug 15 02:03:18 2025 +1200
+
+    Initial commit from Create Next App
+
+[33mcommit cb04269569a30af2f939ab002643e459af210535[m
+Author: hubda444 <hubda444@student.otago.ac.nz>
+Date:   Wed Aug 13 16:37:10 2025 +1200
+
+    Test commit
+
+[33mcommit 25506cfe03420ff46b3f914b5af112bf0d4a9a86[m
+Author: HaroldPonce22 <ponha312@student.otago.ac.nz>
+Date:   Wed Jul 30 07:25:56 2025 +1200
+
+     added a comment to make sure i can edit the project
+
+[33mcommit 961aa70eef78e35a3fa079e560063921edd1aa7c[m
+Author: HaroldPonce22 <hponcesa@macalester.edu>
+Date:   Mon Jul 21 15:40:56 2025 +1200
+
+    first commit

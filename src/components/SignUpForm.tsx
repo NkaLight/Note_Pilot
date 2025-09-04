@@ -1,7 +1,14 @@
 "use client";
 import { use, useState } from "react";
 import Image from "next/image"; // for provider logos
-export default function signUpForm(){
+
+// Define the type for the props
+interface SignUpFormProps {
+  closeForm: () => void;
+}
+
+
+export default function signUpForm({closeForm}: SignUpFormProps){
 
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState(""); 
@@ -42,7 +49,8 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     return (
         <div className="sign-up-container">
-          <form onSubmit={handleSubmit} className="sign-up-form-container">
+          <h3>Sign Up</h3>
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="username" className="block text-sm font-medium">
                 Username
@@ -52,7 +60,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="mt-1 block w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter a username"
               />
             </div>
@@ -65,7 +73,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="mt-1 block w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter your email"
               />
             </div>
@@ -78,16 +86,16 @@ const handleSubmit = async (e: React.FormEvent) => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="mt-1 block w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter your password"
               />
             </div>
             <div className="sign-up-button-container">
               <button
                 type="submit"
-                className="signUpBtn"
+                className="w-full bg-blue-600 text-white py-4 rounded-xl hover:bg-blue-700 transition cursor-pointer"
               >
-                Sign Up
+                Create Account
               </button>
             </div>
             {/* Divider */}
@@ -102,7 +110,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               <button
                 type="button"
                 onClick={() => alert("Google auth not implemented yet")}
-                className="flex-1 flex items-center justify-center"
+                className="flex-1 flex items-center justify-center cursor-pointer"
               >
                 <Image src="/icons/icons8-google.svg" alt="Google" width={32} height={32} />
               </button>
@@ -110,7 +118,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               <button
                 type="button"
                 onClick={() => alert("Apple auth not implemented yet")}
-                className="flex-1 flex items-center justify-center"
+                className="flex-1 flex items-center justify-center cursor-pointer"
               >
                 <Image src="/icons/icons8-apple-inc.svg" alt="Apple" width={32} height={32} />
               </button>
