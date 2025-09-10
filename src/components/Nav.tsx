@@ -1,6 +1,6 @@
 "use client";
 import {motion, AnimatePresence} from "framer-motion";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import SignInForm from "@/components/SignInForm";
 import Modal from "@/components/Modal"; // reusable modal from earlier
 import { useSession } from "@/context/SessionContext";
@@ -76,7 +76,7 @@ const UserNav = ({
     </div>
     <div className="nav-account-section flex gap-2">
       <a onClick={handleLogout}>Logout</a>
-      <a href="signUp">Account</a>
+      <a href="/account">Account</a>
     </div>
   </motion.nav>
 );
@@ -207,7 +207,10 @@ useEffect(() => {
                     onClose={() => setActiveForm(null)}
                     key={"signup"}
                 >
-                        <SignUpForm closeForm={closeSignInModal} />
+                        <SignUpForm closeForm={() => {
+                    setActiveForm(null);
+                    router.push("/ai/dashboard");
+                  }} />
                     </Modal>
                 )
             }
