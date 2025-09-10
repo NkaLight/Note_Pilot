@@ -1,4 +1,5 @@
 "use client"
+
 import { cookies } from "next/headers";
 import { redirect, useRouter } from "next/navigation";
 import { useSession } from "@/context/SessionContext";
@@ -10,11 +11,11 @@ export default function LandingPage() {
       const router =  useRouter();
 
       //If session_token exists, redirect to dashboard
-       useEffect(()=>{
+      useEffect(()=>{
         if(user){
           router.push("/ai/dashboard")
         }
-       }, [user, router])
+      }, [user, router])
 
   return (
     <div className="flex flex-col items-center p-2 my-0">

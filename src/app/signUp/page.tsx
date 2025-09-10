@@ -7,7 +7,9 @@ export default function SignIn() {
           <h1>Welcome to note pilot</h1>
           <Image src="/note_pilot_logo.svg" alt="NotePilot Logo" className="sign-up-page-logo"width={50} height={50} />
         </div>
-        <SignUpForm/>
+        <SignUpForm closeForm={function (): void {
+        throw new Error("Function not implemented.");
+      } }/>
       </div>
   );
 }
