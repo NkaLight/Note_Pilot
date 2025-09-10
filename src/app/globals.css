@@ -1,12 +1,27 @@
 @import "tailwindcss";
 
+/* Theme variables */
+:root {
+  --bg-start: #cee0ff;   /* light top */
+  --bg-mid:   #A3C5FF;   /* light middle */
+  --bg-end:   #ffffff;   /* light bottom */
+  --text:     #0a0a0a;   /* light text */
+}
+
+.dark {
+  --bg-start: #06050500;   /* dark top */
+  --bg-mid:   #1c1c1c;   /* dark middle */
+  --bg-end:   #626262;   /* dark bottom */
+  --text:     #ffffff;   /* dark text */
+}
+
 body {
   /* background: linear-gradient(to bottom, #A3C5FF, white); */
   background: radial-gradient(
     ellipse 100% 120% at center top,  /* width 50%, height 100% */
-    #cee0ff,
-    #A3C5FF,
-    white
+    var(--bg-start),
+    var(--bg-mid),
+    var(--bg-end)
   );
 
   color: white;
@@ -28,6 +43,29 @@ body {
   border-bottom: #0a0a0a none;
   box-shadow: 0 1em 1em -1em rgba(0, 0, 0, 0.3);
 }
+.dark .nav-container{
+  background-color: rgba(0, 0, 0, 0.057);
+  color: white;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 20px -12px rgba(0,0,0,0.6);
+}
+
+.dark .nav-links-container > a:hover{
+  text-decoration: underline;
+  color: white;
+}
+
+.dark .nav-account-section > a{
+  color: white;
+  background-color: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.dark .nav-account-section > a:hover{
+  color: black;
+  background-color: white;
+}
+
 .nav-links-container >span{
   color:black;
   background-color: black;
