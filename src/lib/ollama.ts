@@ -14,7 +14,12 @@ export async function summarizeWithOllama(text: string, model = DEFAULT_MODEL) {
       throw new Error("Ollama returned an empty summary");
     }
     return res.message.content;
-  } catch (err: any) {
-    throw new Error(`Ollama chat failed: ${err?.message || err}`);
+  } catch (err: unknown) {
+      // if error is not a valid instance of Error, err.message doesn't work
+      if (err instanceof Error) {
+        throw new Error(`Ollama chat failed: ${err.message}`);
+      } else {
+        throw new Error(`Ollama chat failed: ${String(err)}`)
+      }
   }
 }

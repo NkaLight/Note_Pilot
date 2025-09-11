@@ -1,4 +1,4 @@
-const { execSync } = require("child_process");
+import { execSync } from "child_process";
 
 try {
   console.log("Note you may need to Ctrl-Shift-P in VS Code to change the interpreter. Check pythonExecutable is correct in /summarize/route.ts. (could be Python3")

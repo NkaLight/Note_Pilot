@@ -16,15 +16,16 @@ export default function ThemeInit() {
     const { user } = useSession();
 
     useEffect(() => {
-        // If your session exposes a boolean (preferred)
-        if (user && typeof (user as any).darkMode === "boolean") {
-            setTheme((user as any).darkMode ? "dark" : "light");
+        // If the session is defined, and dark mode exists
+        if (user?.darkMode !== undefined) {
+            // set the theme to dark if user.darkMode is true, false otherwise
+            setTheme(user.darkMode ? "dark" : "light");
             return;
         }
-        // Or if stored under preferences.dark_mode
-        const pref = (user as any)?.preferences;
-        if (pref && typeof pref.dark_mode === "boolean") {
-            setTheme(pref.dark_mode ? "dark" : "light");
+        // If the session is defined, and user.preferences exists
+        if (user?.preferences !== undefined) {
+            // set the theme to dark if user.darkMode is true, false otherwise
+            setTheme(user.preferences?.darkMode ? "dark" : "light");
         }
     }, [user, setTheme]);
 
