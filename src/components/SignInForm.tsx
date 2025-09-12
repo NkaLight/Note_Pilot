@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image"; // for provider logos
-import {useRouter} from "next/navigation"
 import { useSession } from "@/context/SessionContext";
 
 // Define the type for the props

@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 
 export default async function AIPageLayout({ children }: { children: ReactNode }) {
 
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   //Validate session 
   const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/validate_session`, {
     headers: {

@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import SignInForm from "@/components/SignInForm";
 import Modal from "@/components/Modal"; // reusable modal from earlier
 import { useSession } from "@/context/SessionContext";
-import {useRouter} from "next/navigation"
+import {useRouter, } from "next/navigation"
+import Link from 'next/link'
 import Image from "next/image"; // for provider logos
 import SignUpForm from "@/components/SignUpForm";
 
@@ -57,10 +58,17 @@ const DotMenu = ({ onHover }: { onHover: () => void }) => (
 
 const UserNav = ({
   username,
+  popAccountForm,
+  onhoverStart,
+  onhoverEnd,
   handleLogout,
 }: {
   username: string;
-  handleLogout: () => void;
+  popAccountForm: () => void;
+  onhoverStart:() => void;
+  onhoverEnd: () => void;
+  handleLogout:() => void;
+
 }) => (
   <motion.nav
     className="nav-container flex items-center justify-between"
@@ -68,11 +76,23 @@ const UserNav = ({
     initial="initial"
     animate="animate"
     exit="exit"
+    onHoverStart={onhoverStart}
+    onHoverEnd={onhoverEnd}
   >
-    <div>Welcome back {username}</div>
-    <div className="nav-links-container flex gap-4">
-      <a href="">Courses</a>
+    <Image
+      src="/icons/Note_Pilot_logo.svg"
+      alt="Note Pilot Logo"
+      width={48}
+      height={48}
+      className="nav-logo"
+    />
+    <div className="nav-links-container flex gap-2">
+      <a href="">Flash Cards</a>
       <a href="">Summaries</a>
+      <a href="">Study Guides</a>
+      <a href="">Glossary</a>
+      <a href="">Problem Sets</a>
+
     </div>
     <div className="nav-account-section flex gap-2">
       <a onClick={handleLogout}>Logout</a>
@@ -83,7 +103,7 @@ const UserNav = ({
 
 const GuestNav = ({ onLoginClick, onSignUpClick }: { onLoginClick: () => void, onSignUpClick: () => void }) => (
   <motion.nav
-    className="nav-container flex items-center justify-between"
+    className="nav-container flex justify-between"
     variants={guestNavFadeIn}
     initial="initial"
     animate="animate"
@@ -100,7 +120,7 @@ const GuestNav = ({ onLoginClick, onSignUpClick }: { onLoginClick: () => void, o
       <a href="">About us</a>
       <a href="">Pricing</a>
     </div>
-    <div className="nav-account-section flex gap-2">
+    <div className="nav-account-section flex gap-1">
       <a onClick={onLoginClick}>Login</a>
       <a onClick={onSignUpClick}>Sign Up</a>
     </div>
@@ -111,23 +131,24 @@ const GuestNav = ({ onLoginClick, onSignUpClick }: { onLoginClick: () => void, o
 // Main Nav
 // -------------------------
 export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
-  const [activeForm, setActiveForm] = useState<"signin" | "signup" | null>(
+  const [activeForm, setActiveForm] = useState<"signin" | "signup" | "account"| null>(
     null
   );
   const router = useRouter();
   const { user, setUser, loading } = useSession();
   const [collapsed, setCollapsed] = useState(false);
+  const [hover, setHover] = useState(false)
 
 
 // Track inactivity → collapse after 5s without user activity
 useEffect(() => {
-  if (!showAuth || loading || !user) return;
+  if (!showAuth || loading || !user || activeForm || hover) return;
 
   let timer: ReturnType<typeof setTimeout> | null = null;
 
   const start = () => {
     if (timer) clearTimeout(timer);
-    timer = setTimeout(() => setCollapsed(true), 8000);
+    timer = setTimeout(() => setCollapsed(true), 15000);
   };
 
   const onActivity = () => {
@@ -177,46 +198,62 @@ useEffect(() => {
 
   return (
     <>
-      {user ? (
-        <AnimatePresence mode="wait" initial={false}>
-          {collapsed ? (
-            <DotMenu key={"dot"} onHover={() => setCollapsed(false)} />
-          ) : (
-            <UserNav key={"user"} username={user.username} handleLogout={handleLogout} />
-          )}
-        </AnimatePresence>
-      ) : (
-        <>
-          <GuestNav key={"guest"} onLoginClick={() => setActiveForm("signin")} onSignUpClick={() => setActiveForm("signup")} />
-          {/* Animate Presence for sign/sign up modals */}
-          <AnimatePresence mode="wait" initial={false}>
-            {activeForm === "signin" && (
-                <Modal
-                isOpen={activeForm === "signin"}
-                onClose={() => setActiveForm(null)}
-                key={"signin"}
-            >
-                    <SignInForm closeForm={closeSignInModal} />
-                </Modal>
-            )
-            }
-            {
-            activeForm === "signup" &&(
-                <Modal
-                    isOpen={activeForm === "signup"}
-                    onClose={() => setActiveForm(null)}
-                    key={"signup"}
-                >
-                        <SignUpForm closeForm={() => {
-                    setActiveForm(null);
-                    router.push("/ai/dashboard");
-                  }} />
-                    </Modal>
+      {user ? 
+        (
+            <AnimatePresence mode="wait" initial={false}>
+              {collapsed ? 
+                (
+                  <DotMenu key={"dot"} onHover={() => setCollapsed(false)} />
+                ) : 
+                (
+                  <UserNav key={"user"} username={user.username} onhoverStart={() => setHover(true)} onhoverEnd={() => setHover(false)} popAccountForm={()=> setActiveForm("account")} handleLogout={() => handleLogout} />
                 )
-            }
+              }
             </AnimatePresence>
-        </>
-      )}
+        ) : 
+        (
+          <GuestNav key={"guest"} onLoginClick={() => setActiveForm("signin")} onSignUpClick={() => setActiveForm("signup")} />
+        )
+      }
+      {/* Animate Presence for sign/sign/account up modals */}
+      <AnimatePresence mode="wait" initial={false}>
+        {activeForm === "signin" && (
+            <Modal
+            isOpen={activeForm === "signin"}
+            onClose={() => setActiveForm(null)}
+            key={"signin"}
+        >
+                <SignInForm closeForm={closeSignInModal} />
+            </Modal>
+        )
+        }
+        {
+          activeForm === "signup" &&(
+              <Modal
+                  isOpen={activeForm === "signup"}
+                  onClose={() => setActiveForm(null)}
+                  key={"signup"}
+              >
+                  <SignUpForm closeForm={closeSignInModal} />
+              </Modal>
+              )
+        }
+        {
+          activeForm === "account" && user &&(
+            <Modal
+              isOpen={activeForm === "account"}
+              onClose={() => setActiveForm(null)}
+              account={true}  
+              >
+                <div className="flex-gap-2 bg-black">
+                  <Link href={"/account-management"} className="">Account</Link>
+                  <Link href={"/account-management"} className="">Preferences</Link>
+                  <div onClick={handleLogout} className="cu">Logout</div>
+                </div>
+              </Modal>
+            )
+          }
+        </AnimatePresence>
     </>
   );
 }
