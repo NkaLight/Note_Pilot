@@ -2,13 +2,12 @@
 import { useState } from "react";
 import Image from "next/image"; // for provider logos
 import { useSession } from "@/context/SessionContext";
-
 // Define the type for the props
 interface SignInFormProps {
   closeForm: () => void;
 }
 
-export default function SignInForm({closeForm}: SignInFormProps){
+export default function signInForm({closeForm}: SignInFormProps){
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const {setUser} = useSession()

@@ -6,10 +6,6 @@ type User = {
     user_id: number;
     email: string;
     username: string;
-    darkMode?: boolean;
-    preferences?: {
-        darkMode?: boolean;
-    }
 
 }
 
@@ -42,21 +38,15 @@ export const SessionProvider = ({children}: {children: ReactNode}) =>{
                     const respData = await res.json();
                     setUser(respData.user || null)
                 }
-            }catch(err: unknown){
-                if (err instanceof Error) {
-                    console.log("Error calling validate user", err.message)
-                    setUser(null)
-                } else {
-                    console.log("Error calling validate user", String(err))
-                }
+           }catch(err){
+                console.log("Error calling validate user", err)
+		        setUser(null)
             }finally{
                 setLoading(false);
             }
         }
        fetchSession(); 
        console.log("USER:", user)
-       // eslint-disable-next-line react-hooks/exhaustive-deps
-       // disabled because unsure if 
     }, [])
 
     return (

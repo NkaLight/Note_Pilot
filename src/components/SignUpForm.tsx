@@ -8,7 +8,7 @@ interface SignUpFormProps {
 }
 
 
-export default function SignUpForm({closeForm}: SignUpFormProps){
+export default function signUpForm({closeForm}: SignUpFormProps){
 
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState(""); 
