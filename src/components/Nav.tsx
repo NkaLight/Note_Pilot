@@ -206,7 +206,13 @@ useEffect(() => {
                   <DotMenu key={"dot"} onHover={() => setCollapsed(false)} />
                 ) : 
                 (
-                  <UserNav key={"user"} username={user.username} onhoverStart={() => setHover(true)} onhoverEnd={() => setHover(false)} popAccountForm={()=> setActiveForm("account")} handleLogout={() => handleLogout} />
+                  <UserNav
+                    key={"user"} 
+                    username={user.username} 
+                    onhoverStart={() => setHover(true)}
+                    onhoverEnd={() => setHover(false)} 
+                    popAccountForm={()=> setActiveForm("account")}
+                    handleLogout={handleLogout} />
                 )
               }
             </AnimatePresence>

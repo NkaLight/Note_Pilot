@@ -38,6 +38,11 @@ const handleSubmit = async (e: React.FormEvent) => {
       return;
     }
 
+    if(res.ok) {
+      alert("Created account");
+      closeForm();
+    }
+
     // Success
     } catch (error) {
     console.error(error);
