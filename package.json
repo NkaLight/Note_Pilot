@@ -11,12 +11,13 @@
     "test": "jest"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.876.0",
+    "@aws-sdk/client-s3": "^3.888.0",
     "@babel/preset-typescript": "^7.27.1",
     "@prisma/client": "^6.16.1",
     "@types/bcryptjs": "^2.4.6",
     "aws-sdk": "^2.1692.0",
     "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.2",
     "framer-motion": "^12.23.12",
     "googleapis": "^159.0.0",
     "next": "^15.5.3",
