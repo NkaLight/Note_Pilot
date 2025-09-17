@@ -87,11 +87,11 @@ const UserNav = ({
       className="nav-logo"
     />
     <div className="nav-links-container flex gap-2">
-      <a href="">Flash Cards</a>
-      <a href="">Summaries</a>
-      <a href="">Study Guides</a>
-      <a href="">Glossary</a>
-      <a href="">Problem Sets</a>
+      <a href="/flashcards">Flash Cards</a>
+      <a href="/summaries">Summaries</a>
+      <a href="/studyGuide">Study Guides</a>
+      <a href="/glossary">Glossary</a>
+      <a href="/problemSets">Problem Sets</a>
 
     </div>
     <div className="nav-account-section flex gap-2">

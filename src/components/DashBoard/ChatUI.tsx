@@ -3,85 +3,87 @@
 
 import { useState } from "react";
 
-export default function ChatUI({ onDone }: { onDone: () => void }) {
-  const [input, setInput] = useState("");
-  const [title, setTitle] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState("");
+type Message = { role: "user" | "assistant"; content: string };
 
-  const handleSummarize = async () => {
+export default function ChatUI() {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const handleSend = async () => {
     if (!input.trim()) return;
+    const userMessage: Message = { role: "user", content: input };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
     setBusy(true);
-    setResult("");
+
     try {
-      const res = await fetch("/api/summarize", {
+      const res = await fetch("/api/aiChat", {
         method: "POST",
-        body: JSON.stringify({ text: input, title: title || null }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: input }), // ✅ send just the latest message
       });
+  
       const data = await res.json();
-      if (data?.summary) {
-        setResult(data.summary);
+  
+      if (data?.message) {
+        const botMessage: Message = { role: "assistant", content: data.message };
+        setMessages((prev) => [...prev, botMessage]);
       } else {
-        setResult("No summary returned.");
+        throw new Error("No reply received");
       }
     } catch (e) {
-      setResult("Failed to summarize.");
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "⚠️ Something went wrong." },
+      ]);
     } finally {
       setBusy(false);
     }
   };
-
-  const handleSave = async () => {
-    if (!result) return;
-    setBusy(true);
-    try {
-      await fetch("/api/summaries", {
-        method: "POST",
-        body: JSON.stringify({ title: title || null, summaryText: result }),
-      });
-      onDone();
-    } finally {
-      setBusy(false);
-    }
-  };
-
+  
   return (
-    <div className="w-[min(90vw,700px)] space-y-4">
-      <h2 className="text-xl font-semibold">Create a Summary</h2>
+    <div className="relative w-full h-full flex flex-col">
+    {/* Chat Header */}
+    <h2 className="text-xl font-semibold text-black mb-2">Chat with your notes</h2>
+  
+    {/* Chat messages */}
+    <div className="flex-1 border rounded-2xl p-2 bg-white overflow-y-auto space-y-3">
+      {messages.map((m, i) => (
+        <div
+          key={i}
+          className={`p-3 rounded-xl max-w-[80%] text-black ${
+            m.role === "user"
+              ? "bg-blue-100 ml-auto text-right"
+              : "bg-gray-100 mr-auto text-left"
+          }`}
+        >
+          {m.content}
+        </div>
+      ))}
+      {busy && <p className="text-sm text-black">Thinking…</p>}
+    </div>
+  
+    {/* Input box pinned to bottom */}
+    <div className="absolute bottom-2 left-0 w-full p-4 bg-white border-t border-gray-300 flex gap-2">
       <input
-        className="w-full border rounded-xl px-3 py-2"
-        placeholder="Optional title (e.g., COSC343 Week 4)"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
-      <textarea
-        className="w-full min-h-[160px] border rounded-xl p-3"
-        placeholder="Paste lecture notes or text to summarize…"
+        className="flex-1 border rounded-xl px-3 py-2 text-black"
+        placeholder="Ask something about your notes..."
         value={input}
         onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && handleSend()}
       />
-      <div className="flex items-center gap-3">
-        <button
-          onClick={handleSummarize}
-          disabled={busy || !input.trim()}
-          className="rounded-xl px-4 py-2 border hover:bg-gray-50 disabled:opacity-50"
-        >
-          {busy ? "Summarizing…" : "Summarize"}
-        </button>
-        <button
-          onClick={handleSave}
-          disabled={busy || !result}
-          className="rounded-xl px-4 py-2 border hover:bg-gray-50 disabled:opacity-50"
-        >
-          Save
-        </button>
-      </div>
-      {result && (
-        <div className="border rounded-2xl p-4 bg-gray-50">
-          <h3 className="font-medium mb-2">Summary</h3>
-          <p className="whitespace-pre-wrap">{result}</p>
-        </div>
-      )}
+      <button
+        onClick={handleSend}
+        disabled={busy || !input.trim()}
+        className="rounded-xl px-4 py-2 border hover:bg-gray-50 disabled:opacity-50 text-black"
+      >
+        Send
+      </button>
     </div>
+  </div>
+  
   );
 }
