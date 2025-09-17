@@ -111,11 +111,11 @@ const UserNav = ({
       className="nav-logo"
     />
     <div className="nav-links-container flex gap-2">
-      <a href="/flashcards">Flash Cards</a>
-      <a href="/summaries">Summaries</a>
-      <a href="/studyGuide">Study Guides</a>
-      <a href="/glossary">Glossary</a>
-      <a href="/problemSets">Problem Sets</a>
+      <Link href="/flashcards">Flash Cards</Link>
+      <Link href="/summaries">Summaries</Link>
+      <Link href="/studyGuide">Study Guides</Link>
+      <Link href="/glossary">Glossary</Link>
+      <Link href="/problemSets">Problem Sets</Link>
 
     </div>
     <div className="nav-account-section flex gap-2">
