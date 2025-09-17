@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
+  console.log('Middleware hit for:', request.nextUrl.pathname);
   const sessionToken = request.cookies.get('session_token')?.value;
 
   // If there's no session token, the user is unauthenticated
@@ -32,16 +33,21 @@ export async function middleware(request: NextRequest) {
       },
     });
 
-    // If the API says the token is valid (e.g., returns a 200 OK status)...
-    if (response.ok) {
-      // ...and the user is on the home page, redirect them to the dashboard.
-      if (request.nextUrl.pathname === '/') {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
+    // No token → block access
+    if (response.status != 200) {
+      if (request.nextUrl.pathname.startsWith('/api/')) {
+        return new NextResponse(
+          JSON.stringify({ error: 'Authentication required' }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
       }
-    } else {
-      // If the API says the token is invalid, redirect to login.
-      throw new Error('Token is invalid');
+      return NextResponse.redirect(new URL('/', request.url));
+    }else{
+      if (request.nextUrl.pathname === '/') {
+        return NextResponse.redirect(new URL('/ai/dashboard', request.url));
+      }
     }
+    
   } catch (err: any) {
     console.error('API Validation Error:', err.message);
     const response = NextResponse.redirect(new URL('/', request.url));
@@ -55,8 +61,8 @@ export async function middleware(request: NextRequest) {
 // The matcher protects both pages and API routes
 export const config = {
   matcher: [
-    '/dashboard/',
-    '/account/',
+    '/ai/dashboard/',
+    '/account/path:*',
     '/api/remove_session',
     '/api/summarize',
     '/api/upload',

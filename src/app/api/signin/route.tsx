@@ -8,7 +8,7 @@ import { z } from "zod";
 // Define a schema for validating incoming login data
 const signInSchema = z.object({
   email: z.string().email("Invalid email format"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z.string()
 });
 
 export async function POST(request: Request) {
@@ -16,17 +16,24 @@ export async function POST(request: Request) {
   try {
     // Validate input data
     const body = await request.json();
-    const parsed = signInSchema.parse(body);
+    const parsed = signInSchema.safeParse(body);
 
+    if(!parsed.success){
+          return NextResponse.json(
+            { errors: parsed.error.flatten().fieldErrors },
+            { status: 400 }
+          ); 
+        }
+    const data = parsed.data
     // Find user by email
     const user = await prisma.application_user.findUnique({
         where: {
-            email: parsed.email
+            email: data.email
         },
     });
 
     // Use constant-time comparison through bcrypt
-    if (!user || !(await bcrypt.compare(parsed.password, user.password))) {
+    if (!user || !(await bcrypt.compare(data.password, user.password))) {
         return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
@@ -51,7 +58,7 @@ export async function POST(request: Request) {
       path: "/",
       maxAge: 60 * 60 * 24,
     });
-    return NextResponse.json({ user: { id: user.username, email: user.email } });
+    return NextResponse.json({ user: { id: user.user_id, email: user.email, usernane : user.username } });
 
   } catch (error: any) {
     console.error(error);
