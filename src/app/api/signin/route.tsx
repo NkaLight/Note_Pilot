@@ -1,28 +1,33 @@
-import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { cookies } from "next/headers";
-import { prisma } from "@/lib/prisma"; 
-import { z } from "zod";  
+import { NextResponse } from "next/server";
+import { z } from "zod";
 
 // Define a schema for validating incoming login data
 const signInSchema = z.object({
-  email: z.string().email(),   // Email must be a valid email format
-  password: z.string(), // Password must be at least 8 characters
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 export async function POST(request: Request) {
     
   try {
-    //Find the valid user and validate password with input
+    // Validate input data
     const body = await request.json();
-    const parsed = signInSchema.parse(body); // Validate the input against our schema
+    const parsed = signInSchema.parse(body);
+
+    // Find user by email
     const user = await prisma.application_user.findUnique({
         where: {
             email: parsed.email
         },
-    })
-    if(!user || user.password !== parsed.password){
-        throw new Error(`Invalid credentials ${user}`);
+    });
+
+    // Use constant-time comparison through bcrypt
+    if (!user || !(await bcrypt.compare(parsed.password, user.password))) {
+        return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
     //Generate and store session storage in DB
