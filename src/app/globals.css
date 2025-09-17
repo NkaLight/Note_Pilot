@@ -250,3 +250,23 @@ body {
   margin-top: auto;
 
 }
+
+
+/* Fidget Spinner  */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner-container {
+  /* Set the size of your spinner */
+    width: 2em;
+    height:2em;
+    margin:0px;
+    padding:0px;
+  animation: spin 1s linear infinite;
+}

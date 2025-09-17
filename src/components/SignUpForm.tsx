@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image"; // for provider logos
 import { useState } from "react";
+import { unknown } from "zod";
 
 // Define the type for the props
 interface SignUpFormProps {
@@ -13,10 +14,12 @@ export default function SignUpForm({closeForm}: SignUpFormProps){
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState(""); 
     const [password, setPassword] = useState("");
+    const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
-
+  setIsLoading(true)
     try {
     const res = await fetch("/api/signup", {
       method: "POST",
@@ -31,22 +34,24 @@ const handleSubmit = async (e: React.FormEvent) => {
     });
 
     const data = await res.json();
-
+    
     if (!res.ok) {
       // Server returned an error
-      alert(data.error || "Failed to create user");
+      setIsLoading(false)
+      setError(data.error || "Failed to create a user")
       return;
     }
 
     if(res.ok) {
-      alert("Created account");
+      setIsLoading(false)
       closeForm();
     }
 
     // Success
     } catch (error) {
     console.error(error);
-    alert("Request failed. Please try again.");
+    setError("Unexpected server error")
+    setIsLoading(false)
   }
 };
 
@@ -100,7 +105,13 @@ const handleSubmit = async (e: React.FormEvent) => {
                 type="submit"
                 className="w-full bg-blue-600 text-white py-4 rounded-xl hover:bg-blue-700 transition cursor-pointer"
               >
-                Create Account
+                {isLoading ? <span className=" text-white justify-self-center items-center gap-2">
+                                        <span className="animate-pulse">Loading</span>
+                                        <span className="animate-bounce">.</span>
+                                        <span className="animate-bounce delay-150">.</span>
+                                        <span className="animate-bounce delay-300">.</span>
+                                    </span> :
+                        "Create Account"}
               </button>
             </div>
             {/* Divider */}
@@ -109,8 +120,6 @@ const handleSubmit = async (e: React.FormEvent) => {
               <span className="px-3 text-sm text-gray-500">or continue with</span>
               <div className="flex-grow border-t border-gray-300"></div>
             </div>
-
-            {/* OAuth Buttons */}
             <div className="flex gap-3">
               <button
                 type="button"
@@ -128,6 +137,11 @@ const handleSubmit = async (e: React.FormEvent) => {
                 <Image src="/icons/icons8-apple-inc.svg" alt="Apple" width={32} height={32} />
               </button>
             </div>
+            {error &&( 
+              <div className="text-red-900">
+                {`${error}`}
+              </div>)
+            }
           </form>
         </div>
     )

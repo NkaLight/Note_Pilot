@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Image from "next/image"; // for provider logos
 import { useSession } from "@/context/SessionContext";
+import FidgetSpinner from "@/components/FidgetSpinner"
 // Define the type for the props
 interface SignInFormProps {
   closeForm: () => void;
@@ -10,13 +11,15 @@ interface SignInFormProps {
 export default function SignInForm({closeForm}: SignInFormProps){
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
     const {setUser} = useSession()
 
 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
+        setIsLoading(true)
     try {
     const res = await fetch("/api/signin", {
       method: "POST",
@@ -33,18 +36,21 @@ export default function SignInForm({closeForm}: SignInFormProps){
 
     if (!res.ok) {
       // Server returned an error
-      alert(data.error || "Failed to sign in");
+      setError(data.error)
+      setIsLoading(false)
       return;
     }
 
     // Success
     setUser(data)
+    setIsLoading(false)
     closeForm()
     
     
     } catch (error) {
     console.error(error);
-    alert("Request failed. Please try again.");
+    setIsLoading(false)
+    setError("Unexpected server error")
   }
 };
 
@@ -78,12 +84,20 @@ export default function SignInForm({closeForm}: SignInFormProps){
                         placeholder="Enter your password"
                     />
                 </div>
-                <button
+                <div className="flex">
+                    <button
                     type="submit"
-                    className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition cursor-pointer"
-                >
-                    Sign In
-                </button>
+                    className={"w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition cursor-pointer"}
+                    >
+                        {isLoading ? <span className=" text-white justify-self-center items-center gap-2">
+                                        <span className="animate-pulse">Loading</span>
+                                        <span className="animate-bounce">.</span>
+                                        <span className="animate-bounce delay-150">.</span>
+                                        <span className="animate-bounce delay-300">.</span>
+                                    </span> :
+                        "Sign In"}
+                    </button>
+                </div>
                 {/* Divider */}
                 <div className="my-2 flex items-center">
                     <div className="flex-grow border-t border-gray-300"></div>
@@ -109,6 +123,10 @@ export default function SignInForm({closeForm}: SignInFormProps){
                     <Image src="/icons/icons8-apple-inc.svg" alt="Apple" width={32} height={32} />
                     </button>
                 </div>
+                {error &&( 
+                 <div className="text-red-900">
+                    {error}
+                 </div>)}
             </form>
         </div>
     )

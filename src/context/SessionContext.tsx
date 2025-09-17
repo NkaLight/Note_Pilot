@@ -24,30 +24,16 @@ const SessionContext = createContext<SessionContextType>({
 
 export const useSession = ()=> useContext(SessionContext);
 
-export const SessionProvider = ({children}: {children: ReactNode}) =>{
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
-
-
-    // On load, fetch the & validate current session from /api/session
-    useEffect(()=>{
-        const fetchSession = async ()=> {
-            try{
-                const res = await fetch("/api/validate_session")
-                if (res.ok){
-                    const respData = await res.json();
-                    setUser(respData.user || null)
-                }
-           }catch(err){
-                console.log("Error calling validate user", err)
-		        setUser(null)
-            }finally{
-                setLoading(false);
-            }
-        }
-       fetchSession(); 
-       console.log("USER:", user)
-    }, [])
+    // 1. Accept 'initialUser' as a prop
+    export const SessionProvider = ({
+        children,
+        initialUser,
+    }: {
+        children: ReactNode;
+        initialUser?: User | null; // The prop can be optional or null
+    }) => {
+        const [user, setUser] = useState<User | null>(initialUser || null);
+        const [loading, setLoading] = useState(false);
 
     return (
         <SessionContext.Provider value={{ user, setUser, loading }}>

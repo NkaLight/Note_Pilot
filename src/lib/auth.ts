@@ -45,3 +45,35 @@ export async function requireUserId(): Promise<number> {
   if (!id) throw new Error("Unauthorized");
   return id;
 }
+
+type User = {
+  email: string;
+  username: string;
+};
+
+/* Function that validates session token*/
+export async function getSessionUser(): Promise<User | null> {
+  // Get the session token from the incoming request's cookies
+  const sessionToken = cookies().get('session_token')?.value;
+
+  if (!sessionToken) {
+    return null;
+  }
+  try {
+    // Fetch from your validation API, including the cookies
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/validate_session`, {
+      headers: {
+        Cookie: `session_token=${sessionToken}`,
+      },
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      return data.user || null;
+    }
+
+    return null;
+  } catch (err) {
+    console.error('Error validating session:', err);
+    return null;
+  }
