@@ -30,11 +30,7 @@ export async function POST(request: Request) {
     const { password: _, ...userWithoutPassword } = user;
     return NextResponse.json({ user: userWithoutPassword });
   } catch (error: any) {
-    console.error(error);
-    // Don't expose detailed error messages to client
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors[0].message }, { status: 400 });
-    }
+    console.error(error)
     return NextResponse.json({ error: "Registration failed" }, { status: 500 });
   }
 }
