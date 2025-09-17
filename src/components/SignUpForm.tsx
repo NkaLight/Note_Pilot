@@ -1,6 +1,6 @@
 "use client";
-import { use, useState } from "react";
 import Image from "next/image"; // for provider logos
+import { useState } from "react";
 
 // Define the type for the props
 interface SignUpFormProps {
@@ -8,7 +8,7 @@ interface SignUpFormProps {
 }
 
 
-export default function signUpForm({closeForm}: SignUpFormProps){
+export default function SignUpForm({closeForm}: SignUpFormProps){
 
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState(""); 
