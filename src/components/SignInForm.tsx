@@ -91,9 +91,9 @@ export default function SignInForm({closeForm}: SignInFormProps){
                     >
                         {isLoading ? <span className="text-white inline-flex items-center gap-2">
                                         <span className="animate-pulse">Loading</span>
-                                        <span className="animate-bounce translate-y-[-0.5rem]">.</span>
-                                        <span className="animate-bounce translate-y-[-0.5rem] delay-150">.</span>
-                                        <span className="animate-bounce translate-y-[-0.5rem] delay-300">.</span>
+                                        <span className="animate-bounce translate-y-[-0.1rem]">.</span>
+                                        <span className="animate-bounce translate-y-[-0.1rem] delay-150">.</span>
+                                        <span className="animate-bounce translate-y-[-0.1rem] delay-300">.</span>
                                     </span> :
                         "Sign In"}
                     </button>

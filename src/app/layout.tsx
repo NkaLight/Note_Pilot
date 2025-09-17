@@ -9,6 +9,7 @@ import ThemeInit from "@/components/Account/themeInit";
 import { ThemeProviders } from "@/components/Account/themeProvider";
 import { cookies } from "next/headers";
 import { getSessionUser } from '@/lib/auth';
+import { redirect } from "next/navigation";
 
 
 export const metadata: Metadata = {
@@ -17,9 +18,9 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({children,}: Readonly<{children: React.ReactNode;}>) {
-  
-  const sessionToken = (await cookies()).get('session_token')?.value ?? null;
-  const user = sessionToken ? await getSessionUser() : null;
+    const sessionToken = (await cookies()).get('session_token')?.value ?? null;
+    const user = sessionToken ? await getSessionUser() : null;
+
 
   return (
     <html lang="en">

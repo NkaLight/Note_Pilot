@@ -2,6 +2,7 @@
 import Image from "next/image"; // for provider logos
 import { useState } from "react";
 import { useSession } from "@/context/SessionContext";
+import { useRouter } from "next/navigation";
 
 // Define the type for the props
 interface SignUpFormProps {
@@ -16,7 +17,8 @@ export default function SignUpForm({closeForm}: SignUpFormProps){
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-     const {setUser} = useSession()
+    const {setUser} = useSession()
+    const router = useRouter()
     
 
 const handleSubmit = async (e: React.FormEvent) => {
@@ -36,7 +38,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     });
 
     const data = await res.json();
-    
+    router.prefetch("/account/setup"); //Maybe some performance gains from perfetching
     if (!res.ok) {
       // Server returned an error
       setIsLoading(false)
@@ -47,6 +49,8 @@ const handleSubmit = async (e: React.FormEvent) => {
     if(res.ok) {
       setIsLoading(false)
       setUser(data)
+      router.push("/account")
+      //Implement some UI loading state here.
       closeForm();
     }
 
@@ -108,12 +112,12 @@ const handleSubmit = async (e: React.FormEvent) => {
                 type="submit"
                 className="w-full bg-blue-600 text-white py-4 rounded-xl hover:bg-blue-700 transition cursor-pointer"
               >
-                {isLoading ? <span className=" text-white justify-self-center items-center gap-2">
-                                        <span className="animate-pulse">Loading</span>
-                                        <span className="animate-bounce">.</span>
-                                        <span className="animate-bounce delay-150">.</span>
-                                        <span className="animate-bounce delay-300">.</span>
-                                    </span> :
+                {isLoading ? <span className="text-white inline-flex items-center gap-2">
+                                <span className="animate-pulse">Loading</span>
+                                <span className="animate-bounce translate-y-[-0.1rem]">.</span>
+                                <span className="animate-bounce translate-y-[-0.1rem] delay-150">.</span>
+                                <span className="animate-bounce translate-y-[-0.1rem] delay-300">.</span>
+                              </span> :
                         "Create Account"}
               </button>
             </div>

@@ -62,7 +62,7 @@ export async function getSessionUser(): Promise<User | null> {
   }
   try {
     // Fetch from your validation API, including the cookies
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/validate_session`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/validate_session`, {
       headers: {
         Cookie: `session_token=${sessionToken}`,
       },

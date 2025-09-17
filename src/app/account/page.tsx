@@ -20,6 +20,7 @@ type AILevel = "child" | "student" | "advanced";
 export default function AccountPage() {
     const { theme } = useTheme();
     const { user, setUser } = useSession();
+    console.log(user)
 
     // use username (schema has no first/last)
     const [username, setUsername] = useState(user?.username ?? "");

@@ -50,7 +50,6 @@ export default function ProfileFields({
           type="password"
           placeholder="*********************"
           className={inputClass}
-          value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
       </div>

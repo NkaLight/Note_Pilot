@@ -8,6 +8,8 @@ import {useRouter, } from "next/navigation"
 import Link from 'next/link'
 import Image from "next/image"; // for provider logos
 import SignUpForm from "@/components/SignUpForm";
+import { usePathname } from 'next/navigation';
+
 
 // -------------------------
 // Animations
@@ -55,7 +57,29 @@ const DotMenu = ({ onHover }: { onHover: () => void }) => (
     ))}
   </motion.div>
 );
-
+const AccountNav = ({ handleLogout }: { handleLogout: () => void; }) => (
+  <motion.nav
+    className="nav-container flex items-center justify-between"
+    variants={navFadeIn} // Reuse your existing animation
+    initial="initial"
+    animate="animate"
+    exit="exit"
+  >
+    <Link href="/ai/dashboard">
+        <Image
+          src="/icons/Note_Pilot_logo.svg"
+          alt="Note Pilot Logo"
+          width={48}
+          height={48}
+          className="nav-logo"
+        />
+    </Link>
+    <div className="nav-account-section flex gap-2">
+      <Link href="/ai/dashboard">Dashboard</Link>
+      <a onClick={handleLogout}>Logout</a>
+    </div>
+  </motion.nav>
+);
 const UserNav = ({
   username,
   popAccountForm,
@@ -96,7 +120,7 @@ const UserNav = ({
     </div>
     <div className="nav-account-section flex gap-2">
       <a onClick={handleLogout}>Logout</a>
-      <a href="/account">Account</a>
+      <Link href="/account">Account</Link>
     </div>
   </motion.nav>
 );
@@ -138,6 +162,7 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
   const { user, setUser, loading } = useSession();
   const [collapsed, setCollapsed] = useState(false);
   const [hover, setHover] = useState(false)
+  const pathname = usePathname();
 
 
 // Track inactivity → collapse after 5s without user activity
@@ -205,15 +230,18 @@ useEffect(() => {
                 (
                   <DotMenu key={"dot"} onHover={() => setCollapsed(false)} />
                 ) : 
-                (
-                  <UserNav
-                    key={"user"} 
-                    username={user.username} 
-                    onhoverStart={() => setHover(true)}
-                    onhoverEnd={() => setHover(false)} 
-                    popAccountForm={()=> setActiveForm("account")}
-                    handleLogout={handleLogout} />
-                )
+                    pathname.startsWith('/account') ? (
+                      // If user is on an account page, show AccountNav
+                      <AccountNav key="account" handleLogout={handleLogout} />
+                    ):(
+                      <UserNav
+                      key={"user"} 
+                      username={user.username} 
+                      onhoverStart={() => setHover(true)}
+                      onhoverEnd={() => setHover(false)} 
+                      popAccountForm={()=> setActiveForm("account")}
+                      handleLogout={handleLogout} />
+                    )
               }
             </AnimatePresence>
         ) : 
