@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       path: "/",
       maxAge: 60 * 60 * 24,
     });
-    return NextResponse.json({ user: { id: user.user_id, email: user.email } });
+    return NextResponse.json({ user: { id: user.username, email: user.email } });
 
   } catch (error: any) {
     console.error(error);

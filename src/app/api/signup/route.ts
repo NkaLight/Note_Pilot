@@ -61,7 +61,7 @@ export async function POST(request: Request) {
       maxAge: 60 * 60 * 24,
     });
 
-    return NextResponse.json({ user: { id: user.user_id, email: user.email } });
+    return NextResponse.json({ user: { id: user.user_id, email: user.email, usernane : user.username } });
   } catch (error: any) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if(error.code ==  "P2002"){

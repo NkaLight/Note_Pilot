@@ -24,8 +24,8 @@ const SessionContext = createContext<SessionContextType>({
 
 export const useSession = ()=> useContext(SessionContext);
 
-    // 1. Accept 'initialUser' as a prop
-    export const SessionProvider = ({
+// 1. Accept 'initialUser' as a prop
+export const SessionProvider = ({
         children,
         initialUser,
     }: {
@@ -35,9 +35,9 @@ export const useSession = ()=> useContext(SessionContext);
         const [user, setUser] = useState<User | null>(initialUser || null);
         const [loading, setLoading] = useState(false);
 
-    return (
-        <SessionContext.Provider value={{ user, setUser, loading }}>
-        {children}
-        </SessionContext.Provider>
-    );
-}
+        return (
+            <SessionContext.Provider value={{ user, setUser, loading }}>
+            {children}
+            </SessionContext.Provider>
+        );
+    }

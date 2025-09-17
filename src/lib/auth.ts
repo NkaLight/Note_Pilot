@@ -49,12 +49,13 @@ export async function requireUserId(): Promise<number> {
 type User = {
   email: string;
   username: string;
+  user_id: number;
 };
 
 /* Function that validates session token*/
 export async function getSessionUser(): Promise<User | null> {
   // Get the session token from the incoming request's cookies
-  const sessionToken = cookies().get('session_token')?.value;
+  const sessionToken = (await cookies()).get('session_token')?.value;
 
   if (!sessionToken) {
     return null;
@@ -77,3 +78,6 @@ export async function getSessionUser(): Promise<User | null> {
     console.error('Error validating session:', err);
     return null;
   }
+}
+
+
