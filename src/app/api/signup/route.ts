@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
+import crypto from "crypto";
+import { cookies } from "next/headers";
 
 // Validation schema for signup data
 const signupSchema = z.object({
@@ -36,9 +38,30 @@ export async function POST(request: Request) {
       },
     });
 
-    // Don't send password back in response
-    const { password: _, ...userWithoutPassword } = user;
-    return NextResponse.json({ user: userWithoutPassword });
+
+    //Generate and store session storage in DB
+    const token = crypto.randomBytes(32).toString("hex");
+    
+    // store session in DB
+    await prisma.session.create({
+      data: {
+        user_id: user.user_id,
+        token,
+        expires_at: new Date(Date.now() + 1000 * 60 * 60 * 1), // 1h
+        last_active_at: new Date(),
+      }
+    });
+    
+    // set cookie
+    (await cookies()).set({
+      name: "session_token",
+      value: token,
+      httpOnly: true,
+      path: "/",
+      maxAge: 60 * 60 * 24,
+    });
+
+    return NextResponse.json({ user: { id: user.user_id, email: user.email } });
   } catch (error: any) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if(error.code ==  "P2002"){
@@ -46,6 +69,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: `A user with this ${target} already exists.`}, { status: 400 });
       }
     }
+    
     return NextResponse.json({ error:"Registration failed" }, { status: 500 });
   }
 }

@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image"; // for provider logos
 import { useState } from "react";
-import { unknown } from "zod";
+import { useSession } from "@/context/SessionContext";
 
 // Define the type for the props
 interface SignUpFormProps {
@@ -16,6 +16,8 @@ export default function SignUpForm({closeForm}: SignUpFormProps){
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+     const {setUser} = useSession()
+    
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -44,6 +46,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     if(res.ok) {
       setIsLoading(false)
+      setUser(data)
       closeForm();
     }
 
