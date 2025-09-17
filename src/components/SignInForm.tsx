@@ -7,7 +7,7 @@ interface SignInFormProps {
   closeForm: () => void;
 }
 
-export default function signInForm({closeForm}: SignInFormProps){
+export default function SignInForm({closeForm}: SignInFormProps){
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const {setUser} = useSession()
