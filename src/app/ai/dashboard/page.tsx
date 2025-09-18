@@ -35,7 +35,7 @@ export default function DashboardPage() {
 
       {/* Manual paste → summarize flow (optional) */}
       <div className="border rounded-2xl p-6 bg-white text-black shadow">
-        <ChatUI onDone={fetchSummaries} />
+        <ChatUI/>
       </div>
 
       {/* Saved summaries */}
