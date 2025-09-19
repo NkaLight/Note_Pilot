@@ -10,7 +10,7 @@ export async function POST(req: Request){
     try{
 
         const user = await getSessionUser();
-        if(!user) return new NextResponse("Unauthorized", {status: 404});
+        //if(!user) return new NextResponse("Unauthorized", {status: 404});
         
         const body = await req.json();
         const parsed = chatMessageReqSchema.safeParse(body);
@@ -37,7 +37,7 @@ export async function POST(req: Request){
         if (!resp.ok){
             return NextResponse.json({error: resp.statusText}, {status: resp.status})
         }
-
+        
         const data = await resp.json();
         const reply = data?.choices?.[0]?.message?.content ?? null;
         console.log(reply)
