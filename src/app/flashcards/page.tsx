@@ -44,42 +44,46 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="h-screen w-full flex gap-4 pl-4 pr-0 pt-0 pb-0">
-      {/* Left: Chat */}
-      <div
-        className="border rounded-2xl p-6 bg-white/0 overflow-y-auto mt-5 flex-shrink-0 h-full"
-        style={{ width: chatWidth }}
-      >
-        <ChatUI />
-      </div>
-
-      {/* Divider / Resizer */}
-      <div
-        onMouseDown={startResizing}
-        className="w-1 cursor-col-resize bg-gray-300 hover:bg-gray-400 rounded"
-      />
-
-      {/* Middle: Flashcards */}
-      <div className="border rounded-2xl p-6 bg-gray-50 overflow-y-auto mt-5 flex-grow flex justify-center items-start">
-        <div className="flex flex-col snap-y snap-mandatory gap-4 p-4 w-full items-center">
-          {flashcards.map((card, index) => (
-            <div
-              key={index}
-              onClick={() => toggleFlip(index)}
-              className="snap-center cursor-pointer border rounded-lg shadow hover:shadow-lg transition-all bg-white text-black flex items-center justify-center text-center
-                         w-full max-w-lg aspect-square p-6"
-              style={{ flexShrink: 0 }}
-            >
-              {flippedIndex === index ? card.answer : card.question}
+    <div className=" h-screen w-full flex gap-10 pl-10 pr-0">
+          {/* Left: Chat */}
+        <div className=" rounded-3xl bg-white/0 overflow-y-auto mt-5 flex-shrink-0 h-full pb-10 pt-14"
+          style={{ width: chatWidth }}
+          >
+          <ChatUI />
+          </div>
+    
+          {/* Divider / Resizer */}
+          <div
+            onMouseDown={startResizing}
+            className="w-1 cursor-col-resize opacity-30 bg-white hover:bg-gray-400 rounded relative"
+          >
+          </div>
+    
+          {/* Middle: Flashcards */}
+          <div className="rounded-3xl p-6 bg-black/70 overflow-y-auto mt-19 mb-5 flex-grow flex justify-center items-start">
+            <div className="flex flex-col snap-y snap-mandatory gap-4 p-4 w-full items-center">
+              {flashcards.map((card, index) => (
+                <div
+                  key={index}
+                  onClick={() => toggleFlip(index)}
+                  className="snap-center cursor-pointer border rounded-lg shadow hover:shadow-lg transition-all text-black flex items-center justify-center text-center
+                    w-full max-w-lg aspect-square p-6"
+                  style={{
+                    flexShrink: 0,
+                    background: 'radial-gradient(circle at center, #ffffff, rgb(167, 200, 255))',
+                  }}
+                >
+                  {flippedIndex === index ? card.answer : card.question}
+                  </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
 
-      {/* Right: Upload */}
-      <div className="border border-white/30 p-2 bg-white/30 pb-0 backdrop-blur-md rounded-md shadow-md overflow-y-auto w-[10vw]">
-        <Upload onSaved={() => {}} />
-      </div>
-    </div>
+    
+          {/* Right: Upload */}
+          <div className="border border-white/30 p-2 bg-white/30 pb-0 backdrop-blur-md rounded-md shadow-md overflow-y-auto w-[10vw]">
+            <Upload onSaved={() => {}} />
+          </div>
+        </div>
   );
 }

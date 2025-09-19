@@ -20,7 +20,7 @@ export default function Summary({ summary }: SummaryProps) {
   }
 
   return (
-    <article className="border rounded-2xl p-4 bg-gray-50">
+    <article className="flex-1 border rounded-3xl p-2 bg-white overflow-y-auto space-y-3">
       <div className="flex items-center justify-between mb-2">
         <h4 className="font-semibold">{summary.title ?? "Untitled"}</h4>
         <time className="text-xs text-gray-500">

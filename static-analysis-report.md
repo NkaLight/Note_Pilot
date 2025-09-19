@@ -1,111 +1,95 @@
 # Static Analysis Report - Note Pilot
 
-## 1. Critical Issues Overview
 
-### A. Type Safety Issues (14 instances)
+## Security Issues 
 
-```typescript
-// Examples of 'any' type usage that need fixing:
-- src/app/account/page.tsx (2 instances)
-- src/app/api/account/route.ts (1 instance)
-- src/app/api/signin/route.tsx (1 instance)
-- src/app/api/signup/route.ts (2 instances)
-- src/components/Account/themeInit.tsx (3 instances)
-```
+### High Severity
+- Exposure of sensitive information through console logs (5 instances)
+  ```typescript
+  - src/app/api/remove_session/route.tsx
+  - src/app/api/validate_session/route.tsx
+  - src/app/account/page.tsx
+  ```
 
-### B. Unused Code (23 instances)
+### Medium Severity
+- Type safety violations with `any` usage (14 instances)
+  ```typescript
+  - src/app/account/page.tsx (2 instances)
+  - src/app/api/signin/route.tsx (1 instance)
+  - src/app/api/signup/route.ts (2 instances)
+  - src/components/Account/themeInit.tsx (3 instances)
+  - src/app/api/account/route.ts (1 instance)
+  ```
 
-```typescript
-// Unused imports:
-- useContext in /ai/dashboard/page.tsx
-- crypto in /api/remove_session/route.tsx
-- FidgetSpinner in /components/SignInForm.tsx
-- Geist, Geist_Mono in /layout.tsx
+## Reliability Issues 
 
-// Unused variables:
-- setFlashcards in /flashcards/page.tsx
-- operation in /api/remove_session/route.tsx
-- password in /Account/profileFields.tsx
-```
+### Critical
+1. React Hook Dependencies
+   ```typescript
+   // src/components/Nav.tsx
+   useEffect(() => {
+     // Missing dependencies: 'activeForm', 'hover', and 'user'
+   }, [])
+   ```
 
-### C. Console Statements (5 instances)
+### Major
+1. Unused State Management
+   - Orphaned state updates in `/flashcards/page.tsx`
+   - Redundant state variables:
+     ```typescript
+     - setFlashcards in /flashcards/page.tsx
+     - useEffect, useRef, useState in /components/Account/preferences.tsx
+     ```
 
-```typescript
-- src/app/account/page.tsx
-- src/app/api/remove_session/route.tsx
-- src/app/api/validate_session/route.tsx
-```
+### Minor
+1. Duplicate Components
+   - `DashBoard.tsx/ChatUI.tsx` duplicates `DashBoard/ChatUI.tsx`
 
-## 2. Redundant Files Analysis
+## Maintainability/Readability Issues 
 
-### A. Potentially Redundant Files
+### Code Organization
+1. Dead Code
+   - Empty test file: `src/test/registering_test.js`
+   - Unused imports:
+     ```typescript
+     - useContext in /ai/dashboard/page.tsx
+     - crypto in /api/remove_session/route.tsx
+     - FidgetSpinner in /components/SignInForm.tsx
+     - Geist, Geist_Mono in /layout.tsx
+     ```
 
-1. `src/components/DashBoard.tsx/ChatUI.tsx`
-   - Duplicate of `src/components/DashBoard/ChatUI.tsx`
-   - **Recommendation**: Delete `src/components/DashBoard.tsx/ChatUI.tsx`
+### Code Style
+1. Unused Variables (23 instances)
+   - Most critical in:
+     ```typescript
+     - operation in /api/remove_session/route.tsx
+     - password in /Account/profileFields.tsx
+     ```
 
-2. `src/test/registering_test.js`
-   - Empty/unused test file
-   - **Recommendation**: Either implement tests or remove
+## Statistics 
+- Total Issues: 42
+- Security: 19 (45%)
+- Reliability: 8 (19%)
+- Maintainability: 15 (36%)
 
-### B. Unused Component Imports
+## Recommendations
 
-The following components are imported but never used:
+### Immediate Actions
+1. **Security**
+   - Remove console.log statements containing sensitive data
+   - Implement proper TypeScript types
 
-```typescript
-- 'Summary' in multiple pages
-  - /glossary/page.tsx
-  - /problemSets/page.tsx
-  - /studyGuide/page.tsx
-  - /summaries/page.tsx
-```
+2. **Reliability**
+   - Fix React hook dependencies
+   - Remove duplicate ChatUI component
 
-## 3. React Hook Issues
+3. **Maintainability**
+   - Clean up unused imports
+   - Remove or implement empty test file
 
-### A. Missing Dependencies
+## Impact Assessment
+- **Security Risk**: Medium
+- **Technical Debt**: High
+- **Maintenance Burden**: Medium
 
-```typescript
-// src/components/Nav.tsx
-useEffect(() => {
-  // Missing dependencies: 'activeForm', 'hover', and 'user'
-}, [])
-```
-
-### B. Unused Hooks
-
-```typescript
-- useEffect in /components/FidgetSpinner.jsx
-- useCallback in /components/Nav.tsx
-- useEffect, useRef, useState in /components/Account/preferences.tsx
-```
-
-## 4. Recommended Actions
-
-### A. Files to Delete
-
-1. `src/components/DashBoard.tsx/ChatUI.tsx` (duplicate)
-2. `src/test/registering_test.js` (unless tests will be implemented)
-
-### B. High-Priority Fixes
-
-1. Remove unused imports to improve bundle size
-2. Add proper TypeScript types instead of 'any'
-3. Remove console.log statements from production code
-4. Fix React hook dependencies
-
-### C. Performance Improvements
-
-1. Remove unused state management code
-2. Clean up unused component imports
-3. Implement proper error handling instead of console.logs
-
-## Next Steps
-
-Choose one of the following actions:
-1. Create a cleanup script to remove redundant files
-2. Start fixing specific issues
-3. Generate more detailed analysis of any particular section
-
-## Note
-
-This report was generated on September 18, 2025, using ESLint static analysis tools.
+*Report generated using ESLint v8.x.x with typescript-eslint plugin*

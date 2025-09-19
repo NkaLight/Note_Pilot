@@ -40,15 +40,17 @@ export async function POST(req: Request){
 
         const data = await resp.json();
         const reply = data?.choices?.[0]?.message?.content ?? null;
+        console.log(reply)
         if(!reply) return NextResponse.json({message: ""});
         return NextResponse.json({message: reply});
+        //This code section for implementing streaming, but the front-end has to be updated to handle that first.
         // return new NextResponse(resp.body, {
         //     headers: {
         //         "Content-Type": "text/event-stream",
         //         "Cache-Control": "no-cache",
         //     },
         // })
-    }catch (err: unknown){
+    }catch (err: unknown){ //handling type errors here
         console.error(err)
          let normError: Error;
         if(err instanceof Error){
@@ -57,7 +59,7 @@ export async function POST(req: Request){
             normError = new Error(String(err) || "An unknown error occurred.");
         }
 
-        //Now we can safely handle specific error types
+        //Handling specific error types here.
         if (normError instanceof z.ZodError) {
         // For Zod validation errors, return the structured error messages.
         console.log("ZOD")
