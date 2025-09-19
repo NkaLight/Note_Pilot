@@ -40,6 +40,7 @@ export async function POST(req: Request){
 
         const data = await resp.json();
         const reply = data?.choices?.[0]?.message?.content ?? null;
+        console.log(reply)
         if(!reply) return NextResponse.json({message: ""});
         return NextResponse.json({message: reply});
         //This code section for implementing streaming, but the front-end has to be updated to handle that first.
