@@ -125,6 +125,7 @@ const UserNav = ({
   </motion.nav>
 );
 
+
 const GuestNav = ({ onLoginClick, onSignUpClick }: { onLoginClick: () => void, onSignUpClick: () => void }) => (
   <motion.nav
     className="nav-container flex justify-between"

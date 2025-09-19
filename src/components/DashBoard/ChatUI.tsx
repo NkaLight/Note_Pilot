@@ -1,4 +1,3 @@
-// src/app/components/Dashboard/ChatUI.tsx
 "use client";
 
 import { useState } from "react";
@@ -20,21 +19,19 @@ export default function ChatUI() {
     try {
       const res = await fetch("/api/aiChat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: input }), // ✅ send just the latest message
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: input }),
       });
-  
+
       const data = await res.json();
-  
+
       if (data?.message) {
         const botMessage: Message = { role: "assistant", content: data.message };
         setMessages((prev) => [...prev, botMessage]);
       } else {
         throw new Error("No reply received");
       }
-    } catch (e) {
+    } catch {
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: "⚠️ Something went wrong." },
@@ -43,47 +40,44 @@ export default function ChatUI() {
       setBusy(false);
     }
   };
-  
+
   return (
-    <div className="relative w-full h-full flex flex-col">
-    {/* Chat Header */}
-    <h2 className="text-xl font-semibold text-black mb-2">Chat with your notes</h2>
-  
-    {/* Chat messages */}
-    <div className="flex-1 border rounded-2xl p-2 bg-white overflow-y-auto space-y-3">
-      {messages.map((m, i) => (
-        <div
-          key={i}
-          className={`p-3 rounded-xl max-w-[80%] text-black ${
-            m.role === "user"
-              ? "bg-blue-100 ml-auto text-right"
-              : "bg-gray-100 mr-auto text-left"
-          }`}
+    <div className="w-full h-full flex flex-col">
+
+      {/* Chat messages box */}
+      <div className="flex-1 rounded-3xl p-3 bg-white/50 overflow-y-auto space-y-3">
+        {messages.map((m, i) => (
+          <div
+            key={i}
+            className={`p-3 rounded-xl max-w-[80%] text-black ${
+              m.role === "user"
+                ? "bg-blue-100 ml-auto text-right"
+                : "bg-gray-100 mr-auto text-left"
+            }`}
+          >
+            {m.content}
+          </div>
+        ))}
+        {busy && <p className="text-sm text-black">Thinking…</p>}
+      </div>
+
+      {/* Input box (separate container at bottom) */}
+      <div className="mt-3 p-0 rounded-full bg-black/5 flex gap-2">
+        <input
+          className="flex-1  rounded-xl px-3 py-2 text-black"
+          placeholder="Ask something about your notes..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSend()}
+        />
+        <button
+          onClick={handleSend}
+          disabled={busy || !input.trim()}
+          className="rounded-full px-4 py-2 hover:bg-gray-50 disabled:opacity-50 text-black"
         >
-          {m.content}
-        </div>
-      ))}
-      {busy && <p className="text-sm text-black">Thinking…</p>}
+          Send
+        </button>
+      </div>
     </div>
-  
-    {/* Input box pinned to bottom */}
-    <div className="absolute bottom-2 left-0 w-full p-4 bg-white border-t border-gray-300 flex gap-2">
-      <input
-        className="flex-1 border rounded-xl px-3 py-2 text-black"
-        placeholder="Ask something about your notes..."
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && handleSend()}
-      />
-      <button
-        onClick={handleSend}
-        disabled={busy || !input.trim()}
-        className="rounded-xl px-4 py-2 border hover:bg-gray-50 disabled:opacity-50 text-black"
-      >
-        Send
-      </button>
-    </div>
-  </div>
-  
   );
 }
