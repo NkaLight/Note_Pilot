@@ -27,7 +27,7 @@ export default function ChatUI() {
       });
   
       const data = await res.json();
-  
+      console.log(data)
       if (data?.message) {
         const botMessage: Message = { role: "assistant", content: data.message };
         setMessages((prev) => [...prev, botMessage]);
@@ -35,6 +35,7 @@ export default function ChatUI() {
         throw new Error("No reply received");
       }
     } catch (e) {
+      console.log("Error UI: ", e)
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: "⚠️ Something went wrong." },
