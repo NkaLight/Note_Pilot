@@ -101,28 +101,12 @@ export default function SignInForm({closeForm}: SignInFormProps){
                 {/* Divider */}
                 <div className="my-2 flex items-center">
                     <div className="flex-grow border-t border-gray-300"></div>
-                    <span className="px-3 text-sm text-gray-500">or continue with</span>
+                    <span className="px-3 text-sm text-gray-500">Or</span>
                     <div className="flex-grow border-t border-gray-300"></div>
                 </div>
-    
-                {/* OAuth Buttons */}
-                <div className="flex gap-3">
-                    <button
-                    type="button"
-                    onClick={() => alert("Google auth not implemented yet")}
-                    className="flex-1 flex items-center justify-center cursor-pointer"
-                    >
-                    <Image src="/icons/icons8-google.svg" alt="Google" width={32} height={32} />
-                    </button>
-    
-                    <button
-                    type="button"
-                    onClick={() => alert("Apple auth not implemented yet")}
-                    className="flex-1 flex items-center justify-center cursor-pointer"
-                    >
-                    <Image src="/icons/icons8-apple-inc.svg" alt="Apple" width={32} height={32} />
-                    </button>
-                </div>
+                    <div className="flex gap-3">
+                        Forgot Password
+                    </div>
                 {error &&( 
                  <div className="text-red-900">
                     {error}
