@@ -27,7 +27,7 @@ export default function DashboardPage() {
   useEffect(() => { fetchSummaries(); }, []);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 mt-16">
       <h1 className="text-2xl font-semibold">Dashboard</h1>
 
       {/* Upload flow */}

@@ -1,0 +1,203 @@
+COSC343/AIML402
+MODULE: MACHINE LEARNING
+LECTURE 10: LEARNING
+Lech Szymanski
+School of Computing, University of Otago S2 2025
+Hand-built vs. learning agent
+Two different approaches to building an AI agent.
+•Designing the whole agent by hand
+•Designing an AI agent which can learn from the sensory data it receives
+COSC343/AIML402 L10: Learning 2
+The agent function
+Percepts/Input to Actions/Output
+P 7→ A
+y=f(x)x1∈ {0
+A,1
+B}
+x2∈ {0
+Clean,1
+Dirty}
+y1∈ {−1
+Left,0
+No-op,1
+Right}
+y2∈ {0
+No-op,1
+Suck}
+P A
+Room sensor Dirty sensor Drive control Suck control
+0 0 1 0
+0 1 0 1
+1 0 -1 0
+1 1 0 1
+COSC343/AIML402 L10: Learning 3
+The agent function as a hypothesis
+True function,
+y=f(x)
+is unknown.
+So, we make ahypothesis
+function
+ˆy=h(x,w)
+(Hypothesis will often be referred
+to as themodel)xi∈ {0, . . . ,255}
+y1∈ {0
+No face,1
+Face}
+x y
+x1 x8256 y1
+73 . . . 22 1
+161 . . . 30 0
+22 . . . 14 0
+211 . . . 126 1
+COSC343/AIML402 L10: Learning 4
+Supervised learning
+Insupervised learning, the agent learns a function from inputs to outputs:
+•A sample of labelled data (i.e. inputs and corresponding outputs of the
+“supposed” true agent function) for a given task is given.
+•A parameterised model mapping inputs to outputs is chosen.
+•The learning algorithm works out the parameter values of the model that produce
+the “correct” output for given input.
+COSC343/AIML402 L10: Learning 5
+Supervised learning example
+Given a set of labelled images learn the how to classify them.
+COSC343/AIML402 L10: Learning 6
+Unsupervised learning
+Inunsupervised learning, the learning algorithm receives a set of training data, and
+has to work out what regularities it contains:
+•A sample of unlabelled data is given (i.e. examples of inputs, but not target
+outputs).
+•A parameterised model is chosen.
+•The learning algorithm works out the the parameter values of the model that
+“organises”/”categorises” data according to some chosen criteria.
+COSC343/AIML402 L10: Learning 7
+Unsupervised learning example
+Say we have a set of data, where there is a lot of redundant information; unsupervised
+algorithm can spot the most relevant and common patterns to retain as the
+compressed representation.
+COSC343/AIML402 L10: Learning 8
+Reinforcement learning
+Inreinforcement learning, the agent receives data and generates actions in response:
+•An agent is placed in an environment, which provides a reinforcement signal, a
+positive or negative reward depending on the effects of agent’s actions
+•A parameterised model mapping percepts to actions is chosen.
+•The agent generates sequences of actions recording their effects through percepts
+and any received reward(s).
+•The learning algorithm works out the the parameter values of the model that
+generate actions that maximise the rewards for a given situation (inferred from
+the percepts).
+COSC343/AIML402 L10: Learning 9
+Reinforcement learning example
+An agent learning how to play chess needs to perform a sequence of actions (chess
+moves) in order to bring the game to a close and then, depending whether it won or
+lost, receives a positive or negative rewards, from which it needs to deduce ‘good’ and
+’bad’ actions.
+COSC343/AIML402 L10: Learning 10
+Classification vs. regression tasks
+From the modelling point of view, there are two important distinctions of the learning
+tasks:
+•classification– those where the model outputs a discrete value from a finite set
+of choices (related to decision making)
+For example: Given images of two faces – are the individuals related or not?
+•regression– those that involve the model to output a continuous (real number)
+value (related to approximation)
+For example: Given images of two faces – what is the genetic distance between
+two individuals?
+COSC343/AIML402 L10: Learning 11
+Performance metric
+In machine learning, we evaluate the performance of a model with ametric, which
+gives:
+•the average “distance” of the model’s output from the target value, suchmean
+squared error(typically used in regression)
+•the fraction of the model outputs that are wrong (don’t match the target
+outputs) referred to as theclassification error(typically used in classification)
+•Sometimes expressed asaccuracy, the fraction of examples labelled correctly.
+accuracy= 1−classification error
+COSC343/AIML402 L10: Learning 12
+Confusion matrix
+Overall accuracy/classification error often hides vital information on the distribution of
+the errors between classes. Aconfusion matrixprovides more information based on
+grouping of actual labels and the predicted labels. For example, inbinary
+classification, where one class can be thought aspositivesand the other asnegatives,
+the confusion matrix shows the counts of true/false positives/negatives, from which
+various measurements can be derived:
+True positives (TP) False negatives (FN)
+False positives (FP) True negatives (TN)
+Total number of positives (labels of one type) in the data is TP+FN.
+Total number of negatives (labels of second type) in the data is FP+TN.
+Total number of positive predictions by the model is TP+FP.
+Total number of negative predictions by the model is FN+TN.
+COSC343/AIML402 L10: Learning 13
+Supervised learning: induction
+The basic principle behind supervised learning isinduction. We can define an
+inductive learning procedure as follows:
+•Assume there is some “true”, unknown function,fwhich takes input and returns
+”true” outputy=f(x)
+•An indirect evidence of the “true” function is data sample of pairs(x,y)
+•Inductive learning process:
+1. Create a hypothesis function ˆy=h(x,w)with random statew
+2. Compute ˆy=h(x,w)for currentw
+3. If ˆynot close toy, modifywand go back to step 2.
+•Hopefullyh(x,w)≈f(x)
+We want a hypothesis function whichgeneraliseswell to unseen examples off.
+COSC343/AIML402 L10: Learning 14
+Generalisation
+“All generalisations are false, including this one.”
+Mark Twain
+“Essentially, all models are wrong, but some are useful.”
+George Box
+Useful models are the one that perform well on unseen data, i.e.they generalise
+COSC343/AIML402 L10: Learning 15
+Consistency and simplicity
+Aconsistenthypothesis*is one which agrees with all the training examples.
+•It is possible for a consistent model to not perform well on new (previously unseen)
+data – such model is said to have beenovertrained, and itoverfitsthe data.
+There are typically many consistent hypotheses for a given training set. How to choose
+between them?
+•Occam’s razortells us to prefer the simplest hypothesis. Simpler solutions tend
+to generalise better to new examples.
+There is typically a trade off between consistency and simplicity:
+•We can often get a much simpler hypothesis if we’re allowed to ignore a few
+training examples.
+*Don’t confuse with consistent heuristic.
+COSC343/AIML402 L10: Learning 16
+Example: Generalisation and curve-fitting
+Question: What’s the function?
+xf(x)
+COSC343/AIML402 L10: Learning 17
+Noise
+It would be nice if the training data was perfect...
+...but in the real world nothing is perfect - observations are noisy and labels might be
+inaccurate.
+Machine learning algorithms must make useful inferences in the imperfect world.
+COSC343/AIML402 L10: Learning 18
+Training and testing
+•Data available for training is usually split in two sets
+•Training– data used to train the model
+•Testing– data used to verify the performance of the model
+•Consistency, good performance on training data, is not necessarily an indication of
+good generalisation – your hypothesis might be overfitting the data.
+•Good performance on test data is a better indicator of generalisation... but only
+as good as your test set.
+COSC343/AIML402 L10: Learning 19
+Lab 5: Spam filtering
+Objectives:
+•To review the concepts from Bayesian reasoning
+•To implement a Naive Bayes’ Classifier
+•To apply the Naive Bayes’ Classifier to the problem of spam filtering
+•To get into the habit of training and testing machine learning models on
+separated train and test sets
+COSC343/AIML402 L10: Learning 20
+Study guide
+•Understand how input/output table relates to a function
+•What is a parameterised hypothesis?
+•Know the three types of learning feedback (and be able to give examples):
+supervised, unsupervised and reinforcement learning.
+•Understand the inductive supervised learning process.
+•Terms and definitions: hypothesis consistency, generalisation, overtraining,
+overfitting, Occam’s razor, discriminative vs. generative models, classification vs.
+regression, loss function, classification error/accuracy, confusion matrix.
+•Understand the need for separating training and test sets.
+Reading for this lecture What’s next?
+AIMA Chapter 18, Sections 1–2 Decision Trees
+Read AIMA Chapter 19, Section 3
+COSC343/AIML402 L10: Learning 21

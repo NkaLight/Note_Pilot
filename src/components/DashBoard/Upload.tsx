@@ -30,7 +30,7 @@ export default function Upload({ onSaved }: { onSaved: () => void }) {
       form.append("folder", folder);
       form.append("file", file);
 
-      const res = await fetch("/api/upload", { method: "POST", body: form });
+      const res = await fetch("/api/upload_v2", { method: "POST", body: form });
       const data = await res.json();
 
       if (!res.ok) {
@@ -51,14 +51,14 @@ export default function Upload({ onSaved }: { onSaved: () => void }) {
 
   return (
     <div className="bg-white/0 text-black rounded-2xl p-4">
-      <h2 className="font-semibold mb-4">Files</h2>
+      <h2 className="font-semibold mb-4">Your papers</h2>
       <hr className="my-3 border-t border-black/30 -mx-6" />
 
       {/* Folder creation */}
       <div>
         <div className="flex items-center justify-between mb-1">
           <label htmlFor="folder" className="text-sm font-medium">
-            Folders
+            
           </label>
           <button
             type="button"

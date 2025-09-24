@@ -1,10 +1,35 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";  
 import { getSessionUser } from "@/lib/auth";
+import fs from "fs";
+import { pipeline } from "@xenova/transformers";
+
 
 const chatMessageReqSchema = z.object({
     message: z.string()
 })
+
+//Load the chunks and vectors at startup
+const chunks: string[] = JSON.parse(fs.readFileSync("src/data/chunks.json", "utf-8"));
+const vectors: number[][] = JSON.parse(fs.readFileSync("src/data/vectors.json", "utf-8"));
+
+// Cosine similarity
+function cosineSimilarity(a: number[], b: number[]) {
+    let dot = 0, normA = 0, normB = 0;
+    for (let i = 0; i < a.length; i++) {
+        dot += a[i] * b[i];
+        normA += a[i] * a[i];
+        normB += b[i] * b[i];
+    }
+    return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+}
+
+// Retrieve top-k chunks
+function retrieveTopK(queryVec: number[], vectors: number[][], chunks: string[], k = 3) {
+    const scores = vectors.map((vec, i) => ({ i, score: cosineSimilarity(queryVec, vec) }));
+    scores.sort((a, b) => b.score - a.score);
+    return scores.slice(0, k).map(s => chunks[s.i]);
+}
 
 export async function POST(req: Request){
     try{
@@ -17,8 +42,30 @@ export async function POST(req: Request){
         if(!parsed.success) return NextResponse.json({error:"Invalid request body"}, {status:400})
         
         const {message} = parsed.data
+
+        // Embed the user query
+        const embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
+        const queryVec = await embedder(message) as number[][]; // returns [ [ ... ] ]
+        
+        // Retrieve top chunks
+        const topChunks = retrieveTopK(queryVec[0], vectors, chunks, 3);
+        const context = topChunks.join("\n\n");
+
         //Construct message 
         const aiAPiUrl = "https://openrouter.ai/api/v1/chat/completions"
+
+        console.log(context)
+
+        const contextualAIQuery = `
+Use the following context to answer the question.
+If the context does not contain the answer, say you don’t know, ensure your response is human like dont explicitly mention context.
+
+Context:
+${context}
+
+Question:
+${message}
+        `
 
         const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
@@ -29,7 +76,7 @@ export async function POST(req: Request){
             body: JSON.stringify({
                 // The payload your AI service expects
                 model: "nvidia/nemotron-nano-9b-v2:free",
-                messages: [{ role: "user", content: message }],
+                messages: [{ role: "user", content: contextualAIQuery }],
                 stream: false, // Enable streaming for real-time responses
             }),
         });

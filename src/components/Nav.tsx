@@ -103,13 +103,15 @@ const UserNav = ({
     onHoverStart={onhoverStart}
     onHoverEnd={onhoverEnd}
   >
-    <Image
-      src="/icons/Note_Pilot_logo.svg"
-      alt="Note Pilot Logo"
-      width={48}
-      height={48}
-      className="nav-logo"
-    />
+    <Link href="/ai/dashboard">
+      <Image
+        src="/icons/Note_Pilot_logo.svg"
+        alt="Note Pilot Logo"
+        width={48}
+        height={48}
+        className="nav-logo"
+      />
+    </Link>
     <div className="nav-links-container flex gap-2">
       <Link href="/flashcards">Flash Cards</Link>
       <Link href="/summaries">Summaries</Link>
