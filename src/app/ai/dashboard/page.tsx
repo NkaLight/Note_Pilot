@@ -74,6 +74,7 @@ export default function DashboardPage() {
   const [papers, setPapers] = useState<paper[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeForm, setActiveForm] = useState<"addPaper" | "confirmRemovePaper" |"editPaper" | null>(null);
+ 
   
   async function fetchSummaries() {
     setLoading(true);
@@ -101,13 +102,11 @@ export default function DashboardPage() {
       <div>
         <>
             {
-              papers && papers.forEach(paper =>{
-                (
+              papers && papers.map(paper =>(
                   <div>
                     <p>{paper.name}</p>
                   </div>
-                )
-              })
+              ))
             }
         </>
         <div onClick={()=>setActiveForm("addPaper")}>
