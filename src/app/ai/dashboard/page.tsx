@@ -109,6 +109,7 @@ export default function DashboardPage() {
                 )
               })
             }
+            
         </>
         <div onClick={()=>setActiveForm("addPaper")}>
           <p>Add a paper +</p>
