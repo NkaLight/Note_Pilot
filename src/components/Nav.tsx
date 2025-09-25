@@ -105,7 +105,7 @@ const UserNav = ({
   >
     <Link href="/ai/dashboard">
       <Image
-        src="/icons/Note_Pilot_logo.svg"
+        src="../icons/Note_Pilot_logo.svg"
         alt="Note Pilot Logo"
         width={48}
         height={48}

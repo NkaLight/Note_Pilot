@@ -6,7 +6,9 @@ import Upload from "@/components/DashBoard/Upload";
 import {paper} from "@prisma/client";
 import { AnimatePresence } from "framer-motion";
 import Modal from "@/components/Modal";
+import EditIcon from "@/components/EditIcon"
 
+console.log('Imported EditIcon:', EditIcon);
 
 //Form SubComponents
 const AddPaperForm = ({onClose }: { onClose: () => void })=>{
@@ -99,19 +101,24 @@ export default function DashboardPage() {
 
       {/* Display current papers */}
       <h2>Your Papers</h2>
-      <div>
+      <div className="flex p-5 overflow-scroll" >
         <>
             {
               papers && papers.map(paper =>(
-                  <div>
-                    <p>{paper.name}</p>
+                  <div className="relative m-4 bg-white text-black p-4 rounded-full w-36">
+                    <div className="absolute top-1 right-3 m-0 p-0 cursor-pointer">
+                      <EditIcon
+                        className="w-5 h-5 text-black-600 hover:text-blue-500 transition duration-1000"
+                      />
+                    </div>
+                    <p>{paper.code}</p>
                   </div>
               ))
             }
-            
+
         </>
-        <div onClick={()=>setActiveForm("addPaper")}>
-          <p>Add a paper +</p>
+        <div onClick={()=>setActiveForm("addPaper")} className="m-4 bg-white text-black p-4 rounded-full w-30 cursor-pointer">
+          <p>Add paper +</p>
         </div>
       </div>
       {/* Animate Presence for sign/sign/account up modals */}
