@@ -44,17 +44,16 @@ const AddPaperForm = ({onClose }: { onClose: () => void })=>{
       if(data.status == 200){
         setIsSubmitting(false)
         console.log(data)
-        setError("Response is 200")
+        onClose()
        
       }
     }catch(error){
       setError("Unexpected Server error")
       setIsSubmitting(false)
-
     }
   }
   return(
-    <form onSubmit={handleSubmit} className="p-4 space-y-4">
+    <form onSubmit={handleSubmit} className="p-4 space-y-4 bg-white text-black">
       <h2 className="text-lg font-bold">Add New Paper</h2>
       <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Paper Title" className="w-full p-2 border rounded" required />
       <input type="text" value={code} onChange={(e) => setCode(e.target.value)} placeholder="Paper Code" className="w-full p-2 border rounded" required />
@@ -70,13 +69,112 @@ const AddPaperForm = ({onClose }: { onClose: () => void })=>{
 }
 
 
+//Form SubComponents
+const EditPaper = ({onClose, paperItem }: { onClose: () => void; paperItem: paper })=>{
+  if(paperItem == null){
+    onClose
+    return;
+  }
+
+  const [name, setName] = useState<string>(paperItem.name||"");
+  const [code, setCode] = useState<string>(paperItem.code||"")
+  const [descr, setDescr] = useState<string>(paperItem.description||"")
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+  const [error, setError] = useState<string>("")
+
+   const handleUpate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try{
+      const res = await fetch("/api/papers", {
+        method: "PUT", 
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body: JSON.stringify({
+          code, 
+          name, 
+          descr
+        })
+      })
+      const data = await res.json()
+
+      if(!data.ok || data.status !== 200){
+        setIsSubmitting(false)
+        console.log(data)
+        console.log(data.error[0])
+        setError(data.error[0]);
+      }
+      if(data.status == 200){
+        setIsSubmitting(false)
+        console.log(data)
+        onClose;
+        
+       
+      }
+    }catch(error){
+      setError("Unexpected Server error")
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDelete = async (e: React.FormEvent) =>{
+    e.preventDefault()
+    setIsSubmitting(true)
+    try{
+       const res = await fetch("/api/paper", {
+        method: "DELETE",
+        headers:{
+          "Content-Type": "multipart/form-data",
+
+        },
+        body: JSON.stringify({
+          paper_id: paperItem.paper_id
+        })
+       })
+       const data = await res.json()
+       if(!res.ok){
+        setError(data.error)
+        setIsSubmitting(false)
+       }
+       if(res.status == 200){
+        setIsSubmitting(false)
+        onClose()
+       }
+    }catch(error){
+      setError("Unexpected server error")
+      setIsSubmitting(false)
+    }
+  }
+
+  return(
+    <form className="p-4 space-y-4 bg-white text-black">
+      <h2 className="text-lg font-bold">Add New Paper</h2>
+      <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Paper Title" className="w-full p-2 border rounded" required />
+      <input type="text" value={code} onChange={(e) => setCode(e.target.value)} placeholder="Paper Code" className="w-full p-2 border rounded" required />
+      <textarea value={descr} onChange={(e) => setDescr(e.target.value)} placeholder="Paper Description" className="w-full p-2 border rounded" rows={5} required />
+      <button onSubmit={handleUpate} disabled={isSubmitting} className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400">
+        {isSubmitting ? 'Updating...' : 'Update'}
+      </button>
+      <button onSubmit={handleDelete} disabled={isSubmitting} className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-gray-400">
+        {isSubmitting ? "Deleting..." : "Delete"}
+      </button>
+      {
+        error && (<p>{error}</p>)
+      }
+    </form>
+  )
+}
+
+
+
 
 
 export default function DashboardPage() {
   const [papers, setPapers] = useState<paper[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeForm, setActiveForm] = useState<"addPaper" | "confirmRemovePaper" |"editPaper" | null>(null);
- 
+  const [selectedPaper, setSelectedPaper] = useState<paper|null>();
   
   async function fetchSummaries() {
     setLoading(true);
@@ -90,11 +188,21 @@ export default function DashboardPage() {
   }
   function handleCloseModal(){
     setActiveForm(null);
+    setSelectedPaper(null);
+    console.log(selectedPaper)
   }
   useEffect(() =>{
     fetchSummaries()
   }, [])
 
+  function handleSelectPaper(paper:paper){
+    console.log("Handle select clicked")
+    console.log(paper)
+    setActiveForm("editPaper")
+    setSelectedPaper(paper)
+    console.log(activeForm)
+    console.log(selectedPaper)
+  }
   return (
     <div className="space-y-8 mt-16">
       <h1 className="text-2xl font-semibold">Dashboard</h1>
@@ -106,7 +214,7 @@ export default function DashboardPage() {
             {
               papers && papers.map(paper =>(
                   <div className="relative m-4 bg-white text-black p-4 rounded-full w-36">
-                    <div className="absolute top-1 right-3 m-0 p-0 cursor-pointer">
+                    <div className="absolute top-1 right-3 m-0 p-0 cursor-pointer" onClick={()=>handleSelectPaper(paper)}>
                       <EditIcon
                         className="w-5 h-5 text-black-600 hover:text-blue-500 transition duration-1000"
                       />
@@ -149,7 +257,10 @@ export default function DashboardPage() {
                     onClose={() => setActiveForm(null)}
                     key={"editPaper"}
                   >
-                    <EditPaper closeForm={handleCloseModal}/>
+                    <EditPaper 
+                      closeForm={handleCloseModal}
+                      paperItem={selectedPaper}
+                    />
                   </Modal>
                 )
               }
