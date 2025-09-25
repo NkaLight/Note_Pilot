@@ -54,18 +54,18 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    // 1) Require a logged-in user
+    //  Require a logged-in user
     const user = await getSessionUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    // 2) Validate body with Zod
+    //  Validate body with Zod
     const body = await req.json();
     const parsed = FlashcardsReq.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.message }, { status: 400 });
     }
 
-    // 3) Resolve source text: prefer `text`; fallback to DB via `uploadId`
+    // Resolve source text: prefer `text`; fallback to DB via `uploadId`
     let sourceText = parsed.data.text ?? "";
     const uploadId = parsed.data.uploadId ?? null;
 
@@ -81,7 +81,7 @@ export async function POST(req: Request) {
       sourceText = summary.text_data;
     }
 
-    // 4) Build a precise user prompt that restates the JSON-only shape
+    // Build a precise user prompt that restates the JSON-only shape
     const userPrompt = `
 Generate flashcards from the following content.
 Output JSON ONLY as:
@@ -93,7 +93,7 @@ Content:
 """${sourceText.slice(0, 12000)}"""
 `.trim();
 
-    // 5) Call OpenRouter with timeout/abort protection
+    // Call OpenRouter with timeout/abort protection
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 45000);
 
@@ -102,8 +102,8 @@ Content:
       signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
-        // Use whichever env var your project actually sets for the OpenRouter key
-        "Authorization": `Bearer ${process.env.NVIDIA_AI_API || process.env.OPENROUTER_API_KEY || ""}`,
+        // Use whichever env var you have for the AI_API
+        "Authorization": `Bearer ${process.env.NVIDIA_AI_API}`,
         // Recommended by OpenRouter (helps identify traffic)
         "HTTP-Referer": process.env.APP_URL || "http://localhost:3000",
         "X-Title": "Note Pilot",
@@ -119,7 +119,7 @@ Content:
       }),
     }).finally(() => clearTimeout(timeout));
 
-    // 6) Robust upstream error/ctype handling
+    //  Robust upstream error/ctype handling
     const ctype = resp.headers.get("content-type") || "";
     if (!resp.ok) {
       const errText = ctype.includes("application/json") ? JSON.stringify(await resp.json()) : await resp.text();
@@ -133,12 +133,12 @@ Content:
       return NextResponse.json({ error: "Non-JSON response from provider", detail: text.slice(0, 800) }, { status: 502 });
     }
 
-    // 7) Parse provider JSON, hardening against accidental ``` fences
+    //  Parse provider JSON, hardening against accidental ``` fences
     const data = await resp.json();
     const raw = (data?.choices?.[0]?.message?.content ?? "").trim();
     const jsonText = raw.replace(/^\s*```(?:json)?/i, "").replace(/```\s*$/i, "");
 
-    // 8) Validate LLM output against strict schema
+    //  Validate LLM output against strict schema
     let flashcards;
     try {
       flashcards = FlashcardArray.parse(JSON.parse(jsonText));
@@ -149,7 +149,7 @@ Content:
       );
     }
 
-    // 9) Optional persistence: if client passed uploadId, save the set and items
+    //  Optional persistence: if client passed uploadId, save the set and items
     let savedSet = null;
     if (uploadId) {
       savedSet = await prisma.flashcard_set.create({
@@ -167,7 +167,7 @@ Content:
       });
     }
 
-    // 10) Respond to client
+    //  Respond to client
     return NextResponse.json({ flashcards, savedSet });
   } catch (err: unknown) {
     // Normalize unknown errors and convert aborts to 504
