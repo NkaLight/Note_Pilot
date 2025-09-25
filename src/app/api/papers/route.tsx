@@ -10,14 +10,16 @@ export async function GET(){
     const user = await getSessionUser();
     if(!user) return NextResponse.json({ error:"Unauthorized" }, {status : 401});
     try{
-        const papers = prisma.paper.findMany({
+        const papers = await prisma.paper.findMany({
         where: {
             user_id: user.user_id
             }
         })
-
+        console.log(user.user_id)
+        console.log(papers)
         return NextResponse.json({papers});
     }catch(error: any){
+        console.log(error)
         return NextResponse.json( { error:"Internal Server error" }, {status: 500});
     }
 }
@@ -42,20 +44,25 @@ export async function POST(req: Request){
         return NextResponse.json({error: z.treeifyError(result.error).errors, status: 400})
     }
     const validatedInput = result.data
+    console.log(result)
     if(!validatedInput){
         return NextResponse.json({error: "Internal Server error", status:500})
     }
+    console.log(validatedInput)
 
     try{
         console.log(validatedInput)
         const papers = await prisma.paper.create({
-        data:{
-            user_id: user.user_id,
-            name: validatedInput.name,
-            filename:"",
-            code: validatedInput.code
-        }
-        })
+            data:{
+                user_id: user.user_id,
+                name: validatedInput.name,
+                filename:"",
+                code: validatedInput.code,
+                description: validatedInput.descr,
+                }
+        
+        });
+        console.log(validatedInput)
         return NextResponse.json({papers});
     }catch(error: any){
         return NextResponse.json( { error:"Internal Server error" }, {status: 500});
