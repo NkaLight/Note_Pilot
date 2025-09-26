@@ -114,7 +114,7 @@ export async function DELETE(req: Request){
     //Validate input 
     const body = await req.json();
     const validate = deletePaperSchema.safeParse(body);
-    if(!validate) return NextResponse.json({error: validate.error.flatten().fieldErrors}, {status:500});
+    if(!validate.success) return NextResponse.json({error: validate.error.flatten().fieldErrors}, {status:500});
 
     const data = validate.data
     if(!data) return NextResponse.json({error: "Internal server error"}, {status: 500});
