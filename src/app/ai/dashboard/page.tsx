@@ -229,17 +229,7 @@ export default function DashboardPage() {
                   </Modal>
               )
               }{
-                activeForm === "confirmRemovePaper" &&(
-                  <Modal
-                    isOpen={activeForm ==="confirmRemovePaper"}
-                    onClose={() => setActiveForm(null)}
-                    key={"confirmRemovePaper"}
-                  >
-                    <ConfirmRemovePaper closeForm={handleCloseModal}/>
-                  </Modal>
-                )
-              }{
-                activeForm === "editPaper" &&(
+                activeForm === "editPaper" && selectedPaper &&(
                   <Modal
                     isOpen={activeForm === "editPaper"}
                     onClose={() => setActiveForm(null)}

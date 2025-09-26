@@ -62,7 +62,7 @@ export async function POST(req: Request){
             If the context does not contain the answer, say you don't know, ensure your response is human like dont explicitly mention context.
 
             Context:
-            ${context}
+            {context}
 
             Question:
             ${message}
@@ -90,6 +90,7 @@ export async function POST(req: Request){
         const reply = data?.choices?.[0]?.message?.content ?? null;
         if(!reply) return NextResponse.json({message: ""});
         return NextResponse.json({message: reply});
+        
         //This code section for implementing streaming, but the front-end has to be updated to handle that first.
         // return new NextResponse(resp.body, {
         //     headers: {
