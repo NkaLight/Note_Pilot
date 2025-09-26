@@ -1,22 +1,31 @@
 // src/lib/auth.ts
 /**
- * auth.ts
- * - Session helpers backed by Prisma.
- * - getAuthedUserId(): reads 'session_token' cookie, validates session (expiry/is_used), touches last_active_at.
- * - requireUserId(): convenience variant that throws if not authenticated.
- * - Keep cookie name in sync with your sign-in flow.
+ * Auth/session helpers (server-side)
+ *
+ * WHAT IT DOES
+ * - getAuthedUserId(): Reads the 'session_token' cookie, verifies the session against DB
+ *   (not expired, not used), updates last_active_at, and returns the user_id or null.
+ * - requireUserId(): Convenience wrapper that throws if no user is authenticated.
+ * - getSessionUser(): Higher-level helper that calls your /api/validate_session endpoint
+ *   to return { user_id, username, email } or null.
+ *
+ * IMPORTANT
+ * - This version intentionally REMOVES any dev-bypass (AUTH_BYPASS).
+ * - Keep SESSION_COOKIE in sync with sign-in/sign-out handlers.
  */
 
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
 
-// Keep in sync with whatever you set on login
 export const SESSION_COOKIE = "session_token";
 
-/**
- * Returns the authenticated user's id from the session cookie, or null.
- * Also touches last_active_at. Checks expiry and is_used.
- */
+export type SessionUser = {
+  user_id: number;
+  username: string;
+  email: string;
+};
+
+/** Lowest-level: cookie → user_id, with DB validation and activity touch. */
 export async function getAuthedUserId(): Promise<number | null> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token) return null;
@@ -27,9 +36,7 @@ export async function getAuthedUserId(): Promise<number | null> {
   });
   if (!sess) return null;
 
-  if (sess.expires_at && sess.expires_at < new Date()) {
-    return null;
-  }
+  if (sess.expires_at && sess.expires_at < new Date()) return null;
 
   await prisma.session.updateMany({
     where: { token },
@@ -39,45 +46,33 @@ export async function getAuthedUserId(): Promise<number | null> {
   return sess.user_id;
 }
 
-/** Helper if you prefer throwing */
+/** Throws if not authenticated — handy for server actions or API routes. */
 export async function requireUserId(): Promise<number> {
   const id = await getAuthedUserId();
   if (!id) throw new Error("Unauthorized");
   return id;
 }
 
-type User = {
-  email: string;
-  username: string;
-  user_id: number;
-};
+/**
+ * Higher-level: return the full user object using your validation API.
+ * Expects /api/validate_session to return { user: { user_id, username, email } } on success.
+ */
+export async function getSessionUser(): Promise<SessionUser | null> {
+  const sessionToken = (await cookies()).get(SESSION_COOKIE)?.value;
+  if (!sessionToken) return null;
 
-/* Function that validates session token*/
-export async function getSessionUser(): Promise<User | null> {
-  // Get the session token from the incoming request's cookies
-  const sessionToken = (await cookies()).get('session_token')?.value;
-
-  if (!sessionToken) {
-    return null;
-  }
   try {
-    // Fetch from your validation API, including the cookies
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/validate_session`, {
-      headers: {
-        Cookie: `session_token=${sessionToken}`,
-      },
+    const base = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const res = await fetch(`${base}/api/validate_session`, {
+      headers: { Cookie: `${SESSION_COOKIE}=${sessionToken}` },
+      cache: "no-store",
     });
 
-    if (res.ok) {
-      const data = await res.json();
-      return data.user || null;
-    }
-
-    return null;
+    if (!res.ok) return null;
+    const data = await res.json();
+    return (data?.user ?? null) as SessionUser | null;
   } catch (err) {
-    console.error('Error validating session:', err);
+    console.error("Error validating session:", err);
     return null;
   }
 }
-
-
