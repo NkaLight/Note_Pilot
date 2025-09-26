@@ -3,12 +3,10 @@
 
 import { useContext, useEffect, useState } from "react";
 import Upload from "@/components/DashBoard/Upload";
-import {paper} from "@prisma/client";
+import type {paper} from "@prisma/client";
 import { AnimatePresence } from "framer-motion";
 import Modal from "@/components/Modal";
 import EditIcon from "@/components/EditIcon"
-
-console.log('Imported EditIcon:', EditIcon);
 
 //Form SubComponents
 const AddPaperForm = ({closeForm }: { closeForm: () => void })=>{
@@ -43,7 +41,6 @@ const AddPaperForm = ({closeForm }: { closeForm: () => void })=>{
 
       if(data.status == 200){
         setIsSubmitting(false)
-        console.log(data)
         closeForm()
        
       }
@@ -76,9 +73,9 @@ const EditPaper = ({closeForm, paperItem }: { closeForm: () => void; paperItem: 
     return;
   }
 
-  const [name, setName] = useState<string>(paperItem.name||"");
-  const [code, setCode] = useState<string>(paperItem.code||"")
-  const [descr, setDescr] = useState<string>(paperItem.description||"")
+  const [name, setName] = useState<string>(paperItem.name ??"");
+  const [code, setCode] = useState<string>(paperItem.code??"")
+  const [descr, setDescr] = useState<string>(paperItem.description??"")
   const [paper_id, setPaperId] = useState<number>(paperItem.paper_id);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [error, setError] = useState<string>("")
@@ -110,7 +107,6 @@ const EditPaper = ({closeForm, paperItem }: { closeForm: () => void; paperItem: 
       closeForm();
     }catch(error){
       setError("Unexpected Server error")
-      console.log(error)
       setIsSubmitting(false)
     }
   }
