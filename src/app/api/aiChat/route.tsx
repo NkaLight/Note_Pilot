@@ -43,28 +43,29 @@ export async function POST(req: Request){
         
         const {message} = parsed.data
 
-        // Embed the user query
-        const embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
-        const queryVec = await embedder(message) as number[][]; // returns [ [ ... ] ]
+
+        /*RAG Implementation Not done. CURRENTLY JUST PASSING USER QUERY DIRECTLY TO LLM */
+        // // Embed the user query
+        // const embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
+        // const queryVec = await embedder(message) as number[][]; // returns [ [ ... ] ]
         
-        // Retrieve top chunks
-        const topChunks = retrieveTopK(queryVec[0], vectors, chunks, 3);
-        const context = topChunks.join("\n\n");
+        // // Retrieve top chunks
+        // const topChunks = retrieveTopK(queryVec[0], vectors, chunks, 3);
+        // const context = topChunks.join("\n\n");
 
         //Construct message 
         const aiAPiUrl = "https://openrouter.ai/api/v1/chat/completions"
 
-        console.log(context)
 
         const contextualAIQuery = `
-Use the following context to answer the question.
-If the context does not contain the answer, say you don’t know, ensure your response is human like dont explicitly mention context.
+            Use the following context to answer the question.
+            If the context does not contain the answer, say you don't know, ensure your response is human like dont explicitly mention context.
 
-Context:
-${context}
+            Context:
+            ${context}
 
-Question:
-${message}
+            Question:
+            ${message}
         `
 
         const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -74,10 +75,10 @@ ${message}
                 "Authorization": `Bearer ${process.env.NVIDIA_AI_API}`
             },
             body: JSON.stringify({
-                // The payload your AI service expects
+                // The payload the AI service expects
                 model: "nvidia/nemotron-nano-9b-v2:free",
-                messages: [{ role: "user", content: contextualAIQuery }],
-                stream: false, // Enable streaming for real-time responses
+                messages: [{ role: "user", content: message }],
+                stream: false, // For streaming response currently not implemented.
             }),
         });
 
@@ -87,7 +88,6 @@ ${message}
         
         const data = await resp.json();
         const reply = data?.choices?.[0]?.message?.content ?? null;
-        console.log(reply)
         if(!reply) return NextResponse.json({message: ""});
         return NextResponse.json({message: reply});
         //This code section for implementing streaming, but the front-end has to be updated to handle that first.

@@ -11,7 +11,7 @@ import EditIcon from "@/components/EditIcon"
 console.log('Imported EditIcon:', EditIcon);
 
 //Form SubComponents
-const AddPaperForm = ({onClose }: { onClose: () => void })=>{
+const AddPaperForm = ({closeForm }: { closeForm: () => void })=>{
   const [name, setName] = useState<string>("")
   const [code, setCode] = useState<string>("")
   const [descr, setDescr] = useState<string>("")
@@ -33,18 +33,18 @@ const AddPaperForm = ({onClose }: { onClose: () => void })=>{
           descr
         })
       })
+      if(!res.ok){
+        const error = await res.json()
+        setIsSubmitting(false)
+        setError(error.error);
+
+      }
       const data = await res.json()
 
-      if(!data.ok || data.status !== 200){
-        setIsSubmitting(false)
-        console.log(data)
-        console.log(data.error[0])
-        setError(data.error[0]);
-      }
       if(data.status == 200){
         setIsSubmitting(false)
         console.log(data)
-        onClose()
+        closeForm()
        
       }
     }catch(error){
@@ -70,62 +70,58 @@ const AddPaperForm = ({onClose }: { onClose: () => void })=>{
 
 
 //Form SubComponents
-const EditPaper = ({onClose, paperItem }: { onClose: () => void; paperItem: paper })=>{
+const EditPaper = ({closeForm, paperItem }: { closeForm: () => void; paperItem: paper })=>{
   if(paperItem == null){
-    onClose
+    closeForm();
     return;
   }
 
   const [name, setName] = useState<string>(paperItem.name||"");
   const [code, setCode] = useState<string>(paperItem.code||"")
   const [descr, setDescr] = useState<string>(paperItem.description||"")
+  const [paper_id, setPaperId] = useState<number>(paperItem.paper_id);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [error, setError] = useState<string>("")
 
-   const handleUpate = async (e: React.FormEvent) => {
-    e.preventDefault();
+   const handleUpate = async () => {
     setIsSubmitting(true);
     try{
       const res = await fetch("/api/papers", {
         method: "PUT", 
         headers: {
-          "Content-Type": "multipart/form-data",
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           code, 
           name, 
-          descr
+          descr,
+          paper_id : paperItem.paper_id
         })
       })
+      
+      if(!res.ok){
+        setIsSubmitting(false)
+        const errorData = await res.json()
+        setError(errorData.error);
+      }
       const data = await res.json()
-
-      if(!data.ok || data.status !== 200){
-        setIsSubmitting(false)
-        console.log(data)
-        console.log(data.error[0])
-        setError(data.error[0]);
-      }
-      if(data.status == 200){
-        setIsSubmitting(false)
-        console.log(data)
-        onClose;
-        
-       
-      }
+      //Success
+      setIsSubmitting(false)
+      closeForm();
     }catch(error){
       setError("Unexpected Server error")
+      console.log(error)
       setIsSubmitting(false)
     }
   }
 
-  const handleDelete = async (e: React.FormEvent) =>{
-    e.preventDefault()
+  const handleDelete = async () =>{
     setIsSubmitting(true)
     try{
-       const res = await fetch("/api/paper", {
+       const res = await fetch("/api/papers", {
         method: "DELETE",
         headers:{
-          "Content-Type": "multipart/form-data",
+          "Content-Type": "application/json",
 
         },
         body: JSON.stringify({
@@ -139,7 +135,7 @@ const EditPaper = ({onClose, paperItem }: { onClose: () => void; paperItem: pape
        }
        if(res.status == 200){
         setIsSubmitting(false)
-        onClose()
+        closeForm()
        }
     }catch(error){
       setError("Unexpected server error")
@@ -153,10 +149,10 @@ const EditPaper = ({onClose, paperItem }: { onClose: () => void; paperItem: pape
       <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Paper Title" className="w-full p-2 border rounded" required />
       <input type="text" value={code} onChange={(e) => setCode(e.target.value)} placeholder="Paper Code" className="w-full p-2 border rounded" required />
       <textarea value={descr} onChange={(e) => setDescr(e.target.value)} placeholder="Paper Description" className="w-full p-2 border rounded" rows={5} required />
-      <button onSubmit={handleUpate} disabled={isSubmitting} className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400">
+      <button type="button" onClick={handleUpate} disabled={isSubmitting} className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400">
         {isSubmitting ? 'Updating...' : 'Update'}
       </button>
-      <button onSubmit={handleDelete} disabled={isSubmitting} className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-gray-400">
+      <button type="button" onClick={handleDelete} disabled={isSubmitting} className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-gray-400">
         {isSubmitting ? "Deleting..." : "Delete"}
       </button>
       {
@@ -187,21 +183,17 @@ export default function DashboardPage() {
     }
   }
   function handleCloseModal(){
+    fetchSummaries(); //Refresh
     setActiveForm(null);
     setSelectedPaper(null);
-    console.log(selectedPaper)
   }
   useEffect(() =>{
     fetchSummaries()
   }, [])
 
   function handleSelectPaper(paper:paper){
-    console.log("Handle select clicked")
-    console.log(paper)
     setActiveForm("editPaper")
     setSelectedPaper(paper)
-    console.log(activeForm)
-    console.log(selectedPaper)
   }
   return (
     <div className="space-y-8 mt-16">
@@ -209,11 +201,11 @@ export default function DashboardPage() {
 
       {/* Display current papers */}
       <h2>Your Papers</h2>
-      <div className="flex p-5 overflow-scroll" >
+      <div className="flex p-5 overflow-x-auto" >
         <>
             {
               papers && papers.map(paper =>(
-                  <div className="relative m-4 bg-white text-black p-4 rounded-full w-36">
+                  <div className="relative m-4 bg-white text-black p-4 rounded-full w-36 flex-shrink-0">
                     <div className="absolute top-1 right-3 m-0 p-0 cursor-pointer" onClick={()=>handleSelectPaper(paper)}>
                       <EditIcon
                         className="w-5 h-5 text-black-600 hover:text-blue-500 transition duration-1000"
@@ -225,7 +217,7 @@ export default function DashboardPage() {
             }
 
         </>
-        <div onClick={()=>setActiveForm("addPaper")} className="m-4 bg-white text-black p-4 rounded-full w-30 cursor-pointer">
+        <div onClick={()=>setActiveForm("addPaper")} className="m-4 bg-white text-black p-4 rounded-full w-30 cursor-pointer flex-shrink-0">
           <p>Add paper +</p>
         </div>
       </div>
@@ -237,7 +229,7 @@ export default function DashboardPage() {
                   onClose={() => setActiveForm(null)}
                   key={"addPaper"}
               >
-                      <AddPaperForm onClose={handleCloseModal} />
+                      <AddPaperForm closeForm={handleCloseModal} />
                   </Modal>
               )
               }{
