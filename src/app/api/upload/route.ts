@@ -1,7 +1,7 @@
+import { getAuthedUserId } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
-import { pdf_processing } from "@/lib/pdf_processing";
-import { summarizeWithOllama } from "@/lib/ollama";
-//import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import pdf2json from "pdf2json";
 
 export const runtime = "nodejs";
 
@@ -43,49 +43,123 @@ await prisma.upload.create({
 */
 
 
+
+function extractTextFromPDF(buffer: Buffer): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const pdfParser = new pdf2json();
+        
+        pdfParser.on("pdfParser_dataError", errData => {
+            console.error("PDF parsing error:", errData);
+            reject(new Error(`PDF parsing failed: ${errData.parserError || errData}`));
+        });
+        
+        pdfParser.on("pdfParser_dataReady", pdfData => {
+            try {
+                if (!pdfData || !pdfData.formImage) {
+                    console.log("PDF data structure:", JSON.stringify(pdfData, null, 2));
+                    resolve(""); // Return empty string for unparseable PDFs
+                    return;
+                }
+                
+                if (!pdfData.formImage.Pages || pdfData.formImage.Pages.length === 0) {
+                    console.log("No pages found in PDF, returning empty string");
+                    resolve(""); // Return empty string instead of rejecting
+                    return;
+                }
+                
+                const text = pdfData.formImage.Pages.map(page => {
+                    if (!page.Texts || page.Texts.length === 0) return "";
+                    return page.Texts.map(t => {
+                        try {
+                            return decodeURIComponent(t.R[0].T);
+                        } catch (e) {
+                            return t.R[0].T; // Fallback if decoding fails
+                        }
+                    }).join(" ");
+                }).join("\n").trim();
+                
+                resolve(text || ""); // Ensure we always return a string
+            } catch (error) {
+                console.error("Error processing PDF data:", error);
+                resolve(""); // Return empty string on any processing error
+            }
+        });
+        
+        try {
+            pdfParser.parseBuffer(buffer);
+        } catch (error) {
+            console.error("Error starting PDF parse:", error);
+            reject(new Error(`Failed to start PDF parsing: ${error}`));
+        }
+    });
+}
+
 export async function POST(req: Request) {
-  try {
-    const form = await req.formData();
-    const file = form.get("file");
+    try {
+        const userId = await getAuthedUserId();
+        if (!userId) {
+            return new NextResponse("Unauthorized", { status: 401 });
+        }
 
-    if (!(file instanceof File)) {
-      return NextResponse.json({ error: "No file provided" }, { status: 400 });
+        const form = await req.formData();
+        const file = form.get("file") as File | null;
+        if (!file) {
+            return new NextResponse("File could not be processed", { status: 400 });
+        }
+
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const name = file.name;
+        const ext = name.split('.').pop()?.toLowerCase();
+
+        let textContent = "";
+        if (ext === "pdf") {
+            try {
+                textContent = await extractTextFromPDF(buffer);
+                if (!textContent.trim()) {
+                    console.log("PDF extraction returned empty text, but continuing with upload");
+                }
+            } catch (error) {
+                console.error("PDF extraction failed:", error);
+                // Continue with empty text content for problematic PDFs
+                textContent = "";
+            }
+        } else if (ext === "txt") {
+            textContent = buffer.toString("utf-8");
+        } else {
+            return new NextResponse("Unsupported file type. Please upload PDF or TXT files.", { status: 415 });
+        }
+
+        // Create a new paper entry first
+        const paper = await prisma.paper.create({
+            data: { 
+                user_id: userId, 
+                name: name.replace(/\.[^/.]+$/, ""), // Remove file extension for paper name
+            }
+        });
+
+        // Store upload with extracted text
+        const upload = await prisma.upload.create({
+            data: {
+                paper_id: paper.paper_id,
+                filename: name,
+                storage_path: name,
+                text_content: textContent,
+            }
+        });
+
+        return NextResponse.json({
+            success: true,
+            paper_id: paper.paper_id,
+            upload_id: upload.upload_id,
+            textLength: textContent.length,
+            fileType: ext
+        });
+    } catch (err: any) {
+        console.error("Upload processing error:", err);
+        return NextResponse.json(
+            { error: err?.message || "An internal server error occurred" },
+            { status: 500 }
+        );
     }
-
-    const name = file.name || "Untitled";
-    const isTxt =
-      file.type.startsWith("text/") || name.toLowerCase().endsWith(".txt");
-    const isPdf =
-      file.type === "application/pdf" || name.toLowerCase().endsWith(".pdf");
-
-    let text = "";
-
-    if (isTxt) {
-      text = Buffer.from(await file.arrayBuffer()).toString("utf8").trim();
-    } else if (isPdf) {
-      const buffer = Buffer.from(await file.arrayBuffer());
-      text = await pdf_processing(buffer)
-    } else {
-      return NextResponse.json(
-        { error: "Unsupported file type; please use .txt or .pdf" },
-        { status: 415 }
-      );
-    }
-
-    if (!text) {
-      return NextResponse.json(
-        { error: "File is empty" },
-        { status: 422 }
-      );
-    }
-
-    const summary = await summarizeWithOllama(text);
-
-    return NextResponse.json({ summary });
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: err?.message || "Summarization failed" },
-      { status: 500 }
-    );
-  }
 }

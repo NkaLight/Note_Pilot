@@ -26,12 +26,12 @@ export default function Upload({ onSaved }: { onSaved: () => void }) {
     setError("");
 
     try {
-      const form = new FormData();
-      form.append("folder", folder);
-      form.append("file", file);
+  const form = new FormData();
+  form.append("folder", folder);
+  form.append("file", file);
 
-      const res = await fetch("/api/upload_v2", { method: "POST", body: form });
-      const data = await res.json();
+  const res = await fetch("/api/upload", { method: "POST", body: form });
+  const data = await res.json();
 
       if (!res.ok) {
         setError(data.error || "Upload failed");
