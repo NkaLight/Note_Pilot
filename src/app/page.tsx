@@ -8,7 +8,7 @@ export default async function LandingPage() {
       const user = sessionToken ? await getSessionUser() : null;
 
     if(user){
-      redirect("/ai/dashboard") //Check if the user is signed in.
+      redirect("/dashboard") //Check if the user is signed in.
     }
 
   return (

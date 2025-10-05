@@ -60,12 +60,12 @@ const DotMenu = ({ onHover }: { onHover: () => void }) => (
 const AccountNav = ({ handleLogout }: { handleLogout: () => void; }) => (
   <motion.nav
     className="nav-container flex items-center justify-between"
-    variants={navFadeIn} // Reuse your existing animation
+    variants={navFadeIn}
     initial="initial"
     animate="animate"
     exit="exit"
   >
-    <Link href="/ai/dashboard">
+    <Link href="/dashboard">
         <Image
           src="/icons/Note_Pilot_logo.svg"
           alt="Note Pilot Logo"
@@ -75,11 +75,36 @@ const AccountNav = ({ handleLogout }: { handleLogout: () => void; }) => (
         />
     </Link>
     <div className="nav-account-section flex gap-2">
-      <Link href="/ai/dashboard">Dashboard</Link>
+      <Link href="/dashboard">Dashboard</Link>
       <a onClick={handleLogout}>Logout</a>
     </div>
   </motion.nav>
 );
+
+const DashboardNav = ({ handleLogout }: { handleLogout: () => void; }) => (
+  <motion.nav
+    className="nav-container flex items-center justify-between"
+    variants={navFadeIn}
+    initial="initial"
+    animate="animate"
+    exit="exit"
+  >
+    <Link href="/dashboard">
+        <Image
+          src="/icons/Note_Pilot_logo.svg"
+          alt="Note Pilot Logo"
+          width={48}
+          height={48}
+          className="nav-logo"
+        />
+    </Link>
+    <div className="nav-account-section flex gap-2">
+      <Link href="/account">Account</Link>
+      <a onClick={handleLogout}>Logout</a>
+    </div>
+  </motion.nav>
+);
+
 const UserNav = ({
   username,
   popAccountForm,
@@ -103,7 +128,7 @@ const UserNav = ({
     onHoverStart={onhoverStart}
     onHoverEnd={onhoverEnd}
   >
-    <Link href="/ai/dashboard">
+    <Link href="/dashboard">
       <Image
         src="../icons/Note_Pilot_logo.svg"
         alt="Note Pilot Logo"
@@ -157,7 +182,7 @@ const GuestNav = ({ onLoginClick, onSignUpClick }: { onLoginClick: () => void, o
 // -------------------------
 // Main Nav
 // -------------------------
-export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
+export default function Nav({ showAuth = true, paperId }: { showAuth?: boolean, paperId?:number}) {
   const [activeForm, setActiveForm] = useState<"signin" | "signup" | "account"| null>(
     null
   );
@@ -166,6 +191,8 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
   const [collapsed, setCollapsed] = useState(false);
   const [hover, setHover] = useState(false)
   const pathname = usePathname();
+
+  console.log(paperId)
 
 
 // Track inactivity → collapse after 5s without user activity
@@ -216,7 +243,7 @@ useEffect(() => {
 
   const closeSignInModal = () => {
     setActiveForm(null);
-    setTimeout(() => router.push("/ai/dashboard"), 500);
+    setTimeout(() => router.push("/dashboard"), 500);
   };
 
   if (!showAuth) return null;
@@ -226,7 +253,56 @@ useEffect(() => {
 
   return (
     <>
-      {user ? 
+    {user && paperId !== undefined &&  //User is logged in and has chosen a paper
+      (
+      <AnimatePresence mode="wait" initial={false}>
+        {collapsed ? 
+          (
+            <DotMenu key={"dot"} onHover={() => setCollapsed(false)} />
+          ): 
+            pathname.startsWith('/account') ? (
+              // If user is on an account page, show AccountNav
+              <AccountNav key="account" handleLogout={handleLogout} />
+          ):(
+            <UserNav
+            key={"user"} 
+            username={user.username} 
+            onhoverStart={() => setHover(true)}
+            onhoverEnd={() => setHover(false)} 
+            popAccountForm={()=> setActiveForm("account")}
+            handleLogout={handleLogout} />
+          )
+        }
+      </AnimatePresence>
+      )
+    }
+    {user && paperId === undefined &&  //User is logged in no paper chosen yet
+      (
+      <AnimatePresence mode="wait" initial={false}>
+        {collapsed ? 
+          (
+            <DotMenu key={"dot"} onHover={() => setCollapsed(false)} />
+          ): 
+            pathname.startsWith('/account') ? (
+              // If user is on an account page, show AccountNav
+              <AccountNav key="account" handleLogout={handleLogout} />
+          ):(
+            <DashboardNav
+            key={"user"}
+            handleLogout={handleLogout} />
+          )
+        }
+      </AnimatePresence>
+      )
+    }
+    {
+    !user && (
+      <GuestNav key={"guest"} onLoginClick={() => setActiveForm("signin")} onSignUpClick={() => setActiveForm("signup")} />
+
+    ) 
+    }
+
+      {/* {user ? 
         (
             <AnimatePresence mode="wait" initial={false}>
               {collapsed ? 
@@ -251,7 +327,9 @@ useEffect(() => {
         (
           <GuestNav key={"guest"} onLoginClick={() => setActiveForm("signin")} onSignUpClick={() => setActiveForm("signup")} />
         )
-      }
+      } */}
+
+
       {/* Animate Presence for sign/sign/account up modals */}
       <AnimatePresence mode="wait" initial={false}>
         {activeForm === "signin" && (

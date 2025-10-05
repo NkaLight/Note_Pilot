@@ -1,4 +1,4 @@
-// src/app/ai/dashboard/page.tsx
+// src/app/dashboard/page.tsx
 "use client";
 
 import { useContext, useEffect, useState } from "react";
@@ -7,6 +7,7 @@ import type {paper} from "@prisma/client";
 import { AnimatePresence } from "framer-motion";
 import Modal from "@/components/Modal";
 import EditIcon from "@/components/EditIcon"
+import Link from "next/link";
 
 //Form SubComponents
 const AddPaperForm = ({closeForm }: { closeForm: () => void })=>{
@@ -200,17 +201,7 @@ export default function DashboardPage() {
       <div className="flex p-5 overflow-x-auto" >
         <>
             {
-              papers && papers.map(paper =>(
-                  <div className="relative m-4 bg-white text-black p-4 rounded-full w-36 flex-shrink-0">
-                    <div className="absolute top-1 right-3 m-0 p-0 cursor-pointer" onClick={()=>handleSelectPaper(paper)}>
-                      <EditIcon
-                        className="w-5 h-5 text-black-600 hover:text-blue-500 transition duration-1000"
-                      />
-                    </div>
-                    <p>{paper.code}</p>
-                  </div>
-              ))
-            }
+             git 
 
         </>
         <div onClick={()=>setActiveForm("addPaper")} className="m-4 bg-white text-black p-4 rounded-full w-30 cursor-pointer flex-shrink-0">

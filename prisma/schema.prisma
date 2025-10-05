@@ -54,6 +54,7 @@ model paper {
   name             String?
   code             String?
   description      String?
+  filename         String?
   application_user application_user @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
   upload           upload[]
 }
@@ -120,12 +121,18 @@ model twofactorauthtoken {
 }
 
 model upload {
-  upload_id     Int      @id @default(autoincrement())
+  upload_id     Int            @id @default(autoincrement())
   paper_id      Int
   filename      String
-  storage_path  String   // Original file path or location
-  text_content  String?  @db.Text  // Extracted text from PDF/TXT files
-  paper         paper    @relation(fields: [paper_id], references: [paper_id], onDelete: Cascade, onUpdate: NoAction)
+  storage_path  String
+  file_type     String?
+  text_content  String?
+  uploaded_at   DateTime       @default(now())
+  flashcard_set flashcard_set?
+  glossary      glossary?
+  problem_set   problem_set?
+  summary       summary?
+  paper         paper          @relation(fields: [paper_id], references: [paper_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([paper_id, filename])
 }

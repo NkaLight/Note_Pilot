@@ -44,7 +44,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/', request.url));
     }else{
       if (request.nextUrl.pathname === '/') {
-        return NextResponse.redirect(new URL('/ai/dashboard', request.url));
+        return NextResponse.redirect(new URL('/dashboard', request.url));
       }
     }
     
@@ -61,7 +61,7 @@ export async function middleware(request: NextRequest) {
 // The matcher protects both pages and API routes
 export const config = {
   matcher: [
-    '/ai/dashboard/',
+    '/dashboard/',
     '/account/path:*',
     '/api/remove_session',
     '/api/summarize',
