@@ -127,5 +127,11 @@ model upload {
   text_content  String?  @db.Text  // Extracted text from PDF/TXT files
   paper         paper    @relation(fields: [paper_id], references: [paper_id], onDelete: Cascade, onUpdate: NoAction)
 
+  flashcard_set flashcard_set[]
+  glossary      glossary[]
+  problem_set   problem_set[]
+  summary       summary[]
+
+
   @@unique([paper_id, filename])
 }
