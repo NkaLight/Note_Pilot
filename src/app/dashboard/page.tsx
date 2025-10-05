@@ -201,7 +201,19 @@ export default function DashboardPage() {
       <div className="flex p-5 overflow-x-auto" >
         <>
             {
-             git 
+              papers && papers.map(paper =>(
+                <Link href={`/paper_view/${paper.paper_id}`}>
+                  <div className="relative m-4 bg-white text-black p-4 rounded-full w-36 flex-shrink-0 cursor-pointer hover:bg-green">
+                    <div className="absolute top-1 right-3 m-0 p-0 cursor-pointer" onClick={()=>handleSelectPaper(paper)}>
+                      <EditIcon
+                        className="w-5 h-5 text-black-600 hover:text-blue-500 transition duration-1000"
+                      />
+                    </div>
+                    <p>{paper.code}</p>
+                  </div>
+                </Link>
+              ))
+            }
 
         </>
         <div onClick={()=>setActiveForm("addPaper")} className="m-4 bg-white text-black p-4 rounded-full w-30 cursor-pointer flex-shrink-0">
