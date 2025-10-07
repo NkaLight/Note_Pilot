@@ -1,5 +1,8 @@
+import { usePaperViewContext } from "@/context/PaperViewContext";
 import { getAuthedUserId } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { error } from "console";
+import { useParams } from "next/navigation";
 import { NextResponse } from "next/server";
 import pdf2json from "pdf2json";
 
@@ -103,14 +106,16 @@ export async function POST(req: Request) {
 
         const form = await req.formData();
         const file = form.get("file") as File | null;
-        if (!file) {
+        const paperId = form.get("paperId") as string | null;
+        const lectureTitle = form.get("lectureTitle") as string | null
+        if (!file && !paperId ) {
             return new NextResponse("File could not be processed", { status: 400 });
         }
 
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
-        const name = file.name;
-        const ext = name.split('.').pop()?.toLowerCase();
+        const name = file.name; // Probably want to store them from user inputs
+        const ext = file.name.split('.').pop()?.toLowerCase();
 
         let textContent = "";
         if (ext === "pdf") {
@@ -130,19 +135,13 @@ export async function POST(req: Request) {
             return new NextResponse("Unsupported file type. Please upload PDF or TXT files.", { status: 415 });
         }
 
-        // Create a new paper entry first
-        const paper = await prisma.paper.create({
-            data: { 
-                user_id: userId, 
-                name: name.replace(/\.[^/.]+$/, ""), // Remove file extension for paper name
-            }
-        });
-
+        
         // Store upload with extracted text
+        const papId = parseInt(paperId, 10)
         const upload = await prisma.upload.create({
             data: {
-                paper_id: paper.paper_id,
-                filename: name,
+                paper_id: papId,
+                filename: lectureTitle?lectureTitle:"",// Probably want to store the filename as lecture title, since we are storing the "storage path"
                 storage_path: name,
                 text_content: textContent,
             }
@@ -150,13 +149,45 @@ export async function POST(req: Request) {
 
         return NextResponse.json({
             success: true,
-            paper_id: paper.paper_id,
+            paper_id: upload.paper_id,
             upload_id: upload.upload_id,
             textLength: textContent.length,
             fileType: ext
         });
     } catch (err: any) {
         console.error("Upload processing error:", err);
+        return NextResponse.json(
+            { error: err?.message || "An internal server error occurred" },
+            { status: 500 }
+        );
+    }
+}
+
+interface Props {
+  params: { paperId: string };
+}
+
+export async function GET(req: Request, { params }: Props) { //Get all upload related to the lecture and paperId
+    try {
+        const userId = await getAuthedUserId();
+        if (!userId) {
+            return new NextResponse("Unauthorized", { status: 401 });
+        }
+        //check paperId
+        const paper_id = parseInt(params.paperId, 10);
+        const data = await prisma.upload.findMany({
+            where:{
+                paper:{
+                    user_id:userId,
+                    paper_id:paper_id
+                }
+            },
+            orderBy:{
+                uploaded_at:"desc",
+            }
+        })
+
+    } catch (err: any) {
         return NextResponse.json(
             { error: err?.message || "An internal server error occurred" },
             { status: 500 }

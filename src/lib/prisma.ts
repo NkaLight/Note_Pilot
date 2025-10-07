@@ -1,4 +1,6 @@
+import { useSession } from "@/context/SessionContext";
 import { PrismaClient } from "@prisma/client";
+import { getAuthedUserId } from "./auth";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
@@ -17,10 +19,28 @@ type Lecture = {
 };
 
 export async function getLecturesForPaper(paperId: number): Promise<Lecture[]> {
-    // Call prisma later
-    return [
-        { id: 101, title: 'Lecture 1: Intro to AI', createdAt: new Date() },
-        { id: 102, title: 'Lecture 2: Search Algorithms', createdAt: new Date() },
-        { id: 103, title: 'Lecture 3: Neural Networks', createdAt: new Date() }
-    ]
+    const user_id = await getAuthedUserId();
+    if(!user_id) return [];
+    const data = await prisma.upload.findMany({
+                where:{
+                    paper:{
+                        user_id:user_id,
+                        paper_id:paperId,
+                    }
+                },
+                orderBy:{
+                    uploaded_at:"desc",
+                }
+            })
+
+    console.log(data)
+    const list = data.map(item => {
+        return {
+          id: item.upload_id,
+          title: item.filename,
+          createdAt: item.uploaded_at
+        };
+      });
+
+    return list;
 }

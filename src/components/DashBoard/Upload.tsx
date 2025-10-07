@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { usePaperViewContext } from "@/context/PaperViewContext"
+import { useParams } from "next/navigation";
 
 type Lecture = {
   id: number;
@@ -16,8 +17,9 @@ export default function Upload({ onSaved }: { onSaved: () => void }) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
   const {lectures, setChosenLectureId, setLectures, chosenLectureId} = usePaperViewContext();
-  console.log("LECTURES IN UPLOAD FROM CONTETXT",lectures)
-  
+
+  const paperId = useParams().paperId?.toString();
+  console.log(paperId)
 
   // Handler for when a file is selected
   async function handleFileUpload(file: File) {
@@ -34,6 +36,7 @@ export default function Upload({ onSaved }: { onSaved: () => void }) {
       // Pass the user-provided title and the file
       form.append("lectureTitle", lectureTitle.trim()); 
       form.append("file", file);
+      form.append("paperId", paperId?paperId:"");
 
       // 1. API Call
       const res = await fetch("/api/upload", { method: "POST", body: form });
@@ -43,7 +46,6 @@ export default function Upload({ onSaved }: { onSaved: () => void }) {
         setError(data.error || "Upload failed. Please try again.");
       } else {
         // 2. Success - Reset form and notify parent
-        setLectureTitle(""); // Clear the input field
 
         // Trigger the parent component (WorkspaceClient) to refresh its lecture list
         const newLecture : Lecture = {id: lectures.length, title: lectureTitle, createdAt: new Date()};

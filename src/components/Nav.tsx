@@ -199,7 +199,6 @@ export default function Nav({ showAuth = true}: { showAuth?: boolean}) {
 
   const params = useParams();
   const paperId: number =  Number(params.paperId);
-  console.log("PaperId: ", paperId)
   
 
 // Track inactivity → collapse after 5s without user activity
