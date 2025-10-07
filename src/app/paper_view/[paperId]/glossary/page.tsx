@@ -32,30 +32,30 @@ export default function DashboardPage() {
 
   return (
     <div className=" h-screen w-full flex gap-10 pl-10 pr-0">
-          {/* Left: Chat */}
-        <div className=" rounded-3xl bg-white/0 overflow-y-auto mt-5 flex-shrink-0 h-full pb-10 pt-14"
-          style={{ width: chatWidth }}
-          >
-          <ChatUI />
-          </div>
-    
-          {/* Divider / Resizer */}
-          <div
-            onMouseDown={startResizing}
-            className="w-1 cursor-col-resize opacity-30 bg-white hover:bg-gray-400 rounded relative"
-          >
-          </div>
-    
-          {/* Middle: Summaries */}
-          <div className=" rounded-3xl mb-5 mt-19 p-6 bg-white/50 overflow-y-auto mt-5 flex-grow">
-            <h2 className="text-xl font-semibold mb-4 text-black">Glossary</h2>
-            {/* TODO: render summaries here */}
-          </div>
-    
-          {/* Right: Upload */}
-          <div className="border border-white/30 p-2 bg-white/30 pb-0 backdrop-blur-md rounded-md shadow-md overflow-y-auto w-[10vw]">
-            <Upload onSaved={() => {}} />
-          </div>
+        {/* Left: Chat */}
+      <div className=" rounded-3xl bg-white/0 overflow-y-auto mt-5 flex-shrink-0 h-full pb-10 pt-14"
+        style={{ width: chatWidth }}
+        >
+        <ChatUI />
         </div>
+  
+        {/* Divider / Resizer */}
+        <div
+          onMouseDown={startResizing}
+          className="w-1 cursor-col-resize opacity-30 bg-white hover:bg-gray-400 rounded relative"
+        >
+        </div>
+  
+        {/* Middle: Summaries */}
+        <div className=" rounded-3xl mb-5 mt-19 p-6 bg-white/50 overflow-y-auto mt-5 flex-grow">
+          <h2 className="text-xl font-semibold mb-4 text-black">Glossary</h2>
+          {/* TODO: render summaries here */}
+        </div>
+  
+        {/* Right: Upload */}
+        <div className="border border-white/30 p-2 bg-white/30 pb-0 backdrop-blur-md rounded-md shadow-md overflow-y-auto w-[10vw]">
+          <Upload onSaved={() => {}} />
+        </div>
+    </div>
   );
 }

@@ -9,6 +9,7 @@ import Link from 'next/link'
 import Image from "next/image"; // for provider logos
 import SignUpForm from "@/components/SignUpForm";
 import { usePathname } from 'next/navigation';
+import { useParams } from 'next/navigation'
 
 
 // -------------------------
@@ -111,12 +112,14 @@ const UserNav = ({
   onhoverStart,
   onhoverEnd,
   handleLogout,
+  paperId
 }: {
   username: string;
   popAccountForm: () => void;
   onhoverStart:() => void;
   onhoverEnd: () => void;
   handleLogout:() => void;
+  paperId:number
 
 }) => (
   <motion.nav
@@ -130,7 +133,7 @@ const UserNav = ({
   >
     <Link href="/dashboard">
       <Image
-        src="../icons/Note_Pilot_logo.svg"
+        src="/icons/Note_Pilot_logo.svg"
         alt="Note Pilot Logo"
         width={48}
         height={48}
@@ -138,11 +141,11 @@ const UserNav = ({
       />
     </Link>
     <div className="nav-links-container flex gap-2">
-      <Link href="/flashcards">Flash Cards</Link>
-      <Link href="/summaries">Summaries</Link>
-      <Link href="/studyGuide">Study Guides</Link>
-      <Link href="/glossary">Glossary</Link>
-      <Link href="/problemSets">Problem Sets</Link>
+      <Link href={`/paper_view/${paperId}/flashcards`}>Flash Cards</Link>
+      <Link href={`/paper_view/${paperId}/summaries`}>Summaries</Link>
+      <Link href={`/paper_view/${paperId}/studyGuide`}>Study Guides</Link>
+      <Link href={`/paper_view/${paperId}/glossary`}>Glossary</Link>
+      <Link href={`/paper_view/${paperId}/problemSets`}>Problem Sets</Link>
 
     </div>
     <div className="nav-account-section flex gap-2">
@@ -161,13 +164,15 @@ const GuestNav = ({ onLoginClick, onSignUpClick }: { onLoginClick: () => void, o
     animate="animate"
     exit="exit"
   >
-    <Image
-      src="/icons/Note_Pilot_logo.svg"
-      alt="Note Pilot Logo"
-      width={48}
-      height={48}
-      className="nav-logo"
-    />
+    <Link href="/">
+        <Image
+          src="/icons/Note_Pilot_logo.svg"
+          alt="Note Pilot Logo"
+          width={48}
+          height={48}
+          className="nav-logo"
+        />
+    </Link>
     <div className="nav-links-container flex gap-4">
       <a href="">About us</a>
       <a href="">Pricing</a>
@@ -182,7 +187,7 @@ const GuestNav = ({ onLoginClick, onSignUpClick }: { onLoginClick: () => void, o
 // -------------------------
 // Main Nav
 // -------------------------
-export default function Nav({ showAuth = true, paperId }: { showAuth?: boolean, paperId?:number}) {
+export default function Nav({ showAuth = true}: { showAuth?: boolean}) {
   const [activeForm, setActiveForm] = useState<"signin" | "signup" | "account"| null>(
     null
   );
@@ -192,8 +197,10 @@ export default function Nav({ showAuth = true, paperId }: { showAuth?: boolean, 
   const [hover, setHover] = useState(false)
   const pathname = usePathname();
 
-  console.log(paperId)
-
+  const params = useParams();
+  const paperId: number =  Number(params.paperId);
+  console.log("PaperId: ", paperId)
+  
 
 // Track inactivity → collapse after 5s without user activity
 useEffect(() => {
@@ -253,7 +260,7 @@ useEffect(() => {
 
   return (
     <>
-    {user && paperId !== undefined &&  //User is logged in and has chosen a paper
+    {user && !Number.isNaN(paperId) &&  //User is logged in and has chosen a paper
       (
       <AnimatePresence mode="wait" initial={false}>
         {collapsed ? 
@@ -270,13 +277,15 @@ useEffect(() => {
             onhoverStart={() => setHover(true)}
             onhoverEnd={() => setHover(false)} 
             popAccountForm={()=> setActiveForm("account")}
-            handleLogout={handleLogout} />
+            handleLogout={handleLogout} 
+            paperId={paperId}
+            />
           )
         }
       </AnimatePresence>
       )
     }
-    {user && paperId === undefined &&  //User is logged in no paper chosen yet
+    {user && Number.isNaN(paperId) &&  //User is logged in no paper chosen yet
       (
       <AnimatePresence mode="wait" initial={false}>
         {collapsed ? 

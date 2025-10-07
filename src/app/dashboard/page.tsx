@@ -77,7 +77,6 @@ const EditPaper = ({closeForm, paperItem }: { closeForm: () => void; paperItem: 
   const [name, setName] = useState<string>(paperItem.name ??"");
   const [code, setCode] = useState<string>(paperItem.code??"")
   const [descr, setDescr] = useState<string>(paperItem.description??"")
-  const [paper_id, setPaperId] = useState<number>(paperItem.paper_id);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [error, setError] = useState<string>("")
 
@@ -202,7 +201,7 @@ export default function DashboardPage() {
         <>
             {
               papers && papers.map(paper =>(
-                <Link href={`/paper_view/${paper.paper_id}`}>
+                <Link href={`/paper_view/${paper.paper_id}/summaries`} key={paper.paper_id}>
                   <div className="relative m-4 bg-white text-black p-4 rounded-full w-36 flex-shrink-0 cursor-pointer hover:bg-green">
                     <div className="absolute top-1 right-3 m-0 p-0 cursor-pointer" onClick={()=>handleSelectPaper(paper)}>
                       <EditIcon

@@ -1,8 +1,6 @@
 "use client";
 import { useState } from "react";
-import Image from "next/image"; // for provider logos
 import { useSession } from "@/context/SessionContext";
-import FidgetSpinner from "@/components/FidgetSpinner"
 // Define the type for the props
 interface SignInFormProps {
   closeForm: () => void;
