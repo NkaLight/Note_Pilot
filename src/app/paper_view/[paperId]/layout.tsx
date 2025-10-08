@@ -1,8 +1,3 @@
-import { getSessionUser } from "@/lib/auth";
-import { notFound, redirect, useParams } from "next/navigation"; 
-import { prisma } from "@/lib/prisma";
-import ThemeInit from "@/components/Account/themeInit";
-import { ThemeProviders } from "@/components/Account/themeProvider";
 import ClientProviderWrapper from "./ClientProviderWrapper";
 import {getLecturesForPaper} from "@/lib/prisma";
 
