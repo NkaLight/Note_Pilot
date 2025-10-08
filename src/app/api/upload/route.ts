@@ -1,4 +1,3 @@
-import { usePaperViewContext } from "@/context/PaperViewContext";
 import { getAuthedUserId } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
@@ -49,9 +48,9 @@ function extractTextFromPDF(buffer: Buffer): Promise<string> {
     return new Promise((resolve, reject) => {
         const pdfParser = new pdf2json();
         
-        pdfParser.on("pdfParser_dataError", errData => {
+        pdfParser.on("pdfParser_dataError", (errData: any) => {
             console.error("PDF parsing error:", errData);
-            reject(new Error(`PDF parsing failed: ${errData.parserError || errData}`));
+            reject(new Error(`PDF parsing failed: ${(errData as any).parserError || errData}`));
         });
         
         pdfParser.on("pdfParser_dataReady", pdfData => {
