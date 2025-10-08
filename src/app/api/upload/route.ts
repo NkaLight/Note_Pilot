@@ -163,34 +163,3 @@ export async function POST(req: Request) {
     }
 }
 
-interface Props {
-  params: { paperId: string };
-}
-
-export async function GET(req: Request, { params }: Props) { //Get all upload related to the lecture and paperId
-    try {
-        const userId = await getAuthedUserId();
-        if (!userId) {
-            return new NextResponse("Unauthorized", { status: 401 });
-        }
-        //check paperId
-        const paper_id = parseInt(params.paperId, 10);
-        const data = await prisma.upload.findMany({
-            where:{
-                paper:{
-                    user_id:userId,
-                    paper_id:paper_id
-                }
-            },
-            orderBy:{
-                uploaded_at:"desc",
-            }
-        })
-
-    } catch (err: any) {
-        return NextResponse.json(
-            { error: err?.message || "An internal server error occurred" },
-            { status: 500 }
-        );
-    }
-}
