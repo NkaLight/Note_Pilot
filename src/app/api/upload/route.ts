@@ -1,8 +1,6 @@
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { getAuthedUserId } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { error } from "console";
-import { useParams } from "next/navigation";
 import { NextResponse } from "next/server";
 import pdf2json from "pdf2json";
 
