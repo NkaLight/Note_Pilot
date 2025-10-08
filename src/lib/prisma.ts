@@ -22,6 +22,7 @@ export async function getLecturesForPaper(paperId: number): Promise<Lecture[]> {
     const user_id = await getAuthedUserId();
     if(!user_id) return [];
     const data = await prisma.upload.findMany({
+                
                 where:{
                     paper:{
                         user_id:user_id,
@@ -30,7 +31,12 @@ export async function getLecturesForPaper(paperId: number): Promise<Lecture[]> {
                 },
                 orderBy:{
                     uploaded_at:"desc",
-                }
+                },
+                select: {
+                  upload_id: true,
+                  filename: true,
+                  uploaded_at: true,
+                },
             })
 
     console.log(data)
@@ -44,3 +50,18 @@ export async function getLecturesForPaper(paperId: number): Promise<Lecture[]> {
 
     return list;
 }
+
+export async function getLectureConentById(id:string){
+    const user_id = await getAuthedUserId();
+    if (!user_id) return null;
+    const uploeadId = Number(id);
+    const textContent = await prisma.upload.findFirst({
+        where:{
+            paper:{
+              user_id: user_id
+            },
+            upload_id: uploeadId,
+        }
+    })
+    return textContent.text_content;
+};

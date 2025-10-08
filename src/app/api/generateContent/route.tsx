@@ -1,0 +1,93 @@
+import { NextResponse } from "next/server";
+import { getSessionUser } from "@/lib/auth";
+import { getLectureConentById } from "@/lib/prisma";
+
+export async function POST(req: Request) {
+  try {
+    // 1️⃣ Check user authentication
+    const user = await getSessionUser();
+    if (!user) {
+      return new NextResponse("Unauthorized", { status: 401 }); // 401 is more standard than 404
+    }
+
+    // 2️⃣ Parse request body (assuming JSON)
+    const body = await req.json();
+    const { lectureId, contentType } = body;
+
+    if (!lectureId || !contentType) {
+      return new NextResponse("Missing lectureId or contentType", { status: 400 });
+    }
+
+    // 3️⃣ Fetch lecture content from DB
+    // Example function: getLectureTextById
+    const lecture = await getLectureConentById(lectureId);
+
+    if (!lecture) {
+      return new NextResponse("Lecture not found", { status: 404 });
+    }
+
+    // 4️⃣ Call your LLM to generate content
+    // Example: generateContent(lectureText, contentType)
+    const aiAPiUrl = "https://openrouter.ai/api/v1/chat/completions"
+    const aiQuery = `You are an AI that summarizes lecture content into a structured JSON array. 
+        Generate **at least 5 objects**, each with:
+        1. "header": a concise title.
+        2. "text": summarized text with <strong>...</strong> tags highlighting key concepts.
+
+        Return the data as a valid JSON array ONLY, with no extra text outside the array.
+
+        Lecture text:
+        """
+        ${lecture}
+        """
+
+        Example output:
+        [
+        {
+            "header": "Introduction to Algorithms",
+            "text": "Algorithms are <strong>step-by-step procedures</strong> for solving problems efficiently..."
+        },
+        {
+            "header": "Time Complexity",
+            "text": "We measure <strong>algorithm performance</strong> by..."
+        }
+        ]`;
+    // QUERY the LLM
+    const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${process.env.NVIDIA_AI_API}`
+            },
+            body: JSON.stringify({
+                // The payload the AI service expects
+                model: "nvidia/nemotron-nano-9b-v2:free",
+                messages: [{ role: "system", content: "You are an AI that outputs JSON only, no explanations." }, { role: "user", content: aiQuery }], 
+                stream: false, // For streaming response currently not implemented.
+            }),
+        });
+
+    const data = await resp.json();
+    console.log(data);
+    const reply = data?.choices?.[0]?.message?.content ?? null;
+    console.log(reply)
+
+
+    let replyJson = {};
+        try {
+        replyJson = JSON.parse(reply);
+        console.log(replyJson)
+        } catch (e) {
+        console.error("Failed to parse LLM response as JSON:", reply);
+        replyJson = { text: reply };
+        }
+    
+    return NextResponse.json({ content: replyJson });
+  } catch (err: any) {
+    console.error("Error in POST /api/generateContent:", err);
+    return NextResponse.json(
+      { error: err.message || "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
