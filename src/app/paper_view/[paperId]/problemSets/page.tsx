@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import ChatUI from "@/components/DashBoard/ChatUI";
 import Summary from "@/components/DashBoard/Summary";
 import Upload from "@/components/DashBoard/Upload";
+import { usePaperViewContext } from "@/context/PaperViewContext";
 
 export default function DashboardPage() {
   // Chat width starts at 50% of viewport
@@ -30,6 +31,9 @@ export default function DashboardPage() {
     document.removeEventListener("mouseup", stopResizing);
   };
 
+  const {chosenLectureId} = usePaperViewContext(); 
+
+  
   return (
     <div className=" h-screen w-full flex gap-10 pl-10 pr-0">
           {/* Left: Chat */}
@@ -53,8 +57,22 @@ export default function DashboardPage() {
           </div>
     
           {/* Right: Upload */}
-          <div className="border border-white/30 p-2 bg-white/30 pb-0 backdrop-blur-md rounded-md shadow-md overflow-y-auto w-[10vw]">
-            <Upload onSaved={() => {}} />
+          <div className="group">
+            {/* Invisible hover zone (triggers panel to slide in) */}
+            <div className="absolute left-0 top-0 h-full w-3 bg-transparent z-20 cursor-ew-resize" />
+    
+            {/* Upload Panel */}
+            <div
+              className="
+                border border border-white/30 p-2 bg-white/30 pb-0 backdrop-blur-md rounded-md shadow-md overflow-y-auto w-[0] flex-shrink-0 
+                overflow-y-auto transition-all duration-300 
+                w-0 opacity-0 
+                group-hover:w-[12vw] group-hover:opacity-100
+              "
+            >
+              <h4 className="mt-10 mb-5">Lectures: </h4>
+              <Upload onSaved={() => {}} />
+            </div>
           </div>
         </div>
   );
