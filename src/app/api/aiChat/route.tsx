@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";  
 import { getSessionUser } from "@/lib/auth";
 import fs from "fs";
-import { pipeline } from "@xenova/transformers";
+//import { pipeline } from "@xenova/transformers";
 
 
 const chatMessageReqSchema = z.object({
@@ -10,8 +10,8 @@ const chatMessageReqSchema = z.object({
 })
 
 //Load the chunks and vectors at startup
-const chunks: string[] = JSON.parse(fs.readFileSync("src/data/chunks.json", "utf-8"));
-const vectors: number[][] = JSON.parse(fs.readFileSync("src/data/vectors.json", "utf-8"));
+// const chunks: string[] = JSON.parse(fs.readFileSync("src/data/chunks.json", "utf-8"));
+// const vectors: number[][] = JSON.parse(fs.readFileSync("src/data/vectors.json", "utf-8"));
 
 // Cosine similarity
 function cosineSimilarity(a: number[], b: number[]) {
