@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import ChatUI from "@/components/DashBoard/ChatUI";
 import Summary from "@/components/DashBoard/Summary";
 import Upload from "@/components/DashBoard/Upload";
@@ -10,6 +10,9 @@ export default function DashboardPage() {
   // Chat width starts at 50% of viewport
   const [chatWidth, setChatWidth] = useState("50%");
   const isResizing = useRef(false);
+  const [questions, setQuestions] = useState<any[]>([]);
+  const {chosenLectureId} = usePaperViewContext(); 
+  const [isLoading, setIsLoading] = useState(false);
 
   const startResizing = () => {
     isResizing.current = true;
@@ -31,7 +34,23 @@ export default function DashboardPage() {
     document.removeEventListener("mouseup", stopResizing);
   };
 
-  const {chosenLectureId} = usePaperViewContext(); 
+  useEffect(() => {
+    if (!chosenLectureId) return;
+    setIsLoading(true);
+    setQuestions([]);
+    
+    fetch("/api/problemsets", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode: "generate", lectureId: chosenLectureId }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setQuestions(data.questions || []);
+      })
+      .catch((err) => console.error("Failed to generate problems:", err))
+      .finally(() => setIsLoading(false));
+  }, [chosenLectureId]);
 
   
   return (
@@ -53,14 +72,30 @@ export default function DashboardPage() {
           {/* Middle: Summaries */}
           <div className=" rounded-3xl mb-5 mt-19 p-6 bg-white/50 overflow-y-auto mt-5 flex-grow">
             <h2 className="text-xl font-semibold mb-4 text-black">Problem Sets</h2>
-            {/* TODO: render summaries here */}
+            <div className="space-y-6">
+              {questions.map((q, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white/70 p-4 rounded-xl shadow-md border border-gray-200"
+                >
+                  <h3 className="font-semibold text-lg mb-2 text-gray-800">
+                    Q{idx + 1}. {q.question}
+                  </h3>
+                  <textarea
+                    className="w-full border rounded-md p-2 text-sm text-gray-800 focus:ring focus:ring-blue-200"
+                    placeholder="Type your answer here..."
+                    rows={3}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
     
           {/* Right: Upload */}
           <div className="group">
             {/* Invisible hover zone (triggers panel to slide in) */}
             <div className="absolute left-0 top-0 h-full w-3 bg-transparent z-20 cursor-ew-resize" />
-    
+
             {/* Upload Panel */}
             <div
               className="

@@ -16,6 +16,7 @@ export default function DashboardPage() {
   const isResizing = useRef(false);
   const {chosenLectureId} = usePaperViewContext();
   const [summaries, setSummaries] = useState<SummaryItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   
 
   const startResizing = () => {
@@ -41,6 +42,7 @@ export default function DashboardPage() {
     useEffect(() => { 
     if (!chosenLectureId) return;
     console.log("Called api/generateConent/")
+    setIsLoading(true);
     fetch("/api/generateContent", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -50,7 +52,7 @@ export default function DashboardPage() {
     .then(data => {
       if(Array.isArray(data.content)){
         setSummaries(data.content);
-
+        setIsLoading(false)
       }else{
         console.error("expected format not returned");
         setSummaries([]);
@@ -82,7 +84,7 @@ export default function DashboardPage() {
       <div className=" rounded-3xl mb-5 mt-19 p-6 bg-white/50 overflow-y-auto mt-5 flex-grow">
         <h2 className="text-xl font-semibold mb-4 text-black">Summaries</h2>
         {summaries.length === 0 ? (
-          <p className="text-gray-500">No summaries available for this lecture yet.</p>
+          <p className="text-gray-500">{isLoading? "Generating..." :"No summaries available for this lecture yet."}</p>
         ) : (
           <div className="space-y-6">
             {summaries.map((item, idx) => (

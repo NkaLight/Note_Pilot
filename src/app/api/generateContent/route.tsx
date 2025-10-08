@@ -2,15 +2,18 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { getLectureConentById } from "@/lib/prisma";
 
+
+const API_URL = "https://openrouter.ai/api/v1/chat/completions"
+
 export async function POST(req: Request) {
   try {
-    // 1️⃣ Check user authentication
+    // Check user authentication
     const user = await getSessionUser();
     if (!user) {
       return new NextResponse("Unauthorized", { status: 401 }); // 401 is more standard than 404
     }
 
-    // 2️⃣ Parse request body (assuming JSON)
+    // Parse request body (assuming JSON)
     const body = await req.json();
     const { lectureId, contentType } = body;
 
@@ -18,7 +21,7 @@ export async function POST(req: Request) {
       return new NextResponse("Missing lectureId or contentType", { status: 400 });
     }
 
-    // 3️⃣ Fetch lecture content from DB
+    // Fetch lecture content from DB
     // Example function: getLectureTextById
     const lecture = await getLectureConentById(lectureId);
 
@@ -26,9 +29,7 @@ export async function POST(req: Request) {
       return new NextResponse("Lecture not found", { status: 404 });
     }
 
-    // 4️⃣ Call your LLM to generate content
-    // Example: generateContent(lectureText, contentType)
-    const aiAPiUrl = "https://openrouter.ai/api/v1/chat/completions"
+    // Call your LLM to generate content
     const aiQuery = `You are an AI that summarizes lecture content into a structured JSON array. 
         Generate **at least 5 objects**, each with:
         1. "header": a concise title.
@@ -53,7 +54,7 @@ export async function POST(req: Request) {
         }
         ]`;
     // QUERY the LLM
-    const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    const resp = await fetch(API_URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
