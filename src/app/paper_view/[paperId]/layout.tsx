@@ -3,7 +3,7 @@ import {getLecturesForPaper} from "@/lib/prisma";
 
 type PaperViewLayoutProps = {
   children: React.ReactNode;
-  params: { paperId: string };
+  params: any;
 };
 
 
