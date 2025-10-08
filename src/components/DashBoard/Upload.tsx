@@ -19,7 +19,6 @@ export default function Upload({ onSaved }: { onSaved: () => void }) {
   const {lectures, setChosenLectureId, setLectures, chosenLectureId} = usePaperViewContext();
 
   const paperId = useParams().paperId?.toString();
-  console.log(paperId)
 
   // Handler for when a file is selected
   async function handleFileUpload(file: File) {
@@ -39,7 +38,13 @@ export default function Upload({ onSaved }: { onSaved: () => void }) {
       form.append("paperId", paperId?paperId:"");
 
       // 1. API Call
-      const res = await fetch("/api/upload", { method: "POST", body: form });
+      console.log("Uploading file:", file.text);
+      console.log("File name:", file.name);
+      console.log("File size:", file.size);
+      console.log("File type:", file.type);
+      console.log("PaperId:", paperId);
+      console.log("LectureTitle:", lectureTitle);
+      const res = await fetch("/api/upload_v2", { method: "POST", body: form });
       const data = await res.json();
 
       if (!res.ok) {
