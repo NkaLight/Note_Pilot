@@ -53,23 +53,23 @@ function extractTextFromPDF(buffer: Buffer): Promise<string> {
             reject(new Error(`PDF parsing failed: ${(errData as any).parserError || errData}`));
         });
         
-        pdfParser.on("pdfParser_dataReady", pdfData => {
+        pdfParser.on("pdfParser_dataReady", (pdfData: any)=> {
             try {
-                if (!pdfData || !pdfData.formImage) {
+                if (!pdfData || !pdfData?.formImage) {
                     console.log("PDF data structure:", JSON.stringify(pdfData, null, 2));
                     resolve(""); // Return empty string for unparseable PDFs
                     return;
                 }
                 
-                if (!pdfData.formImage.Pages || pdfData.formImage.Pages.length === 0) {
+                if (!pdfData?.formImage?.Pages || pdfData?.formImage?.Pages?.length === 0) {
                     console.log("No pages found in PDF, returning empty string");
                     resolve(""); // Return empty string instead of rejecting
                     return;
                 }
                 
-                const text = pdfData.formImage.Pages.map(page => {
-                    if (!page.Texts || page.Texts.length === 0) return "";
-                    return page.Texts.map(t => {
+                const text = pdfData?.formImage?.Pages.map(page => {
+                    if (!page?.Texts || page?.Texts?.length === 0) return "";
+                    return page?.Texts?.map(t => {
                         try {
                             return decodeURIComponent(t.R[0].T);
                         } catch (e) {
