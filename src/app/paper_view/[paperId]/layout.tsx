@@ -9,7 +9,7 @@ export default async function PaperViewLayout({
     children: React.ReactNode;
     params: { paperId: string };
 }) {
-    const paper_id = parseInt(params.paperId, 10);
+    const paper_id = Number(params.paperId);
     console.log(paper_id);
     const initialLectures = await getLecturesForPaper(paper_id); //I validate when calling the API for the lectures.
 
