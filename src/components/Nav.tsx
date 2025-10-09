@@ -237,8 +237,8 @@ useEffect(() => {
     try {
       const res = await fetch("/api/remove_session", { method: "GET" });
       if (res.ok) {
-        setUser(null);
         router.push("/");
+        setUser(null);
       } else {
         alert("Failed to log out.");
       }

@@ -1,16 +1,8 @@
 import { useSession } from "@/context/SessionContext";
 import { PrismaClient } from "@prisma/client";
 import { getAuthedUserId } from "./auth";
+import { prisma } from "@/lib/db";
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
-
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    log: ["query"],
-  });
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
 type Lecture = {
   id: number;

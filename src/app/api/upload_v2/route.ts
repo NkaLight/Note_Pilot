@@ -7,17 +7,16 @@ import os from "os";
 import path from "path";
 import { prisma } from "@/lib/db";
 
-export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
-    // 1️⃣ Check auth
+    //auth
     const userId = getAuthedUserId();
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    // 2️⃣ Parse FormData
+    //Parse FormData
     const formData = await req.formData();
     const uploadedFiles = formData.getAll("file"); 
     const paperId = formData.get("paperId") as string | null;
@@ -34,14 +33,14 @@ export async function POST(req: Request) {
 
     console.log("Received file:", uploadedFile.name, uploadedFile.size, uploadedFile.type);
 
-    // 3️⃣ Write temp PDF file
+    // Write temp PDF file
     const fileName = uuidv4();
     const tmpFilePath = path.join(os.tmpdir(), `${fileName}.pdf`);
     const fileBuffer = Buffer.from(await uploadedFile.arrayBuffer());
     console.log("File buffer size:", fileBuffer.length);
     await fs.writeFile(tmpFilePath, fileBuffer);
 
-    // 4️⃣ Parse PDF
+    // Parse PDF
     const pdfParser = new (PDFParser as any)(null, 1); 
     let parsedText = "";
 
@@ -60,8 +59,7 @@ export async function POST(req: Request) {
       pdfParser.loadPDF(tmpFilePath);
     });
 
-    // 5️⃣ Clean up temp file
-    await fs.unlink(tmpFilePath).catch(() => { /* ignore */ });
+    await fs.unlink(tmpFilePath).catch(() => {});
 
 
     //Send to DB
@@ -74,7 +72,6 @@ export async function POST(req: Request) {
             storage_path: uploadedFile.name,
         }
     });
-
     return NextResponse.json({
       status: 200,
       paperId,

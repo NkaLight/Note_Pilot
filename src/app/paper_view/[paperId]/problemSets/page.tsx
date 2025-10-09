@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import ChatUI from "@/components/DashBoard/ChatUI";
 import Upload from "@/components/DashBoard/Upload";
 import { usePaperViewContext } from "@/context/PaperViewContext";
-import ProblemSet from "@/components/Dashboard/ProblemSet";
+import ProblemSet from "@/components/DashBoard/ProblemSet";
 
 export default function DashboardPage() {
   // Chat width starts at 50% of viewport

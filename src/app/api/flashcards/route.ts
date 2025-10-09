@@ -1,4 +1,3 @@
-// src/app/api/flashcards/route.ts
 /**
  * Flashcard generation API (server-only, Next.js App Router)
  *
