@@ -7,16 +7,12 @@
  *   (1) ChatUI on the left
  *   (2) Flashcards in the middle
  *   (3) Upload widget on the right
- * - Lets the user click "📇 Create Flashcards" on ChatUI → calls /api/flashcards
+ * - Lets the user click " Create Flashcards" on ChatUI → calls /api/flashcards
  * - Maps API response into flashcard cards that flip on click.
- *
- * CURRENT LIMITATION
- * - Flashcards are stored in React state only → disappear on page refresh.
- * - Future work: persist flashcards in DB (e.g. prisma.flashcard_set + prisma.flashcard)FYI my db for supabase us buggin.
  */
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import ChatUI from "@/components/DashBoard/ChatUI";
 import Upload from "@/components/DashBoard/Upload";
 
@@ -77,32 +73,28 @@ export default function FlashcardsPage() {
       setLoading(false);
     }
   }
-
-  // (Optional) If Upload gives an uploadId, generate + persist
-  async function makeFlashcardsFromUpload(uploadId: number) {
-    setLoading(true);
-    setErr(null);
-    try {
-      const res = await fetch("/api/flashcards", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ uploadId }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Failed to generate");
-
-      const cards = (data.flashcards as ApiFlashcard[]).map((fc) => ({
-        question: fc.question_front,
-        answer: fc.answer_back,
-      }));
-      setFlashcards(cards);
-      setFlippedIndex(null);
-    } catch (e: any) {
-      setErr(e.message || "Something went wrong");
-    } finally {
-      setLoading(false);
+ // adds persistence to the flashcards when the page is refreshed
+  useEffect(() => {
+    async function loadFlashcards() {
+      try {
+        const res = await fetch("/api/flashcards");
+        if (!res.ok) throw new Error("Failed to load flashcards");
+        const data = await res.json();
+        if (data.flashcards) {
+          setFlashcards(
+            data.flashcards.map((fc: any) => ({
+              question: fc.question_front,
+              answer: fc.answer_back,
+            }))
+          );
+        }
+      } catch (err) {
+        console.error("Error loading flashcards:", err);
+      }
     }
-  }
+  
+    loadFlashcards();
+  }, []);
 
   return (
     <div className="h-screen w-full flex gap-10 pl-10 pr-0">

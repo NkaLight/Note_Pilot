@@ -5,7 +5,7 @@
  * WHAT IT DOES
  * - Shows a chat-style interface with user + assistant messages.
  * - Sends user input to `/api/aiChat` and displays assistant replies.
- * - Adds a 📇 "Create Flashcards" button under each assistant reply.
+ * - Adds a "Create Flashcards" button under each assistant reply.
  *   Clicking this calls `onMakeFlashcards` with the assistant's text.
  *
  * CURRENT LIMITATION
@@ -84,7 +84,7 @@ export default function ChatUI({
                     className="text-sm px-2 py-1 rounded-md border hover:bg-gray-80"
                     title="Create flashcards from this reply"
                   >
-                    📇 Create Flashcards
+                    Create Flashcards
                   </button>
                 </div>
               )}
