@@ -1,7 +1,7 @@
 import { getSessionUser } from "@/lib/auth";
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import z, { date } from "zod";
+import { prisma } from "@/lib/db";
+import z from "zod";
 
 
 

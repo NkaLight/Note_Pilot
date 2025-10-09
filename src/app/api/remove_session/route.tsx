@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import crypto from "crypto";
 import { cookies } from "next/headers";
-import { prisma } from "@/lib/prisma"; 
+import { prisma } from "@/lib/db"; 
 import { z } from "zod";  
+import {clearCache} from "@/lib/session";
 
 const validate_session_schema = z.object({
     token: z.string()
@@ -26,6 +26,13 @@ export async function GET(){
             }
         })
         if(!sessionId) NextResponse.json({user: null});
+
+        //clear session in cache
+        const clearedCache = await clearCache();
+        if(!clearedCache){
+             console.log("failed to clear cache");
+             return NextResponse.json({user:null, error:"Failed to clear cache"}) 
+        }
 
         //Mark is is_used= true in DB
         const operation = await prisma.session.update({

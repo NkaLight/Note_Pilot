@@ -16,6 +16,7 @@
 
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
+import { validateSession, getUserFromToken} from "@/lib/session"
 
 export const SESSION_COOKIE = "session_token";
 
@@ -27,23 +28,9 @@ export type SessionUser = {
 
 /** Lowest-level: cookie → user_id, with DB validation and activity touch. */
 export async function getAuthedUserId(): Promise<number | null> {
-  const token = (await cookies()).get(SESSION_COOKIE)?.value;
-  if (!token) return null;
-
-  const sess = await prisma.session.findFirst({
-    where: { token, is_used: false },
-    select: { user_id: true, expires_at: true },
-  });
-  if (!sess) return null;
-
-  if (sess.expires_at && sess.expires_at < new Date()) return null;
-
-  await prisma.session.updateMany({
-    where: { token },
-    data: { last_active_at: new Date() },
-  });
-
-  return sess.user_id;
+  const user = await getSessionUser();
+  if(!user) return null;
+  return user.user_id;
 }
 
 /** Throws if not authenticated — handy for server actions or API routes. */
@@ -54,25 +41,29 @@ export async function requireUserId(): Promise<number> {
 }
 
 /**
- * Higher-level: return the full user object using your validation API.
- * Expects /api/validate_session to return { user: { user_id, username, email } } on success.
+ * User object by using validateSession lib, since it fetches from cache first O(1) read, if not in cache then it fetches from DB.
  */
 export async function getSessionUser(): Promise<SessionUser | null> {
-  const sessionToken = (await cookies()).get(SESSION_COOKIE)?.value;
-  if (!sessionToken) return null;
+  const cookieJar = await cookies();
+  const token = cookieJar.get(SESSION_COOKIE)?.value;
+  if (!token) return null;
 
-  try {
-    const base = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-    const res = await fetch(`${base}/api/validate_session`, {
-      headers: { Cookie: `${SESSION_COOKIE}=${sessionToken}` },
-      cache: "no-store",
-    });
-
-    if (!res.ok) return null;
-    const data = await res.json();
-    return (data?.user ?? null) as SessionUser | null;
-  } catch (err) {
-    console.error("Error validating session:", err);
-    return null;
-  }
+  return await getUserFromToken(token);
 }
+
+//  
+export async function validatePaperId(paper_id: number){
+  const user_id = await getAuthedUserId();
+  if(user_id == null) return null;
+
+  const isValid = await prisma.paper.count({
+    where:{
+      paper_id:paper_id,
+      user_id:user_id,
+    }
+  })
+  if(isValid < 1) return null;
+  return true;
+
+}
+

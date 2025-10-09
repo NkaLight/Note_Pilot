@@ -29,7 +29,7 @@ export async function POST(req: Request) {
       return new NextResponse("Lecture not found", { status: 404 });
     }
 
-    // Call your LLM to generate content
+    //LLM Query
     const aiQuery = `You are an AI that summarizes lecture content into a structured JSON array. 
         Generate **at least 5 objects**, each with:
         1. "header": a concise title.
@@ -61,7 +61,6 @@ export async function POST(req: Request) {
                 "Authorization": `Bearer ${process.env.NVIDIA_AI_API}`
             },
             body: JSON.stringify({
-                // The payload the AI service expects
                 model: "nvidia/nemotron-nano-9b-v2:free",
                 messages: [{ role: "system", content: "You are an AI that outputs JSON only, no explanations." }, { role: "user", content: aiQuery }], 
                 stream: false, // For streaming response currently not implemented.
