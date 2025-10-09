@@ -10,14 +10,14 @@ export async function POST(req: Request){
         const userId = await getAuthedUserId();
         if(!userId) throw NextResponse.json({error: "Unauthorized", status: 401});
 
-        const {mode, lectureId} = await req.json();
-        console.log(mode, lectureId);
+        const {mode, lectureId, userAnswer, questions} = await req.json();
+        console.log(mode, lectureId, userAnswer, questions);
 
         if(!mode) throw NextResponse.json({error:"No mode selected", status: 400});
-        if(!lectureId) throw NextResponse.json({error:"Lecture Id must be selected", status: 400});
 
         //GENERATE QUESTIONS
         if(mode == "generate"){
+            if(!lectureId) throw NextResponse.json({error:"Lecture Id must be selected", status: 400});
             const lecture = await getLectureConentById(lectureId);
             if (!lecture) return new NextResponse("Lecture not found", { status: 404 });
 
@@ -48,13 +48,54 @@ export async function POST(req: Request){
                 });
 
                 const data = await resp.json();
+                console.log(data);
                 const jsonStr = data?.choices?.[0]?.message?.content ?? "[]";
                 const parsed = JSON.parse(jsonStr);
 
-                return NextResponse.json({questions: parsed});
-        }else if(mode === "evaluate"){
-            
+                //Store problem sets later.
 
+                console.log(parsed);
+
+                return NextResponse.json({questions: parsed});
+
+        }else if(mode === "evaluate"){
+            const {question, answer} = questions;
+            console.log(question, answer, userAnswer);
+
+            const evaluationPrompt = `
+            You are an exam evaluator.
+            Compare the student's answers with the correct ones and return feedback as JSON.
+            Format:
+            [
+                {"question": "...", "userAnswer": "...", "correctAnswer": "...", "feedback": "...", "score": 0-1}
+            ]
+            `;
+
+            const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${process.env.NVIDIA_AI_API}`,
+                },
+                body: JSON.stringify({
+                model: "nvidia/nemotron-nano-9b-v2:free",
+                messages: [
+                    { role: "system", content: evaluationPrompt },
+                    {
+                    role: "user",
+                    content: JSON.stringify({ question: questions.question, userAnser:userAnswer, correctAnswer:questions.answer}),
+                    },
+                ],
+                }),
+            })
+
+            const data = await resp.json();
+            console.log(data)
+            const feedback = JSON.parse(data?.choices?.[0]?.message?.content ?? "[]");
+
+            console.log(feedback)
+            //Store evalutaions later.
+            return NextResponse.json({ feedback });
             
 
         }else{

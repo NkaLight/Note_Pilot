@@ -2,9 +2,9 @@
 
 import { useState, useRef, useEffect } from "react";
 import ChatUI from "@/components/DashBoard/ChatUI";
-import Summary from "@/components/DashBoard/Summary";
 import Upload from "@/components/DashBoard/Upload";
 import { usePaperViewContext } from "@/context/PaperViewContext";
+import ProblemSet from "@/components/Dashboard/ProblemSet";
 
 export default function DashboardPage() {
   // Chat width starts at 50% of viewport
@@ -37,8 +37,8 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!chosenLectureId) return;
     setIsLoading(true);
-    setQuestions([]);
-    
+    setQuestions([]); // clear previous
+
     fetch("/api/problemsets", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -73,20 +73,13 @@ export default function DashboardPage() {
           <div className=" rounded-3xl mb-5 mt-19 p-6 bg-white/50 overflow-y-auto mt-5 flex-grow">
             <h2 className="text-xl font-semibold mb-4 text-black">Problem Sets</h2>
             <div className="space-y-6">
+              {questions.length == 0 && <p className="text-gray-500">{isLoading? "Generating..." :"No questions available for this lecture yet."}</p>}
               {questions.map((q, idx) => (
-                <div
+                <ProblemSet
+                  question={q}
+                  index={idx}
                   key={idx}
-                  className="bg-white/70 p-4 rounded-xl shadow-md border border-gray-200"
-                >
-                  <h3 className="font-semibold text-lg mb-2 text-gray-800">
-                    Q{idx + 1}. {q.question}
-                  </h3>
-                  <textarea
-                    className="w-full border rounded-md p-2 text-sm text-gray-800 focus:ring focus:ring-blue-200"
-                    placeholder="Type your answer here..."
-                    rows={3}
-                  />
-                </div>
+                />
               ))}
             </div>
           </div>
