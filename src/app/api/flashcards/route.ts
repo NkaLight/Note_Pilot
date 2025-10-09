@@ -3,32 +3,11 @@
  * Flashcard generation API (server-only, Next.js App Router)
  *
  * WHAT IT DOES
- * - Validates the caller is authenticated (via getSessionUser).
- * - Validates input with Zod: either `text` OR `uploadId` must be provided.
- * - If `text` is provided, sends it to the LLM via OpenRouter to generate flashcards.
- * - If `uploadId` is provided (and no `text`), loads source text from DB summary table.
- * - Parses/validates the LLM response (must be a JSON array of {question_front, answer_back}).
- * - Optionally persists the flashcards if `uploadId` was given.
- * - Had issues with Supabase before pushing, so will need more testing wether the data is good enough.
- *
- * INPUT (JSON)
- *  {
- *    "text"?: string,
- *    "uploadId"?: number
- *  }
- *  (exactly one of the two must be present)
- *
- * OUTPUT (JSON)
- *  200: { flashcards: Array<{question_front, answer_back}>, savedSet: { ... } | null }
- *  4xx/5xx: { error: string, detail?: string }
- *
- * ENV VARS
- *  - NVIDIA_AI_API or OPENROUTER_API_KEY : the OpenRouter API key (Bearer).
- *  - APP_URL                            : recommended by OpenRouter for referer; defaults to http://localhost:3000
- *
- * NOTES
- * - This route requires an authenticated session (401 otherwise).
- * - The LLM is instructed to return ONLY a raw JSON array (no prose, no fences).
+ * - Authenticates the user.
+ * - Uses OpenRouter AI to generate flashcards (Q/A pairs) from uploaded text or user input.
+ * - Persists flashcards in the database tied to a specific upload (or creates a dummy one if needed).
+ * - Uses `upsert` so that re-generating flashcards for the same upload overwrites old ones.
+ * - Adds a GET route to reload persisted flashcards for the logged-in user.
  */
 
 import { NextResponse } from "next/server";
@@ -36,52 +15,94 @@ import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { FlashcardsReq, FlashcardArray } from "@/lib/zod_schemas/flashcards";
 
-// OpenRouter chat completions endpoint
+// OpenRouter endpoint
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
-// System instruction to keep generations compact & strictly JSON
 const SYSTEM_PROMPT = `
-You generate concise, factual study flashcards.
-Return ONLY a JSON array of objects with keys "question_front" and "answer_back".
-No prose, no markdown, no code fences—JSON array ONLY.
-Max 1–2 sentences per field. Avoid duplicates.
-`;
+You are a flashcard generator that ONLY returns valid JSON arrays.
 
-// Simple health check / smoke test endpoint
-export async function GET() {
-  return NextResponse.json({ ok: true, route: "/api/flashcards" });
+Respond ONLY with a JSON array where each element has:
+- "question_front": the front of the flashcard (1 short question)
+- "answer_back": the answer (1–2 concise sentences)
+
+Never include extra text, markdown, explanations, or code fences.
+Example output:
+[
+  {"question_front": "What is refactoring?", "answer_back": "Improving code without changing behavior."},
+  {"question_front": "What is re-engineering?", "answer_back": "A major system redesign to modernize software."}
+]
+`.trim();
+
+/**
+ * GET — Fetch all flashcard sets belonging to the logged-in user.
+ * This allows persistence across page refreshes.
+ */
+export async function GET(req: Request) {
+  const user = await getSessionUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Optional: allow fetching by uploadId via query param (?uploadId=19)
+  const url = new URL(req.url);
+  const uploadId = url.searchParams.get("uploadId");
+
+  try {
+    const flashcards = uploadId
+      ? await prisma.flashcard.findMany({
+        where: {
+          flashcard_set: {
+            upload_id: Number(uploadId),
+            upload: {
+              paper: { user_id: user.user_id },
+            },
+          },
+        },
+        orderBy: { flashcard_id: "asc" },
+      })
+      : await prisma.flashcard.findMany({
+        where: {
+          flashcard_set: {
+            upload: { paper: { user_id: user.user_id } },
+          },
+        },
+        orderBy: { flashcard_id: "asc" },
+      });
+
+    return NextResponse.json({ flashcards });
+  } catch (err) {
+    console.error("GET /api/flashcards error:", err);
+    return NextResponse.json(
+      { error: "Failed to load flashcards" },
+      { status: 500 }
+    );
+  }
 }
-
+/**
+ * POST — Generate & persist flashcards using AI.
+ */
 export async function POST(req: Request) {
   try {
-    //  Require a logged-in user
     const user = await getSessionUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    //  Validate body with Zod
     const body = await req.json();
     const parsed = FlashcardsReq.safeParse(body);
-    if (!parsed.success) {
+    if (!parsed.success)
       return NextResponse.json({ error: parsed.error.message }, { status: 400 });
-    }
 
-    // Resolve source text: prefer `text`; fallback to DB via `uploadId`
+    // Resolves source text (direct or from upload)
     let sourceText = parsed.data.text ?? "";
     const uploadId = parsed.data.uploadId ?? null;
 
     if (!sourceText && uploadId) {
-      // If client passed an uploadId, load canonical text (e.g., stored summary) from DB
       const summary = await prisma.summary.findUnique({
         where: { upload_id: uploadId },
         select: { text_data: true },
       });
-      if (!summary?.text_data) {
+      if (!summary?.text_data)
         return NextResponse.json({ error: "No text found for given uploadId." }, { status: 404 });
-      }
       sourceText = summary.text_data;
     }
 
-    // Build a precise user prompt that restates the JSON-only shape
+    // Prepares prompt
     const userPrompt = `
 Generate flashcards from the following content.
 Output JSON ONLY as:
@@ -93,7 +114,7 @@ Content:
 """${sourceText.slice(0, 12000)}"""
 `.trim();
 
-    // Call OpenRouter with timeout/abort protection
+    // Calls OpenRouter LLM
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 45000);
 
@@ -102,11 +123,9 @@ Content:
       signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
-        // Use whichever env var you have for the AI_API
         "Authorization": `Bearer ${process.env.NVIDIA_AI_API}`,
-        // Recommended by OpenRouter (helps identify traffic)
         "HTTP-Referer": process.env.APP_URL || "http://localhost:3000",
-        "X-Title": "Note Pilot",
+        "X-Title": "Note Pilot Flashcards",
       },
       body: JSON.stringify({
         model: "nvidia/nemotron-nano-9b-v2:free",
@@ -119,26 +138,23 @@ Content:
       }),
     }).finally(() => clearTimeout(timeout));
 
-    //  Robust upstream error/ctype handling
+    // Checks LLM response
     const ctype = resp.headers.get("content-type") || "";
     if (!resp.ok) {
-      const errText = ctype.includes("application/json") ? JSON.stringify(await resp.json()) : await resp.text();
+      const errText = ctype.includes("application/json")
+        ? JSON.stringify(await resp.json())
+        : await resp.text();
       return NextResponse.json(
         { error: `Upstream error: ${resp.status} ${resp.statusText}`, detail: errText.slice(0, 800) },
         { status: 502 }
       );
     }
-    if (!ctype.includes("application/json")) {
-      const text = await resp.text();
-      return NextResponse.json({ error: "Non-JSON response from provider", detail: text.slice(0, 800) }, { status: 502 });
-    }
 
-    //  Parse provider JSON, hardening against accidental ``` fences
     const data = await resp.json();
     const raw = (data?.choices?.[0]?.message?.content ?? "").trim();
     const jsonText = raw.replace(/^\s*```(?:json)?/i, "").replace(/```\s*$/i, "");
 
-    //  Validate LLM output against strict schema
+    // Validates JSON schema
     let flashcards;
     try {
       flashcards = FlashcardArray.parse(JSON.parse(jsonText));
@@ -149,28 +165,75 @@ Content:
       );
     }
 
-    //  Optional persistence: if client passed uploadId, save the set and items
+    // Handle persistence: link flashcards to the user's most recent paper
     let savedSet = null;
-    if (uploadId) {
-      savedSet = await prisma.flashcard_set.create({
-        data: {
-          upload_id: uploadId,
-          text_data: sourceText,
-          flashcard: {
-            create: flashcards.map((fc) => ({
-              question_front: fc.question_front,
-              answer_back: fc.answer_back,
-            })),
-          },
-        },
-        include: { flashcard: true },
+    let actualUploadId = uploadId;
+
+    if (!actualUploadId) {
+      // Find the latest paper created by this user
+      let paper = await prisma.paper.findFirst({
+        where: { user_id: user.user_id },
+        orderBy: { paper_id: "desc" },
+        select: { paper_id: true },
       });
+
+      // If the user has no papers at all, create a default one
+      if (!paper) {
+        paper = await prisma.paper.create({
+          data: {
+            user_id: user.user_id,
+            name: "Flashcards" + paper,
+            code: "AI",
+            description: "Automatically created to store AI-generated flashcards.",
+          },
+          select: { paper_id: true },
+        });
+      }
+
+      // Creates a new upload record tied to that paper
+      const upload = await prisma.upload.create({
+        data: {
+          paper_id: paper.paper_id,
+          filename: `FlashCards${Date.now()}.txt`,
+          storage_path: "N/A",
+          text_content: sourceText,
+        },
+        select: { upload_id: true },
+      });
+
+      actualUploadId = upload.upload_id;
     }
 
-    //  Respond to client
+    // Saves or updates the flashcard set for this upload
+    savedSet = await prisma.flashcard_set.upsert({
+      where: { upload_id: actualUploadId },
+      update: {
+        text_data: sourceText,
+        flashcard: {
+          deleteMany: {}, // remove old cards for same upload
+          create: flashcards.map((fc) => ({
+            question_front: fc.question_front,
+            answer_back: fc.answer_back,
+          })),
+        },
+      },
+      create: {
+        upload_id: actualUploadId,
+        text_data: sourceText,
+        flashcard: {
+          create: flashcards.map((fc) => ({
+            question_front: fc.question_front,
+            answer_back: fc.answer_back,
+          })),
+        },
+      },
+      include: { flashcard: true },
+    });
+
+    // Returns flashcards + saved data
     return NextResponse.json({ flashcards, savedSet });
-  } catch (err: unknown) {
-    // Normalize unknown errors and convert aborts to 504
+  } catch (err: any) {
+    console.error("POST flashcards error:", err);
     const msg = err instanceof Error ? err.message : String(err);
     const status = msg.includes("aborted") ? 504 : 500;
     return NextResponse.json({ error: msg }, { status });
