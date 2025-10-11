@@ -38,9 +38,18 @@ export async function  validateSession(token: string){
         //check if valid or used
         if(session.expires_at <= new Date() || session.is_used == true){
             sessionCache.delete(session.token);
+            //Set isUsed to false, we wont wait for the response from this background job.
+            prisma.session.update({
+                data:{
+                    is_used:true
+                },
+                where:{
+                    token: session.token
+                }
+            }) 
             return null
         }
-        const newExpiry = new Date(Date.now() + 5 * 60 * 1000); // add an extra 5min
+        const newExpiry = new Date(Date.now() + 10 * 60  * 1000); // add an extra 5min
         session.expires_at = newExpiry;
         sessionCache.set(session.token, session); //update in cache
 

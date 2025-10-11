@@ -7,12 +7,16 @@
  *   (1) ChatUI on the left
  *   (2) Flashcards in the middle
  *   (3) Upload widget on the right
- * - Lets the user click " Create Flashcards" on ChatUI → calls /api/flashcards
+ * - Lets the user click "📇 Create Flashcards" on ChatUI → calls /api/flashcards
  * - Maps API response into flashcard cards that flip on click.
+ *
+ * CURRENT LIMITATION
+ * - Flashcards are stored in React state only → disappear on page refresh.
+ * - Future work: persist flashcards in DB (e.g. prisma.flashcard_set + prisma.flashcard)FYI my db for supabase us buggin.
  */
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import ChatUI from "@/components/DashBoard/ChatUI";
 import Upload from "@/components/DashBoard/Upload";
 
@@ -73,34 +77,38 @@ export default function FlashcardsPage() {
       setLoading(false);
     }
   }
- // adds persistence to the flashcards when the page is refreshed
-  useEffect(() => {
-    async function loadFlashcards() {
-      try {
-        const res = await fetch("/api/flashcards");
-        if (!res.ok) throw new Error("Failed to load flashcards");
-        const data = await res.json();
-        if (data.flashcards) {
-          setFlashcards(
-            data.flashcards.map((fc: any) => ({
-              question: fc.question_front,
-              answer: fc.answer_back,
-            }))
-          );
-        }
-      } catch (err) {
-        console.error("Error loading flashcards:", err);
-      }
+
+  // (Optional) If Upload gives an uploadId, generate + persist
+  async function makeFlashcardsFromUpload(uploadId: number) {
+    setLoading(true);
+    setErr(null);
+    try {
+      const res = await fetch("/api/flashcards", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uploadId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Failed to generate");
+
+      const cards = (data.flashcards as ApiFlashcard[]).map((fc) => ({
+        question: fc.question_front,
+        answer: fc.answer_back,
+      }));
+      setFlashcards(cards);
+      setFlippedIndex(null);
+    } catch (e: any) {
+      setErr(e.message || "Something went wrong");
+    } finally {
+      setLoading(false);
     }
-  
-    loadFlashcards();
-  }, []);
+  }
 
   return (
     <div className="h-screen w-full flex gap-10 pl-10 pr-0">
       {/* Left: Chat */}
       <div
-        className="rounded-3xl bg-white/0 overflow-y-auto mt-5 flex-shrink-0 h-full pb-10 pt-14"
+        className=" h-full rounded-3xl bg-white/0 overflow-y-auto mt-5 flex-shrink-0 h-full pb-10 pt-14"
         style={{ width: chatWidth }}
       >
         {/* ✨ Pass the callback down */}
@@ -110,8 +118,9 @@ export default function FlashcardsPage() {
       {/* Divider / Resizer */}
       <div
         onMouseDown={startResizing}
-        className="w-1 cursor-col-resize opacity-30 bg-white hover:bg-gray-400 rounded relative"
-      />
+        className={`w-8 cursor-col-resize opacity-30 flex-shrink-0 bg-inherit hover:bg-gray-400 rounded relative transition-colors duration-300`}
+      >
+      </div>
 
       {/* Middle: Flashcards */}
       <div className="rounded-3xl p-6 bg-black/70 overflow-y-auto mt-19 mb-5 flex-grow flex justify-center items-start">
@@ -139,22 +148,22 @@ export default function FlashcardsPage() {
 
       {/* Right: Upload */}
       <div className="group">
-        {/* Invisible hover zone (triggers panel to slide in) */}
-        <div className="absolute left-0 top-0 h-full w-3 bg-transparent z-20 cursor-ew-resize" />
-
-        {/* Upload Panel */}
-        <div
-          className="
-            border border border-white/30 p-2 bg-white/30 pb-0 backdrop-blur-md rounded-md shadow-md overflow-y-auto w-[0] flex-shrink-0 
-            overflow-y-auto transition-all duration-300 
-            w-0 opacity-0 
-            group-hover:w-[12vw] group-hover:opacity-100
-          "
-        >
-          <h4 className="mt-10 mb-5">Lectures: </h4>
-          <Upload onSaved={() => {}} />
+          {/* Invisible hover zone (triggers panel to slide in) */}
+          <div className="absolute left-0 top-0 h-full w-3 bg-transparent z-20 cursor-ew-resize" />
+  
+          {/* Upload Panel */}
+          <div
+            className="
+              border border border-white/30 p-2 bg-white/30 pb-0 backdrop-blur-md rounded-md shadow-md overflow-y-auto w-[0] flex-shrink-0 
+              overflow-y-auto transition-all duration-300 
+              w-0 opacity-0 
+              group-hover:w-[12vw] group-hover:opacity-100
+            "
+          >
+            <h4 className="mt-10 mb-5">Lectures: </h4>
+            <Upload onSaved={() => {}} />
+          </div>
         </div>
-      </div>
     </div>
   );
 }

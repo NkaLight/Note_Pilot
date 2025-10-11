@@ -45,7 +45,7 @@ export async function POST(request: Request) {
       data: {
         user_id: user.user_id,
         token,
-        expires_at: new Date(Date.now() + 1000 * 60 * 60 * 1), // 1h
+        expires_at: new Date(Date.now() + 1000 * 60 * 10), // 1min
         last_active_at: new Date(),
       },
     });

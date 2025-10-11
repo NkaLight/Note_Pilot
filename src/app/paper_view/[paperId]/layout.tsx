@@ -1,6 +1,7 @@
+import { getAuthedUserId } from "@/lib/auth";
 import ClientProviderWrapper from "./ClientProviderWrapper";
 import {getLecturesForPaper} from "@/lib/prisma";
-
+import { redirect } from "next/navigation";
 type PaperViewLayoutProps = {
   children: React.ReactNode;
   params: any;

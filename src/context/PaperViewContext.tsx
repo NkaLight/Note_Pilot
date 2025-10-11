@@ -35,7 +35,7 @@ export const PaperViewProvider = ({
     initialLectures: Lecture[]; 
 }) => {
   const [lectures, setLectures] = useState<Lecture[]>(initialLectures);
-  const [chosenLectureId, setChosenLectureId] = useState<number | null>(null);
+  const [chosenLectureId, setChosenLectureId] = useState<number | null>(initialLectures[0]?.id || null);
 
   return (
     <PaperViewContext.Provider 

@@ -12,15 +12,32 @@ type SummaryItem = {
 }
 export default function DashboardPage() {
   // Chat width starts at 50% of viewport
-  const [chatWidth, setChatWidth] = useState("50%");
+  const [chatWidth, setChatWidth] = useState(() => `${window.innerWidth / 2}px`);
+  const chatRef = useRef<HTMLDivElement | null>(null);
   const isResizing = useRef(false);
   const {chosenLectureId} = usePaperViewContext();
   const [summaries, setSummaries] = useState<SummaryItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const startXRef = useRef(0);
+  const startWidthRef = useRef(0);
   
 
-  const startResizing = () => {
+  const startResizing = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     isResizing.current = true;
+    startXRef.current = e.clientX;
+
+    if (chatRef.current) {
+      const currentWidth = chatRef.current.getBoundingClientRect().width;
+      startWidthRef.current = currentWidth;
+    } else {
+      // Fallback to state value parsed as pixels
+      startWidthRef.current = parseFloat(chatWidth);
+    }
+
+
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
     document.addEventListener("mousemove", resize);
     document.addEventListener("mouseup", stopResizing);
   };
@@ -28,22 +45,38 @@ export default function DashboardPage() {
   const resize = (e: MouseEvent) => {
     if (!isResizing.current) return;
 
+    const delta = e.clientX - startXRef.current;
+    const startWidth = startWidthRef.current;
     // Minimum 200px, maximum viewport - 300px (so summaries don't collapse too much)
-    const newWidth = Math.min(Math.max(e.clientX, 200), window.innerWidth - 300);
+    const newWidth = Math.max(
+      200, // Minimum width
+      Math.min(
+        startWidth + delta, 
+        window.innerWidth - 400 // Maximum width (viewport - 300px)
+      )
+    );
+
+    console.log("Windowe inner.width: ", window.innerWidth);
+    console.log("new chatWidth: ", newWidth);
     setChatWidth(`${newWidth}px`);
   };
 
   const stopResizing = () => {
     isResizing.current = false;
+
+    document.body.style.cursor = "default";
+    document.body.style.userSelect = "auto";
+
     document.removeEventListener("mousemove", resize);
     document.removeEventListener("mouseup", stopResizing);
   };
+
 
     useEffect(() => { 
     if (!chosenLectureId) return;
     console.log("Called api/generateConent/")
     setIsLoading(true);
-    fetch("/api/generateContent", {
+    fetch("/api/generateContent....", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ lectureId: chosenLectureId, contentType: "summaries" })
@@ -65,9 +98,9 @@ export default function DashboardPage() {
   }, [chosenLectureId]);
 
   return (
-    <div className=" h-screen w-full flex gap-10 pl-10 pr-0">
+    <div className="h-screen w-full flex gap-8 pl-10 pr-0">
       {/* Left: Chat */}
-    <div className=" rounded-3xl bg-white/0 overflow-y-auto mt-5 flex-shrink-0 h-full pb-10 pt-14"
+    <div className="h-full w-full rounded-3xl bg-white/0 overflow-y-auto mt-5 flex-shrink-0 h-full pb-10 pt-14"
       style={{ width: chatWidth }}
       >
       <ChatUI />
@@ -76,12 +109,12 @@ export default function DashboardPage() {
       {/* Divider / Resizer */}
       <div
         onMouseDown={startResizing}
-        className="w-1 cursor-col-resize opacity-30 bg-white hover:bg-gray-400 rounded relative"
+        className={`w-8 cursor-col-resize opacity-30 flex-shrink-0 bg-inherit hover:bg-gray-400 rounded relative transition-colors duration-300`}
       >
       </div>
 
       {/* Middle: Summaries */}
-      <div className=" rounded-3xl mb-5 mt-19 p-6 bg-white/50 overflow-y-auto mt-5 flex-grow">
+      <div className="h-4/5 rounded-3xl mb-5 mt-19 p-6 bg-white/50 overflow-y-auto mt-5 flex-grow w-full ">
         <h2 className="text-xl font-semibold mb-4 text-black">Summaries</h2>
         {summaries.length === 0 ? (
           <p className="text-gray-500">{isLoading? "Generating..." :"No summaries available for this lecture yet."}</p>
@@ -108,7 +141,7 @@ export default function DashboardPage() {
         {/* Upload Panel */}
         <div
           className="
-            border border border-white/30 p-2 bg-white/30 pb-0 backdrop-blur-md rounded-md shadow-md overflow-y-auto w-[0] flex-shrink-0 
+            h-full border border border-white/30 p-2 bg-white/30 pb-0 backdrop-blur-md rounded-md shadow-md overflow-y-auto w-[0] flex-shrink-0 
             overflow-y-auto transition-all duration-300 
             w-0 opacity-0 
             group-hover:w-[12vw] group-hover:opacity-100

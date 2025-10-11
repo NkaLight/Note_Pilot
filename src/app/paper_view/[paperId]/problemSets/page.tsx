@@ -54,7 +54,7 @@ export default function DashboardPage() {
 
   
   return (
-    <div className=" h-screen w-full flex gap-10 pl-10 pr-0">
+    <div className="h-screen w-full flex gap-10 pl-10 pr-0">
           {/* Left: Chat */}
         <div className=" rounded-3xl bg-white/0 overflow-y-auto mt-5 flex-shrink-0 h-full pb-10 pt-14"
           style={{ width: chatWidth }}
@@ -65,12 +65,12 @@ export default function DashboardPage() {
           {/* Divider / Resizer */}
           <div
             onMouseDown={startResizing}
-            className="w-1 cursor-col-resize opacity-30 bg-white hover:bg-gray-400 rounded relative"
+            className={`w-8 cursor-col-resize opacity-30 flex-shrink-0 bg-inherit hover:bg-gray-400 rounded relative transition-colors duration-300`}
           >
           </div>
     
           {/* Middle: Summaries */}
-          <div className=" rounded-3xl mb-5 mt-19 p-6 bg-white/50 overflow-y-auto mt-5 flex-grow">
+          <div className="h-4/5 rounded-3xl mb-5 mt-19 p-6 bg-white/50 overflow-y-auto mt-5 flex-grow">
             <h2 className="text-xl font-semibold mb-4 text-black">Problem Sets</h2>
             <div className="space-y-6">
               {questions.length == 0 && <p className="text-gray-500">{isLoading? "Generating..." :"No questions available for this lecture yet."}</p>}

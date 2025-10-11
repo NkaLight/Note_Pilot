@@ -5,7 +5,7 @@
  * WHAT IT DOES
  * - Shows a chat-style interface with user + assistant messages.
  * - Sends user input to `/api/aiChat` and displays assistant replies.
- * - Adds a "Create Flashcards" button under each assistant reply.
+ * - Adds a 📇 "Create Flashcards" button under each assistant reply.
  *   Clicking this calls `onMakeFlashcards` with the assistant's text.
  *
  * CURRENT LIMITATION
@@ -59,9 +59,9 @@ export default function ChatUI({
   };
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-full flex-col ">
       {/* Messages */}
-      <div className="flex-1 rounded-3xl p-3 bg-white/50 overflow-y-auto space-y-3">
+      <div className="flex-1 rounded-3xl p-3 bg-white/50 overflow-y-auto space-y-3 h-5/6">
         {messages.map((m, i) => {
           const isAssistant = m.role === "assistant";
           return (
@@ -84,7 +84,7 @@ export default function ChatUI({
                     className="text-sm px-2 py-1 rounded-md border hover:bg-gray-80"
                     title="Create flashcards from this reply"
                   >
-                    Create Flashcards
+                    📇 Create Flashcards
                   </button>
                 </div>
               )}
@@ -95,18 +95,18 @@ export default function ChatUI({
       </div>
 
       {/* Composer */}
-      <div className="mt-3 p-0 rounded-full bg-black/5 flex gap-2">
+      <div className="mt-3 flex items-center gap-2 border border-black-300 rounded-full focus-within:border-black transition-colors">
         <input
-          className="flex-1 rounded-xl px-3 py-2 text-black"
+          className="flex-1 rounded-full px-3 py-2 text-black outline-none bg-grey"
           placeholder="Ask something about your notes..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
+          onKeyDown={(e) => e.key === "Enter" && !busy && handleSend()}
         />
         <button
           onClick={handleSend}
           disabled={busy || !input.trim()}
-          className="rounded-full px-4 py-2 hover:bg-gray-50 disabled:opacity-50 text-black"
+          className="rounded-full px-4 py-2 hover:bg-gray-50 disabled:opacity-50 text-black cursor-pointer"
         >
           Send
         </button>

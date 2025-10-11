@@ -31,7 +31,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className=" h-screen w-full flex gap-10 pl-10 pr-0">
+    <div className="h-screen w-full flex gap-10 pl-10 pr-0">
           {/* Left: Chat */}
         <div className=" rounded-3xl bg-white/0 overflow-y-auto mt-5 flex-shrink-0 h-full pb-10 pt-14"
           style={{ width: chatWidth }}
@@ -42,7 +42,7 @@ export default function DashboardPage() {
           {/* Divider / Resizer */}
           <div
             onMouseDown={startResizing}
-            className="w-1 cursor-col-resize opacity-30 bg-white hover:bg-gray-400 rounded relative"
+            className={`w-8 cursor-col-resize opacity-30 flex-shrink-0 bg-inherit hover:bg-gray-400 rounded relative transition-colors duration-300`}
           >
           </div>
     

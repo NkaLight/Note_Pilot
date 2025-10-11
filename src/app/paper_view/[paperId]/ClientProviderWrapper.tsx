@@ -11,7 +11,7 @@ interface Props {
 export default function ClientProviderWrapper({ children, initialLectures }: Props) {
   return (
     <PaperViewProvider initialLectures={initialLectures}>
-      <div>{children}</div>
+      <main>{children}</main>
     </PaperViewProvider>
   );
 }
