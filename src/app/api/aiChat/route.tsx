@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import { z } from "zod";  
 import { getSessionUser } from "@/lib/auth";
 import fs from "fs";
-//import { pipeline } from "@xenova/transformers";
-
+import { getLectureConentById } from "@/lib/prisma";
 
 const chatMessageReqSchema = z.object({
-    message: z.string()
+    message: z.string(),
+    uploadId: z.number().optional(),
+    uploadIds: z.array(z.number()).optional(),
+    paperId: z.number().optional()
 })
 
 //Load the chunks and vectors at startup
@@ -41,7 +43,33 @@ export async function POST(req: Request){
         const parsed = chatMessageReqSchema.safeParse(body);
         if(!parsed.success) return NextResponse.json({error:"Invalid request body"}, {status:400})
         
-        const {message} = parsed.data
+        const {message, uploadId, uploadIds, paperId} = parsed.data;
+
+        // Gather context from uploads
+        let contextText = "";
+        const activeUploadIds = uploadIds && uploadIds.length > 0 ? uploadIds : (uploadId ? [uploadId] : []);
+        
+        if (activeUploadIds.length > 0) {
+            console.log(`Fetching context from ${activeUploadIds.length} uploads: ${activeUploadIds.join(', ')}`);
+            
+            // Fetch content from all selected uploads
+            const contextPromises = activeUploadIds.map(async (id) => {
+                try {
+                    const content = await getLectureConentById(id.toString());
+                    return content ? `--- Content from Upload ${id} ---\n${content}\n` : "";
+                } catch (error) {
+                    console.error(`Failed to fetch content for upload ${id}:`, error);
+                    return "";
+                }
+            });
+            
+            const contextArray = await Promise.all(contextPromises);
+            contextText = contextArray.filter(content => content.length > 0).join("\n");
+            
+            console.log(`Context gathered: ${contextText.length} characters from ${contextArray.filter(c => c.length > 0).length} uploads`);
+        } else {
+            console.log("No upload context provided");
+        }
 
 
         /*RAG Implementation Not done. CURRENTLY JUST PASSING USER QUERY DIRECTLY TO LLM */
@@ -57,16 +85,19 @@ export async function POST(req: Request){
         const aiAPiUrl = "https://openrouter.ai/api/v1/chat/completions"
 
 
-        const contextualAIQuery = `
-            Use the following context to answer the question.
-            If the context does not contain the answer, say you don't know, ensure your response is human like dont explicitly mention context.
+        //Construct message with context
+        const contextualAIQuery = contextText.length > 0 ? `
+            Use the following context from lecture materials to answer the question.
+            If the context does not contain enough information to answer the question completely, 
+            provide what you can based on the context and indicate what information might be missing.
+            Keep your response natural and conversational.
 
-            Context:
-            {context}
+            Context from selected lectures:
+            ${contextText}
 
             Question:
             ${message}
-        `
+        ` : message;
 
         const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
@@ -75,10 +106,9 @@ export async function POST(req: Request){
                 "Authorization": `Bearer ${process.env.NVIDIA_AI_API}`
             },
             body: JSON.stringify({
-                // The payload the AI service expects
                 model: "nvidia/nemotron-nano-9b-v2:free",
-                messages: [{ role: "user", content: message }],
-                stream: false, // For streaming response currently not implemented.
+                messages: [{ role: "user", content: contextualAIQuery }],
+                stream: false,
             }),
         });
 

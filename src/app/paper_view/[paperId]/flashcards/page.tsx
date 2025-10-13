@@ -15,6 +15,8 @@
 import { useState, useRef, useEffect } from "react";
 import ChatUI from "@/components/DashBoard/ChatUI";
 import Upload from "@/components/DashBoard/Upload";
+import { usePaperViewContext } from "@/context/PaperViewContext";
+import { useParams } from "next/navigation";
 
 type Flashcard = { question: string; answer: string };
 type ApiFlashcard = { question_front: string; answer_back: string };
@@ -22,6 +24,15 @@ type ApiFlashcard = { question_front: string; answer_back: string };
 export default function FlashcardsPage() {
   const [chatWidth, setChatWidth] = useState("50%");
   const isResizing = useRef(false);
+  const {chosenLectureId, lectures, selectedLectureIds} = usePaperViewContext();
+  const params = useParams();
+  const paperId = params?.paperId ? Number(params.paperId) : null;
+
+  // Get the current selected lecture's upload ID
+  const selectedLecture = lectures?.find(lecture => lecture.id === chosenLectureId);
+  const uploadId = selectedLecture?.id || null;
+  // Use selected lecture IDs as upload IDs for context
+  const selectedUploadIds = selectedLectureIds;
 
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [flippedIndex, setFlippedIndex] = useState<number | null>(null);
@@ -104,7 +115,7 @@ export default function FlashcardsPage() {
         style={{ width: chatWidth }}
       >
         {/* ✨ Pass the callback down */}
-        <ChatUI onMakeFlashcards={makeFlashcardsFrom} />
+        <ChatUI onMakeFlashcards={makeFlashcardsFrom} uploadIds={selectedUploadIds} paperId={paperId} />
       </div>
 
       {/* Divider / Resizer */}
@@ -134,25 +145,6 @@ export default function FlashcardsPage() {
               {flippedIndex === index ? card.answer : card.question}
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* Right: Upload */}
-      <div className="group">
-        {/* Invisible hover zone (triggers panel to slide in) */}
-        <div className="absolute left-0 top-0 h-full w-3 bg-transparent z-20 cursor-ew-resize" />
-
-        {/* Upload Panel */}
-        <div
-          className="
-            border border border-white/30 p-2 bg-white/30 pb-0 backdrop-blur-md rounded-md shadow-md overflow-y-auto w-[0] flex-shrink-0 
-            overflow-y-auto transition-all duration-300 
-            w-0 opacity-0 
-            group-hover:w-[12vw] group-hover:opacity-100
-          "
-        >
-          <h4 className="mt-10 mb-5">Lectures: </h4>
-          <Upload onSaved={() => {}} />
         </div>
       </div>
     </div>

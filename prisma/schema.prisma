@@ -18,6 +18,20 @@ model application_user {
   preferences        preferences?
   session            session[]
   twofactorauthtoken twofactorauthtoken[]
+  chat_message       chat_message[]
+}
+
+model chat_message {
+  message_id       Int              @id @default(autoincrement())
+  upload_id        Int
+  user_id          Int
+  role             String           @db.VarChar(20) // 'user' or 'assistant'
+  content          String
+  created_at       DateTime         @default(now()) @db.Timestamp(6)
+  upload           upload           @relation(fields: [upload_id], references: [upload_id], onDelete: Cascade, onUpdate: NoAction)
+  application_user application_user @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([upload_id, user_id])
 }
 
 model flashcard {
@@ -132,7 +146,6 @@ model upload {
   glossary      glossary?
   problem_set   problem_set?
   summary       summary?
+  chat_message  chat_message[]
   paper         paper          @relation(fields: [paper_id], references: [paper_id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([paper_id, filename])
 }

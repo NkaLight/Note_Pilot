@@ -16,14 +16,40 @@ export default function PDFsPage() {
   // Chat width starts at 50% of viewport
   const [chatWidth, setChatWidth] = useState("50%");
   const isResizing = useRef(false);
-  const { chosenLectureId } = usePaperViewContext();
+  const { chosenLectureId, lectures, selectedLectureIds, setSelectedLectureIds, setLectures } = usePaperViewContext();
+
+  // Toggle selection of a lecture
+  const toggleLectureSelection = (lectureId: number) => {
+    setSelectedLectureIds(prev => 
+      prev.includes(lectureId) 
+        ? prev.filter(id => id !== lectureId)
+        : [...prev, lectureId]
+    );
+  };
+
+  // Select all lectures
+  const selectAllLectures = () => {
+    setSelectedLectureIds(lectures.map(lecture => lecture.id));
+  };
+
+  // Clear all selections
+  const clearAllSelections = () => {
+    setSelectedLectureIds([]);
+  };
+
+  // Get upload IDs for selected lectures
+  const selectedUploadIds = selectedLectureIds;
   const [pdfs, setPdfs] = useState<PDFUpload[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const params = useParams();
+  const paperId = params?.paperId ? Number(params.paperId) : null;
+
+  // Get the current selected lecture's upload ID
+  const selectedLecture = lectures?.find(lecture => lecture.id === chosenLectureId);
+  const uploadId = selectedLecture?.id || null;
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
-  const params = useParams();
-  const paperId = params.paperId;
 
   const startResizing = () => {
     isResizing.current = true;
@@ -56,7 +82,16 @@ export default function PDFsPage() {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          setPdfs(data.uploads || []);
+          const uploads = data.uploads || [];
+          setPdfs(uploads);
+          
+          // Sync with lectures context - convert PDFs to lecture format
+          const lecturesFromPDFs = uploads.map((pdf: PDFUpload) => ({
+            id: pdf.upload_id,
+            title: pdf.filename,
+            createdAt: new Date(pdf.uploaded_at)
+          }));
+          setLectures(lecturesFromPDFs);
         } else {
           setError(data.error || "Failed to load PDFs");
         }
@@ -68,7 +103,7 @@ export default function PDFsPage() {
       .finally(() => {
         setIsLoading(false);
       });
-  }, [paperId]);
+  }, [paperId, setLectures]);
 
   // Delete a PDF
   const handleDeletePDF = async (uploadId: number) => {
@@ -82,7 +117,19 @@ export default function PDFsPage() {
       const data = await res.json();
       
       if (data.success) {
-        setPdfs(prev => prev.filter(pdf => pdf.upload_id !== uploadId));
+        const updatedPdfs = pdfs.filter(pdf => pdf.upload_id !== uploadId);
+        setPdfs(updatedPdfs);
+        
+        // Sync with lectures context - convert remaining PDFs to lecture format
+        const lecturesFromPDFs = updatedPdfs.map((pdf: PDFUpload) => ({
+          id: pdf.upload_id,
+          title: pdf.filename,
+          createdAt: new Date(pdf.uploaded_at)
+        }));
+        setLectures(lecturesFromPDFs);
+        
+        // Remove from selected lectures if it was selected
+        setSelectedLectureIds(prev => prev.filter(id => id !== uploadId));
       } else {
         setError(data.error || "Failed to delete PDF");
       }
@@ -139,7 +186,16 @@ export default function PDFsPage() {
       const data = await response.json();
       
       if (data.success) {
-        setPdfs(data.uploads || []);
+        const uploads = data.uploads || [];
+        setPdfs(uploads);
+        
+        // Sync with lectures context - convert PDFs to lecture format
+        const lecturesFromPDFs = uploads.map((pdf: PDFUpload) => ({
+          id: pdf.upload_id,
+          title: pdf.filename,
+          createdAt: new Date(pdf.uploaded_at)
+        }));
+        setLectures(lecturesFromPDFs);
       } else {
         console.error('Failed to refresh PDFs:', data.error);
       }
@@ -159,7 +215,7 @@ export default function PDFsPage() {
       <div className="rounded-3xl bg-white/0 overflow-y-auto mt-5 flex-shrink-0 h-full pb-10 pt-14"
         style={{ width: chatWidth }}
       >
-        <ChatUI />
+        <ChatUI uploadIds={selectedUploadIds} paperId={paperId} />
       </div>
 
       {/* Divider / Resizer */}
@@ -171,6 +227,70 @@ export default function PDFsPage() {
 
       {/* Middle: PDF Management */}
       <div className="rounded-3xl mb-5 mt-19 p-6 bg-white/50 overflow-y-auto mt-5 flex-grow">
+        
+        {/* Lecture Selection Section */}
+        <div className="mb-8 p-4 bg-white rounded-lg shadow-sm border">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-black">Select Lectures for AI Context</h3>
+            <div className="flex gap-2">
+              <button
+                onClick={selectAllLectures}
+                className="text-xs px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
+                disabled={lectures.length === 0}
+              >
+                Select All
+              </button>
+              <button
+                onClick={clearAllSelections}
+                className="text-xs px-3 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200"
+                disabled={selectedLectureIds.length === 0}
+              >
+                Clear All
+              </button>
+            </div>
+          </div>
+          
+          {lectures.length === 0 ? (
+            <p className="text-gray-500 text-center py-4">No lectures uploaded yet.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-40 overflow-y-auto">
+              {lectures.map((lecture) => (
+                <label 
+                  key={lecture.id} 
+                  className={`flex items-center p-3 rounded-lg border cursor-pointer transition-colors ${
+                    selectedLectureIds.includes(lecture.id)
+                      ? 'bg-blue-50 border-blue-300 text-blue-900'
+                      : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedLectureIds.includes(lecture.id)}
+                    onChange={() => toggleLectureSelection(lecture.id)}
+                    className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm truncate">{lecture.title}</div>
+                    <div className="text-xs text-gray-500">
+                      {lecture.createdAt.toLocaleDateString()}
+                    </div>
+                  </div>
+                </label>
+              ))}
+            </div>
+          )}
+          
+          <div className="mt-3 text-sm text-gray-600">
+            {selectedLectureIds.length > 0 ? (
+              <span className="text-blue-600 font-medium">
+                ✓ {selectedLectureIds.length} lecture{selectedLectureIds.length !== 1 ? 's' : ''} selected for AI context
+              </span>
+            ) : (
+              <span>Select lectures to provide context for AI chat</span>
+            )}
+          </div>
+        </div>
+
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-black">PDF Management</h2>
           <button

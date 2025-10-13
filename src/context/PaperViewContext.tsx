@@ -15,6 +15,8 @@ type PaperViewContextType = {
   setLectures: React.Dispatch<React.SetStateAction<Lecture[]>>;
   chosenLectureId: number | null;
   setChosenLectureId: React.Dispatch<React.SetStateAction<number | null>>;
+  selectedLectureIds: number[];
+  setSelectedLectureIds: React.Dispatch<React.SetStateAction<number[]>>;
 }
 
 const PaperViewContext = createContext<PaperViewContextType>({
@@ -22,6 +24,8 @@ const PaperViewContext = createContext<PaperViewContextType>({
   setLectures: () => {},
   chosenLectureId: null,
   setChosenLectureId: () => {},
+  selectedLectureIds: [],
+  setSelectedLectureIds: () => {},
 });
 
 export const usePaperViewContext = ()=> useContext(PaperViewContext)
@@ -36,6 +40,7 @@ export const PaperViewProvider = ({
 }) => {
   const [lectures, setLectures] = useState<Lecture[]>(initialLectures);
   const [chosenLectureId, setChosenLectureId] = useState<number | null>(null);
+  const [selectedLectureIds, setSelectedLectureIds] = useState<number[]>([]);
 
   return (
     <PaperViewContext.Provider 
@@ -43,7 +48,9 @@ export const PaperViewProvider = ({
         lectures, 
         setLectures, 
         chosenLectureId, 
-        setChosenLectureId 
+        setChosenLectureId,
+        selectedLectureIds,
+        setSelectedLectureIds
       }}
     >
       {children}

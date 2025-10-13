@@ -5,14 +5,23 @@ import ChatUI from "@/components/DashBoard/ChatUI";
 import Upload from "@/components/DashBoard/Upload";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import ProblemSet from "@/components/DashBoard/ProblemSet";
+import { useParams } from "next/navigation";
 
 export default function DashboardPage() {
   // Chat width starts at 50% of viewport
   const [chatWidth, setChatWidth] = useState("50%");
   const isResizing = useRef(false);
   const [questions, setQuestions] = useState<any[]>([]);
-  const {chosenLectureId} = usePaperViewContext(); 
+  const {chosenLectureId, lectures, selectedLectureIds} = usePaperViewContext(); 
   const [isLoading, setIsLoading] = useState(false);
+  const params = useParams();
+  const paperId = params?.paperId ? Number(params.paperId) : null;
+
+  // Get the current selected lecture's upload ID
+  const selectedLecture = lectures?.find(lecture => lecture.id === chosenLectureId);
+  const uploadId = selectedLecture?.id || null;
+  // Use selected lecture IDs as upload IDs for context
+  const selectedUploadIds = selectedLectureIds;
 
   const startResizing = () => {
     isResizing.current = true;
@@ -59,7 +68,7 @@ export default function DashboardPage() {
         <div className=" rounded-3xl bg-white/0 overflow-y-auto mt-5 flex-shrink-0 h-full pb-10 pt-14"
           style={{ width: chatWidth }}
           >
-          <ChatUI />
+          <ChatUI uploadIds={selectedUploadIds} paperId={paperId} />
           </div>
     
           {/* Divider / Resizer */}
@@ -81,25 +90,6 @@ export default function DashboardPage() {
                   key={idx}
                 />
               ))}
-            </div>
-          </div>
-    
-          {/* Right: Upload */}
-          <div className="group">
-            {/* Invisible hover zone (triggers panel to slide in) */}
-            <div className="absolute left-0 top-0 h-full w-3 bg-transparent z-20 cursor-ew-resize" />
-
-            {/* Upload Panel */}
-            <div
-              className="
-                border border border-white/30 p-2 bg-white/30 pb-0 backdrop-blur-md rounded-md shadow-md overflow-y-auto w-[0] flex-shrink-0 
-                overflow-y-auto transition-all duration-300 
-                w-0 opacity-0 
-                group-hover:w-[12vw] group-hover:opacity-100
-              "
-            >
-              <h4 className="mt-10 mb-5">Lectures: </h4>
-              <Upload onSaved={() => {}} />
             </div>
           </div>
         </div>
