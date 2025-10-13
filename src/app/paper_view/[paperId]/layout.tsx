@@ -3,12 +3,13 @@ import {getLecturesForPaper} from "@/lib/prisma";
 
 type PaperViewLayoutProps = {
   children: React.ReactNode;
-  params: any;
+  params: Promise<{ paperId: string }>;
 };
 
 
 export default async function PaperViewLayout({ children, params }: PaperViewLayoutProps) {
-    const paper_id = Number(params.paperId);
+    const resolvedParams = await params;
+    const paper_id = Number(resolvedParams.paperId);
     console.log(paper_id);
     const initialLectures = await getLecturesForPaper(paper_id); //I validate when calling the API for the lectures.
 

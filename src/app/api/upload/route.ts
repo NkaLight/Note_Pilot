@@ -1,7 +1,8 @@
 import { getAuthedUserId } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
-import pdf2json from "pdf2json";
+import { PdfReader } from 'pdfreader';
+import fs from 'fs';
 
 export const runtime = "nodejs";
 
@@ -44,54 +45,66 @@ await prisma.upload.create({
 
 
 
-function extractTextFromPDF(buffer: Buffer): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const pdfParser = new pdf2json();
+async function extractTextFromPDF(buffer: Buffer): Promise<string> {
+  return new Promise((resolve) => {
+    try {
+      console.log('Starting PDF text extraction with pdfreader');
+      
+      const pdfReader = new PdfReader();
+      let fullText = '';
+      let textArray: string[] = [];
+      
+      // Create a temporary file since pdfreader requires a file path
+      const tempFileName = `temp_${Date.now()}.pdf`;
+      const tempFilePath = tempFileName;
+      
+      try {
+        fs.writeFileSync(tempFilePath, buffer);
         
-        pdfParser.on("pdfParser_dataError", (errData: any) => {
-            console.error("PDF parsing error:", errData);
-            reject(new Error(`PDF parsing failed: ${(errData as any).parserError || errData}`));
-        });
-        
-        pdfParser.on("pdfParser_dataReady", (pdfData: any)=> {
-            try {
-                if (!pdfData || !pdfData?.formImage) {
-                    console.log("PDF data structure:", JSON.stringify(pdfData, null, 2));
-                    resolve(""); // Return empty string for unparseable PDFs
-                    return;
-                }
-                
-                if (!pdfData?.formImage?.Pages || pdfData?.formImage?.Pages?.length === 0) {
-                    console.log("No pages found in PDF, returning empty string");
-                    resolve(""); // Return empty string instead of rejecting
-                    return;
-                }
-                
-                const text = pdfData?.formImage?.Pages.map(page => {
-                    if (!page?.Texts || page?.Texts?.length === 0) return "";
-                    return page?.Texts?.map(t => {
-                        try {
-                            return decodeURIComponent(t.R[0].T);
-                        } catch (e) {
-                            return t.R[0].T; // Fallback if decoding fails
-                        }
-                    }).join(" ");
-                }).join("\n").trim();
-                
-                resolve(text || ""); // Ensure we always return a string
-            } catch (error) {
-                console.error("Error processing PDF data:", error);
-                resolve(""); // Return empty string on any processing error
+        pdfReader.parseFileItems(tempFilePath, (err: any, item: any) => {
+          if (err) {
+            console.error('PDF parsing error:', err);
+            // Clean up temp file
+            try { fs.unlinkSync(tempFilePath); } catch (e) {}
+            resolve('');
+            return;
+          }
+          
+          if (!item) {
+            // End of file - process collected text
+            try { fs.unlinkSync(tempFilePath); } catch (e) {}
+            
+            const cleanedText = textArray.join(' ')
+              .replace(/\s+/g, ' ')
+              .trim();
+            
+            console.log(`PDF parsed successfully. Total text length: ${cleanedText.length} characters`);
+            
+            if (cleanedText.length > 0) {
+              console.log('Sample extracted text:', cleanedText.substring(0, 200) + '...');
+              resolve(cleanedText);
+            } else {
+              console.warn('No text content extracted from PDF');
+              resolve('');
             }
+            return;
+          }
+          
+          if (item.text) {
+            textArray.push(item.text);
+          }
         });
         
-        try {
-            pdfParser.parseBuffer(buffer);
-        } catch (error) {
-            console.error("Error starting PDF parse:", error);
-            reject(new Error(`Failed to start PDF parsing: ${error}`));
-        }
-    });
+      } catch (fileError) {
+        console.error('Error creating temporary file:', fileError);
+        resolve('');
+      }
+      
+    } catch (error) {
+      console.error('Error in PDF text extraction:', error);
+      resolve('');
+    }
+  });
 }
 
 export async function POST(req: Request) {
@@ -138,18 +151,26 @@ export async function POST(req: Request) {
         const upload = await prisma.upload.create({
             data: {
                 paper_id: papId,
-                filename: lectureTitle?lectureTitle:"",// Probably want to store the filename as lecture title, since we are storing the "storage path"
+                filename: lectureTitle || name.replace(/\.[^/.]+$/, ""), // Remove extension if no title provided
                 storage_path: name,
                 text_content: textContent,
             }
         });
 
+        // Log the result for debugging
+        console.log(`Upload created - ID: ${upload.upload_id}, Text length: ${textContent.length}`);
+        console.log("Text content preview:", textContent.substring(0, 200));
+
         return NextResponse.json({
             success: true,
             paper_id: upload.paper_id,
             upload_id: upload.upload_id,
+            filename: upload.filename,
             textLength: textContent.length,
-            fileType: ext
+            fileType: ext,
+            message: textContent.length > 0 
+                ? "File uploaded and text extracted successfully" 
+                : "File uploaded but no text content was extracted (PDF may be image-only or empty)"
         });
     } catch (err: any) {
         console.error("Upload processing error:", err);

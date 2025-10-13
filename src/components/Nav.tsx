@@ -146,6 +146,7 @@ const UserNav = ({
       <Link href={`/paper_view/${paperId}/studyGuide`}>Study Guides</Link>
       <Link href={`/paper_view/${paperId}/glossary`}>Glossary</Link>
       <Link href={`/paper_view/${paperId}/problemSets`}>Problem Sets</Link>
+      <Link href={`/paper_view/${paperId}/pdfs`}>PDFs</Link>
 
     </div>
     <div className="nav-account-section flex gap-2">
