@@ -1,11 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
 import ChatUI from "@/components/DashBoard/ChatUI";
-import Summary from "@/components/DashBoard/Summary";
-import Upload from "@/components/DashBoard/Upload";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { useParams } from "next/navigation";
+import { useRef, useState } from "react";
 
 export default function DashboardPage() {
   // Chat width starts at 50% of viewport

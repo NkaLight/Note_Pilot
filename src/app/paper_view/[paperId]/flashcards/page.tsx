@@ -12,11 +12,10 @@
  */
 "use client";
 
-import { useState, useRef, useEffect } from "react";
 import ChatUI from "@/components/DashBoard/ChatUI";
-import Upload from "@/components/DashBoard/Upload";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { useParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 type Flashcard = { question: string; answer: string };
 type ApiFlashcard = { question_front: string; answer_back: string };

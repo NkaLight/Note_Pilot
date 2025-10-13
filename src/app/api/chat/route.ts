@@ -9,10 +9,10 @@
  * - Links chat messages to uploads and users for persistence
  */
 
+import { getAuthedUserId } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { prisma } from "@/lib/db";
-import { getAuthedUserId } from "@/lib/auth";
 
 // Validation schemas
 const getChatSchema = z.object({

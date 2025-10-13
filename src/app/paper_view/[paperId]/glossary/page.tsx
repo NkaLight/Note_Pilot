@@ -13,12 +13,10 @@
  *   and associated with the user's uploaded papers.
  */
 
-import { useState, useRef } from "react";
 import ChatUI from "@/components/DashBoard/ChatUI";
-import Upload from "@/components/DashBoard/Upload";
-import Summary from "@/components/DashBoard/Summary";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { useParams } from "next/navigation";
+import { useRef, useState } from "react";
 
 type GlossaryItem = {
   term: string;
