@@ -1,11 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
 import ChatUI from "@/components/DashBoard/ChatUI";
-import Summary from "@/components/DashBoard/Summary";
-import Upload from "@/components/DashBoard/Upload";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { useParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 type SummaryItem = {
   header: string,

@@ -1,8 +1,7 @@
-import { NextResponse } from "next/server";
-import { z } from "zod";  
 import { getSessionUser } from "@/lib/auth";
-import fs from "fs";
 import { getLectureConentById } from "@/lib/prisma";
+import { NextResponse } from "next/server";
+import { z } from "zod";
 
 const chatMessageReqSchema = z.object({
     message: z.string(),
