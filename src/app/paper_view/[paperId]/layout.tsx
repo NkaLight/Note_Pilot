@@ -1,5 +1,5 @@
+import { getLecturesForPaper } from "@/lib/prisma";
 import ClientProviderWrapper from "./ClientProviderWrapper";
-import {getLecturesForPaper} from "@/lib/prisma";
 
 type PaperViewLayoutProps = {
   children: React.ReactNode;

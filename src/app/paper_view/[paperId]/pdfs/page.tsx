@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
 import ChatUI from "@/components/DashBoard/ChatUI";
-import Upload from "@/components/DashBoard/Upload";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { useParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 type PDFUpload = {
   upload_id: number;

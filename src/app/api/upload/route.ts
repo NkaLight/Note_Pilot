@@ -1,8 +1,8 @@
 import { getAuthedUserId } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import fs from 'fs';
 import { NextResponse } from "next/server";
 import { PdfReader } from 'pdfreader';
-import fs from 'fs';
 
 export const runtime = "nodejs";
 

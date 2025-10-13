@@ -1,15 +1,13 @@
 "use client";
-import {motion, AnimatePresence} from "framer-motion";
-import { useCallback, useEffect, useState } from "react";
-import SignInForm from "@/components/SignInForm";
 import Modal from "@/components/Modal"; // reusable modal from earlier
-import { useSession } from "@/context/SessionContext";
-import {useRouter, } from "next/navigation"
-import Link from 'next/link'
-import Image from "next/image"; // for provider logos
+import SignInForm from "@/components/SignInForm";
 import SignUpForm from "@/components/SignUpForm";
-import { usePathname } from 'next/navigation';
-import { useParams } from 'next/navigation'
+import { useSession } from "@/context/SessionContext";
+import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image"; // for provider logos
+import Link from 'next/link';
+import { useParams, usePathname, useRouter, } from "next/navigation";
+import { useEffect, useState } from "react";
 
 
 // -------------------------

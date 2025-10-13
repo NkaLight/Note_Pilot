@@ -1,7 +1,5 @@
-import { useSession } from "@/context/SessionContext";
-import { PrismaClient } from "@prisma/client";
-import { getAuthedUserId } from "./auth";
 import { prisma } from "@/lib/db";
+import { getAuthedUserId } from "./auth";
 
 
 type Lecture = {
