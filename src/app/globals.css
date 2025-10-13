@@ -139,7 +139,7 @@ body {
   .nav-dot-menu {
     position: absolute;
     top: 1.5em;
-    left: 42%;
+    left: 47%;
     transform: translateX(-50%);
     display: flex;
     justify-content: center;

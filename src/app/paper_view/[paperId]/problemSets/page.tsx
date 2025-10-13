@@ -78,7 +78,7 @@ export default function DashboardPage() {
           </div>
     
           {/* Middle: Summaries */}
-          <div className=" rounded-3xl mb-5 mt-19 p-6 bg-white/50 overflow-y-auto mt-5 flex-grow">
+          <div className=" rounded-3xl mb-5 mt-19 p-6 mr-10 bg-white/50 overflow-y-auto mt-5 flex-grow">
             <h2 className="text-xl font-semibold mb-4 text-black">Problem Sets</h2>
             <div className="space-y-6">
               {questions.length == 0 && <p className="text-gray-500">{isLoading? "Generating..." :"No questions available for this lecture yet."}</p>}

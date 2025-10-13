@@ -226,7 +226,7 @@ export default function PDFsPage() {
       </div>
 
       {/* Middle: PDF Management */}
-      <div className="rounded-3xl mb-5 mt-19 p-6 bg-white/50 overflow-y-auto mt-5 flex-grow">
+      <div className="rounded-3xl mb-5 mt-19 p-6 mr-10 bg-white/50 overflow-y-auto mt-5 flex-grow">
         
         {/* Lecture Selection Section */}
         <div className="mb-8 p-4 bg-white rounded-lg shadow-sm border">

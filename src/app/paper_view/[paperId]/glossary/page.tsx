@@ -103,7 +103,7 @@ export default function DashboardPage() {
       />
 
       {/* Middle: Glossary */}
-      <div className="rounded-3xl mb-5 mt-19 p-6 bg-white/50 overflow-y-auto mt-5 flex-grow text-black">
+      <div className="rounded-3xl mb-5 mt-19 p-6 bg-white/50 mr-10 overflow-y-auto mt-5 flex-grow text-black">
         <h2 className="text-xl font-semibold mb-4 text-black">Glossary</h2>
 
         {/* Input + Generate button */}

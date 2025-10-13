@@ -124,7 +124,7 @@ export default function FlashcardsPage() {
       />
 
       {/* Middle: Flashcards */}
-      <div className="rounded-3xl p-6 bg-black/70 overflow-y-auto mt-19 mb-5 flex-grow flex justify-center items-start">
+      <div className="rounded-3xl p-6 bg-black/70 overflow-y-auto mt-19 mb-5 mr-10 flex-grow flex justify-center items-start">
         <div className="flex flex-col snap-y snap-mandatory gap-4 p-4 w-full items-center">
           {loading && <p className="text-white/80">Generating flashcards…</p>}
           {err && <p className="text-red-300">{err}</p>}
