@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useSession } from "@/context/SessionContext";
+import { useRouter } from "next/navigation";
 // Define the type for the props
 interface SignInFormProps {
   closeForm: () => void;
@@ -11,7 +12,8 @@ export default function SignInForm({closeForm}: SignInFormProps){
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const {setUser} = useSession()
+    const {setUser} = useSession();
+    const router = useRouter();
 
 
 
@@ -44,6 +46,8 @@ export default function SignInForm({closeForm}: SignInFormProps){
     setIsLoading(false)
     closeForm()
     
+    // Redirect to dashboard after successful login
+    router.push("/dashboard");
     
     } catch (error) {
     console.error(error);
