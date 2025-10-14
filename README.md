@@ -19,3 +19,5 @@
 
 ### Users Manual
 [Found in Taiga](https://taiga.otago.ac.nz/project/group_15/wiki/users-manual)
+
+Downloads/DashBoard.gif
