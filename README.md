@@ -17,5 +17,5 @@
 ### Use case diagrams
 [Model found in Taiga](https://taiga.otago.ac.nz/project/group_15/wiki/)
 
-### User's Manual
+### Users Manual
 [Found in Taiga](https://taiga.otago.ac.nz/project/group_15/wiki/users-manual)
