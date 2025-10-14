@@ -1,4 +1,3 @@
-// src/app/dashboard/page.tsx
 "use client";
 
 import { useContext, useEffect, useState } from "react";
@@ -9,7 +8,20 @@ import Modal from "@/components/Modal";
 import EditIcon from "@/components/EditIcon"
 import Link from "next/link";
 
-//Form SubComponents
+/**
+ * DashboardPage Component
+ *
+ * @description
+ * Renders the user's dashboard for managing their papers.
+ * Viewing existing papers
+ * Adding new papers (via AddPaperForm)
+ * Editing and deleting papers (via EditPaperForm)
+ * Retrieve latest papers from the server
+ *
+ * @returns {JSX.Element} Rendered dashboard page
+ */
+
+// Sub-component to handle adding a new paper
 const AddPaperForm = ({closeForm }: { closeForm: () => void })=>{
   const [name, setName] = useState<string>("")
   const [code, setCode] = useState<string>("")
@@ -67,7 +79,7 @@ const AddPaperForm = ({closeForm }: { closeForm: () => void })=>{
 }
 
 
-//Form SubComponents
+// Sub-component to handle editing an existing paper
 const EditPaper = ({closeForm, paperItem }: { closeForm: () => void; paperItem: paper })=>{
   if(paperItem == null){
     closeForm();
@@ -157,7 +169,11 @@ const EditPaper = ({closeForm, paperItem }: { closeForm: () => void; paperItem: 
     </form>
   )
 }
-
+/**  DashboardPage Component
+  * @description
+  * View, edit and otherwise manage user's papers.
+  * Updates UI dynamically based on server data.
+*/
 export default function DashboardPage(props:{onloadPapers :paper[] | null}) {
   const [papers, setPapers] = useState<paper[] | null>(props.onloadPapers);
   const [loading, setLoading] = useState(false);

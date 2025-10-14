@@ -1,12 +1,4 @@
 "use client";
-/**
- * AccountPage (/account)
- * - Client route that renders the account "window" (profile fields, preferences, avatar).
- * - Hydrates initial values from SessionContext and keeps session in sync after updates.
- * - Submits to /api/account (supports JSON and multipart for avatar upload).
- * - Sends current theme choice (next-themes) so server can persist darkMode in preferences.
- * - Visual container uses Tailwind classes for a glassy panel in light/dark modes.
- */
 
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
@@ -15,14 +7,25 @@ import ProfileFields from "@/components/Account/profileFields";
 import Preferences from "@/components/Account/preferences";
 import Avatar from "@/components/Account/avatar";
 
-type AILevel = "child" | "student" | "advanced";
+type AILevel = "child" | "student" | "advanced"; // Define the level at which the AI should operate for the user
 
+/**
+ * AccountPage Component
+ * @description 
+ * Client side component that renders the account "window" (profile fields, preferences, avatar).
+ * Hydrates initial values from SessionContext and keeps session in sync after updates.
+ * Submits to /api/account (supports JSON and multipart for avatar upload).
+ * Sends current theme choice (next-themes) so server can persist darkMode in preferences.
+ * Visual container uses Tailwind classes for a glassy panel in light/dark modes.
+ * Can update username, email, password, aiLevel, avatar, and delete the account.
+ * @returns {JSX.Element} The rendered component
+ */
 export default function AccountPage() {
     const { theme } = useTheme();
     const { user, setUser } = useSession();
     console.log(user)
 
-    // use username (schema has no first/last)
+    // Local state for profile fields
     const [username, setUsername] = useState(user?.username ?? "");
     const [email, setEmail] = useState(user?.email ?? "");
     const [password, setPassword] = useState("");
@@ -43,6 +46,7 @@ export default function AccountPage() {
         // set avatarPreview from user.avatarUrl when you add it later
     }, [user]);
 
+    // Handle form updates
     const handleUpdate = async () => {
         setSaving(true);
         try {
@@ -96,6 +100,7 @@ export default function AccountPage() {
         }
     };
 
+    // Handle account deletion
     const handleDelete = async () => {
         if (!confirm("Delete your account? This cannot be undone.")) return;
         setDeleting(true);

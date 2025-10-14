@@ -1,4 +1,3 @@
-// src/app/ai/dashboard/layout.tsx
 import type { ReactNode } from "react";
 import {getSessionUser} from  "@/lib/auth"
 import { redirect } from "next/navigation";
@@ -6,6 +5,13 @@ import React from "react";
 import type {paper} from "@prisma/client";
 import { getPapersByUserId } from "@/lib/paper";
 
+/** Dashboard React Component
+ * @description 
+ * Server side component.
+ * Defines the dashboard layout for authenticated users,
+ * otherwise redirects to home page.
+ * @returns {JSX.Element} The rendered component
+ */
 export default async function AIPageLayout({ children }: { children: ReactNode }) {
   const user = await getSessionUser();
   console.log(user);
