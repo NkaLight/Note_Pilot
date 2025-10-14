@@ -20,4 +20,4 @@
 ### Users Manual
 [Found in Taiga](https://taiga.otago.ac.nz/project/group_15/wiki/users-manual)
 
-Downloads/DashBoard.gif
+file:///Users/spedk/Downloads/ScreenRecording2025-10-14at2.34.21PM-ezgif.com-video-to-gif-converter.gif
