@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useTheme } from "next-themes";
-import { useSession } from "@/context/SessionContext";
-import ProfileFields from "@/components/Account/profileFields";
-import Preferences from "@/components/Account/preferences";
 import Avatar from "@/components/Account/avatar";
+import Preferences from "@/components/Account/preferences";
+import ProfileFields from "@/components/Account/profileFields";
+import { useSession } from "@/context/SessionContext";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 type AILevel = "child" | "student" | "advanced"; // Define the level at which the AI should operate for the user
 

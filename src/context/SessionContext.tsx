@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, useEffect, ReactNode} from "react"
+import { createContext, ReactNode, useContext, useState } from "react";
 
 type User = {
     user_id: number;

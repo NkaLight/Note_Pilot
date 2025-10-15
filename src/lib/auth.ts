@@ -14,9 +14,9 @@
  * - Keep SESSION_COOKIE in sync with sign-in/sign-out handlers.
  */
 
-import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
-import { validateSession, getUserFromToken} from "@/lib/session"
+import { getUserFromToken } from "@/lib/session";
+import { cookies } from "next/headers";
 
 export const SESSION_COOKIE = "session_token";
 
