@@ -109,7 +109,8 @@ export default function ChatUI({
         const data = await response.json();
         return data.message;
       } else {
-        console.error('Failed to save message to database');
+        const errorText = await response.text();
+        console.error('Failed to save message to database:', response.status, errorText);
         return null;
       }
     } catch (error) {
@@ -128,8 +129,12 @@ export default function ChatUI({
 
     // Save user message to database if we have active uploads
     if (activeUploadIds.length > 0) {
-      // Save to the first upload for now, could be enhanced to save to all
-      await saveMessage(userMessage, activeUploadIds[0]);
+      try {
+        // Save to the first upload for now, could be enhanced to save to all
+        await saveMessage(userMessage, activeUploadIds[0]);
+      } catch (error) {
+        console.warn('Failed to save user message:', error);
+      }
     }
 
     try {
@@ -161,10 +166,18 @@ export default function ChatUI({
 
       // Save assistant message to database if we have active uploads
       if (activeUploadIds.length > 0) {
-        await saveMessage(assistantMessage, activeUploadIds[0]);
+        try {
+          await saveMessage(assistantMessage, activeUploadIds[0]);
+        } catch (error) {
+          console.warn('Failed to save assistant message:', error);
+        }
       }
       if (uploadId && reply) {
-        await saveMessage(assistantMessage, uploadId);
+        try {
+          await saveMessage(assistantMessage, uploadId);
+        } catch (error) {
+          console.warn('Failed to save assistant message for uploadId:', error);
+        }
       }
     } catch {
       const errorMessage: Message = {
@@ -176,7 +189,11 @@ export default function ChatUI({
       
       // Save error message to database if we have active uploads
       if (activeUploadIds.length > 0) {
-        await saveMessage(errorMessage, activeUploadIds[0]);
+        try {
+          await saveMessage(errorMessage, activeUploadIds[0]);
+        } catch (error) {
+          console.warn('Failed to save error message:', error);
+        }
       }
     } finally {
       setBusy(false);

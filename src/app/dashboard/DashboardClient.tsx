@@ -163,7 +163,7 @@ const EditPaper = ({closeForm, paperItem }: { closeForm: () => void; paperItem: 
       <button type="button" onClick={handleDelete} disabled={isSubmitting} className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-gray-400">
         {isSubmitting ? "Deleting..." : "Delete"}
       </button>
-      {
+      { 
         error && (<p>{error}</p>)
       }
     </form>
@@ -174,7 +174,7 @@ const EditPaper = ({closeForm, paperItem }: { closeForm: () => void; paperItem: 
   * View, edit and otherwise manage user's papers.
   * Updates UI dynamically based on server data.
 */
-export default function DashboardPage(props:{onloadPapers :paper[] | null}) {
+export default function DashboardPage(props:{onloadPapers:paper[] | null}) {
   const [papers, setPapers] = useState<paper[] | null>(props.onloadPapers);
   const [loading, setLoading] = useState(false);
   const [activeForm, setActiveForm] = useState<"addPaper" | "confirmRemovePaper" |"editPaper" | null>(null);
@@ -213,7 +213,7 @@ export default function DashboardPage(props:{onloadPapers :paper[] | null}) {
         <>
             {
               papers && papers.map(paper =>(
-                <Link href={`/paper_view/${paper.paper_id}/summaries`} key={paper.paper_id}>
+                <Link href={`/paper_view/${paper.paper_id}/pdfs`} key={paper.paper_id}>
                   <div className="relative m-4 bg-white text-black p-4 rounded-full w-36 flex-shrink-0 cursor-pointer hover:bg-green">
                     <div className="absolute top-1 right-3 m-0 p-0 cursor-pointer" onClick={(e)=>{e.stopPropagation();e.preventDefault();handleSelectPaper(paper)}}>
                       <EditIcon
