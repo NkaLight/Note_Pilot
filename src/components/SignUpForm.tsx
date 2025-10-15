@@ -1,8 +1,7 @@
 "use client";
-import Image from "next/image"; // for provider logos
-import { useState } from "react";
 import { useSession } from "@/context/SessionContext";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 // Define the type for the props
 interface SignUpFormProps {

@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import EditIcon from "@/components/EditIcon";
+import Modal from "@/components/Modal";
 import type { paper } from "@prisma/client";
 import { AnimatePresence } from "framer-motion";
-import Modal from "@/components/Modal";
-import EditIcon from "@/components/EditIcon";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 /* ---------- AddPaperForm Component ---------- */
 const AddPaperForm = ({ closeForm }: { closeForm: () => void }) => {
@@ -300,8 +300,8 @@ export default function DashboardPage(props: { onloadPapers: paper[] | null }) {
             className="bg-white/20 backdrop-blur-lg p-6 rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300"
           >
             <div className="text-4xl mb-4">{box.icon}</div>
-            <h3 className="text-xl font-semibold mb-2">{box.title}</h3>
-            <p className="text-gray-200 text-sm">{box.description}</p>
+            <h3 className="text-xl font-semibold mb-2 text-black">{box.title}</h3>
+            <p className="text-black text-sm">{box.description}</p>
           </div>
         ))}
       </div>
