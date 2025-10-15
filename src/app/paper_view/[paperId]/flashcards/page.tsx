@@ -183,23 +183,7 @@ export default function FlashcardsPage() {
       </div>
     ))}
   </div>
-
-  {/* Vertical Progress Bar */}
-  <div className="absolute top-0 right-0 w-4 h-full bg-gray-300 dark:bg-zinc-700 rounded-l-full overflow-hidden">
-    <div
-      className="w-full bg-blue-500 transition-all origin-bottom"
-      style={{
-        height: `${
-          flashcards.length > 0
-            ? (flashcards.filter((c) => c.learnt).length / flashcards.length) * 100
-            : 0
-        }%`,
-      }}
-    />
-  </div>
 </div>
-
-
     </div>
   );
 }
