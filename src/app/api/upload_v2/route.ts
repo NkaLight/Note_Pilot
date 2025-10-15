@@ -7,16 +7,24 @@ import os from "os";
 import path from "path";
 import { prisma } from "@/lib/db";
 
+/** The current upload API route */
 
+
+
+/**
+ * A function to handle file uploads (PDF and TXT).
+ * Extracts text content from the files and stores them in the database.
+ * Currently text extraction is done within the function, but should be moved to lib.
+ */
 export async function POST(req: Request) {
   try {
-    //auth
+    // Get the user ID from the authentication token
     const userId = getAuthedUserId();
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    //Parse FormData
+    // Parse FormData
     const formData = await req.formData();
     const uploadedFiles = formData.getAll("file"); 
     const paperId = formData.get("paperId") as string | null;

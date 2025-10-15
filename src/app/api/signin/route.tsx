@@ -5,12 +5,22 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-// Define a schema for validating incoming login data
+/**
+ * API route for user sign-in.
+ * Validate user credentials and create a session.
+ */
+
+// Define a schema using Zod for validating incoming login data
 const signInSchema = z.object({
   email: z.string().email("Invalid email format"),
   password: z.string()
 });
 
+/**
+ * This function handles user sign-in.
+ * @param request the request object containing email and password.
+ * @returns the user object in JSON format.
+ */
 export async function POST(request: Request) {
     
   try {
@@ -37,10 +47,10 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
-    //Generate and store session storage in DB
+    // Generate and store session storage in DB
     const token = crypto.randomBytes(32).toString("hex");
 
-    // store session in DB
+    // Store session in DB
     await prisma.session.create({
       data: {
         user_id: user.user_id,
@@ -50,7 +60,7 @@ export async function POST(request: Request) {
       },
     });
 
-    // set cookie
+    // Set cookies
     (await cookies()).set({
       name: "session_token",
       value: token,

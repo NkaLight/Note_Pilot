@@ -1,12 +1,12 @@
 /**
  * Flashcard generation API (server-only, Next.js App Router)
  *
- * WHAT IT DOES
- * - Authenticates the user.
- * - Uses OpenRouter AI to generate flashcards (Q/A pairs) from uploaded text or user input.
- * - Persists flashcards in the database tied to a specific upload (or creates a dummy one if needed).
- * - Uses `upsert` so that re-generating flashcards for the same upload overwrites old ones.
- * - Adds a GET route to reload persisted flashcards for the logged-in user.
+ * WHAT IT DOES:
+ * Authenticates the user.
+ * Uses OpenRouter AI to generate flashcards (Q/A pairs) from uploaded text or user input.
+ * Persists flashcards in the database tied to a specific upload (or creates a dummy one if needed).
+ * Uses `upsert` so that re-generating flashcards for the same upload overwrites old ones.
+ * Adds a GET route to reload persisted flashcards for the logged-in user.
  */
 
 import { NextResponse } from "next/server";

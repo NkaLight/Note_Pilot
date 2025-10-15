@@ -2,9 +2,19 @@ import { NextResponse } from "next/server";
 import { getAuthedUserId, getSessionUser } from "@/lib/auth";
 import { getLectureConentById } from "@/lib/prisma";
 
+/**
+ * API route for managing problem sets.
+ * Similar to generateContent, but focused on generating exam-style questions for the user.
+ * Supports the evaluation of user answers using the LLM.
+ */
 
 const API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
+/**
+ * POST function
+ * @param req the request object containing mode, lectureId, userAnswer, and questions.
+ * @returns the generated questions or evaluation feedback in JSON format.
+ */
 export async function POST(req: Request){
     try{
         const userId = await getAuthedUserId();
@@ -15,7 +25,7 @@ export async function POST(req: Request){
 
         if(!mode) throw NextResponse.json({error:"No mode selected", status: 400});
 
-        //GENERATE QUESTIONS
+        // GENERATE QUESTIONS
         if(mode == "generate"){
             if(!lectureId) throw NextResponse.json({error:"Lecture Id must be selected", status: 400});
             const lecture = await getLectureConentById(lectureId);

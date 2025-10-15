@@ -1,18 +1,17 @@
-// src/app/api/chat/route.ts
-/**
- * Chat API endpoints for persistent chat message management
- * 
- * WHAT IT DOES:
- * - GET: Retrieve chat history for specific uploads
- * - POST: Save new chat messages to database
- * - DELETE: Clear chat history for specific uploads
- * - Links chat messages to uploads and users for persistence
- */
-
 import { getAuthedUserId } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+
+/**
+ * Chat API endpoints for persistent chat message management
+ * 
+ * WHAT IT DOES:
+ * GET: Retrieve chat history for specific uploads
+ * POST: Save new chat messages to database
+ * DELETE: Clear chat history for specific uploads
+ * Links chat messages to uploads and users for persistence
+ */
 
 // Validation schemas
 const getChatSchema = z.object({

@@ -3,6 +3,12 @@ import { getLectureConentById } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+/**
+ * A route for AI chat interactions (Node runtime).
+ * Contains some redundant code for future RAG implementation.
+ */
+
+/** Schema validation for incoming chat message requests */
 const chatMessageReqSchema = z.object({
     message: z.string(),
     uploadId: z.number().optional(),
@@ -10,11 +16,12 @@ const chatMessageReqSchema = z.object({
     paperId: z.number().optional()
 })
 
-//Load the chunks and vectors at startup
-// const chunks: string[] = JSON.parse(fs.readFileSync("src/data/chunks.json", "utf-8"));
-// const vectors: number[][] = JSON.parse(fs.readFileSync("src/data/vectors.json", "utf-8"));
-
-// Cosine similarity
+/** IGNORE: This function is for RAG (Retrieval Augmented Generation)
+* however, the RAG implementation is not complete yet.
+* Load the chunks and vectors at startup
+* const chunks: string[] = JSON.parse(fs.readFileSync("src/data/chunks.json", "utf-8"));
+* const vectors: number[][] = JSON.parse(fs.readFileSync("src/data/vectors.json", "utf-8"));
+*/
 function cosineSimilarity(a: number[], b: number[]) {
     let dot = 0, normA = 0, normB = 0;
     for (let i = 0; i < a.length; i++) {
@@ -25,13 +32,16 @@ function cosineSimilarity(a: number[], b: number[]) {
     return dot / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
-// Retrieve top-k chunks
+/** IGNORE: This function is for RAG (Retrieval Augmented Generation) */
 function retrieveTopK(queryVec: number[], vectors: number[][], chunks: string[], k = 3) {
     const scores = vectors.map((vec, i) => ({ i, score: cosineSimilarity(queryVec, vec) }));
     scores.sort((a, b) => b.score - a.score);
     return scores.slice(0, k).map(s => chunks[s.i]);
 }
 
+/**
+ * Handles POST requests to /api/aiChat.
+*/
 export async function POST(req: Request){
     try{
 
@@ -71,20 +81,21 @@ export async function POST(req: Request){
         }
 
 
-        /*RAG Implementation Not done. CURRENTLY JUST PASSING USER QUERY DIRECTLY TO LLM */
-        // // Embed the user query
-        // const embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
-        // const queryVec = await embedder(message) as number[][]; // returns [ [ ... ] ]
+        /* RAG Implementation Not done. CURRENTLY JUST PASSING USER QUERY DIRECTLY TO LLM
+        // Embed the user query
+        const embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
+        const queryVec = await embedder(message) as number[][]; // returns [ [ ... ] ]
         
-        // // Retrieve top chunks
-        // const topChunks = retrieveTopK(queryVec[0], vectors, chunks, 3);
-        // const context = topChunks.join("\n\n");
+        // Retrieve top chunks
+        const topChunks = retrieveTopK(queryVec[0], vectors, chunks, 3);
+        const context = topChunks.join("\n\n");
+        */
 
         //Construct message 
-        const aiAPiUrl = "https://openrouter.ai/api/v1/chat/completions"
+        const aiAPIUrl = "https://openrouter.ai/api/v1/chat/completions"
 
 
-        //Construct message with context
+        // Construct message with context
         const contextualAIQuery = contextText.length > 0 ? `
             Use the following context from lecture materials to answer the question.
             If the context does not contain enough information to answer the question completely, 
@@ -98,7 +109,7 @@ export async function POST(req: Request){
             ${message}
         ` : message;
 
-        const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        const resp = await fetch(aiAPIUrl, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -120,16 +131,16 @@ export async function POST(req: Request){
         if(!reply) return NextResponse.json({message: ""});
         return NextResponse.json({message: reply});
         
-        //This code section for implementing streaming, but the front-end has to be updated to handle that first.
-        // return new NextResponse(resp.body, {
-        //     headers: {
-        //         "Content-Type": "text/event-stream",
-        //         "Cache-Control": "no-cache",
-        //     },
-        // })
-    }catch (err: unknown){ //handling type errors here
+        /* This code section for implementing streaming, but the front-end has to be updated to handle that first.
+        return new NextResponse(resp.body, {
+            headers: {
+                "Content-Type": "text/event-stream",
+                "Cache-Control": "no-cache",
+            },
+        }) */
+    }catch (err: unknown){
         console.error(err)
-         let normError: Error;
+        let normError: Error;
         if(err instanceof Error){
             normError = err;
         }else{
@@ -139,8 +150,8 @@ export async function POST(req: Request){
         //Handling specific error types here.
         if (normError instanceof z.ZodError) {
         // For Zod validation errors, return the structured error messages.
-        console.log("ZOD")
-        return NextResponse.json({ error: normError.message }, { status: 400 });
+            console.log("ZOD")
+            return NextResponse.json({ error: normError.message }, { status: 400 });
         }
         return NextResponse.json({error: normError.message}, {status: 500}) //Return null 
     }

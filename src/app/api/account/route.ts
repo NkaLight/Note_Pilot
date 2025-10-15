@@ -1,20 +1,26 @@
-// app/api/account/route.ts
-/**
- * /api/account (PUT, DELETE) — Node runtime
- * - PUT: accepts JSON or multipart/form-data (for avatar).
- *   * Updates application_user (username/email/password[hashed]).
- *   * Upserts preferences (learner_style via aiLevel mapping, dark_mode).
- *   * Returns JSON only; validates content type to avoid HTML error pages.
- *   * Demo: avatar processed to data URL (replace with cloud storage later).
- * - DELETE: (wire as needed) deletes account/session; returns JSON.
- * - Always respond with JSON to keep client robust (no Unexpected token '<').
- */
 export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
-import { getAuthedUserId } from "@/lib/auth"; // your existing helper
+import { getAuthedUserId } from "@/lib/auth"; // returns user ID or null
+
+/**
+ * API route for updating/deleting user account (Node runtime)
+ * 
+ * PUT: accepts JSON or multipart/form-data (for avatar).
+ * Updates application_user (username/email/password[hashed]).
+ * Upserts preferences (learner_style via aiLevel mapping, dark_mode).
+ * Returns JSON only; validates content type to avoid HTML error pages.
+ * Demo: avatar processed to data URL (replace with cloud storage later).
+ * 
+ * DELETE: (wire as needed) deletes account/session; returns JSON.
+ * 
+ * Notes:
+ * 
+ * Always respond with JSON to keep client robust (no Unexpected token '<').
+ */
+
 
 const uiToDbLevel: Record<string, string> = {
     child: "early",
@@ -27,6 +33,11 @@ const dbToUiLevel: Record<string, string> = {
     advanced: "advanced",
 };
 
+/**
+ * Updates username, password, preferneces, etc. using prisma.
+ * @param req JSON/form datas
+ * @returns JSON
+ */
 export async function PUT(req: NextRequest) {
     const userId = await getAuthedUserId();
     if (!userId) {

@@ -2,6 +2,9 @@ import { getAuthedUserId } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 
+/**
+ * API route to delete a specific upload by its ID.
+ */
 export async function DELETE(
     request: Request,
     { params }: { params: Promise<{ uploadId: string }> }
