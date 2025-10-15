@@ -271,13 +271,42 @@ body {
   margin-top: 2em;
 }
 
-.footer-section{
-  text-align: center;
-  color:black;
-  background-color: pink;
-  margin-top: auto;
-
+.footer-section {
+  position: relative;
+  overflow: hidden;        /* hide overflow for carousel effect */
+  height: 2em;
+  background-color: #181818;
+  color: white;
+  display: flex;
+  align-items: center;
 }
+
+.footer-section .carousel-track {
+  display: flex;
+  white-space: nowrap;     /* keep text on one line */
+  animation: scroll-left 15s linear infinite;
+  gap: 3em;                /* space between text items */
+}
+
+.footer-section p {
+  display: inline-block;
+  margin: 0;
+  padding: 2em;
+  white-space: nowrap;
+  text-align: center;
+  font-size: 1em;
+}
+
+/* Carousel animation: move left continuously */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
 
 
 /* Fidget Spinner  */
