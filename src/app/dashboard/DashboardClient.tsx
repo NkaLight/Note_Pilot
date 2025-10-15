@@ -270,8 +270,7 @@ export default function DashboardPage(props: { onloadPapers: paper[] | null }) {
         {papers &&
           papers.map((paper) => (
             <Link href={`/paper_view/${paper.paper_id}/pdfs`} key={paper.paper_id}>
-              <div className="relative m-4 bg-white text-black p-4 rounded-full w-36 flex-shrink-0 cursor-pointer hover:bg-green-200">
-                <div
+                <div className="relative m-4 bg-white text-black p-4 rounded-full w-36 flex-shrink-0 cursor-pointer hover:bg-blue-700 hover:text-white transition-colors duration-300"><div
                   className="absolute top-1 right-3 cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();
