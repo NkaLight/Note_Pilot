@@ -1,14 +1,13 @@
 "use client";
-import Modal from "@/components/Modal"; // reusable modal from earlier
+import Modal from "@/components/Modal";
 import SignInForm from "@/components/SignInForm";
 import SignUpForm from "@/components/SignUpForm";
 import { useSession } from "@/context/SessionContext";
 import { AnimatePresence, motion } from "framer-motion";
-import Image from "next/image"; // for provider logos
-import Link from 'next/link';
-import { useParams, usePathname, useRouter, } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-
 
 // -------------------------
 // Animations
@@ -20,10 +19,10 @@ const navFadeIn = {
 };
 
 const guestNavFadeIn = {
-    initial: { opacity: 1, y: 0 },
-    animate: { opacity: 1, y: 0, transition: { duration: 5 } },
-    exit: { opacity: 0, y: 0, transition: { duration: 0.3 } },
-}
+  initial: { opacity: 1, y: 0 },
+  animate: { opacity: 1, y: 0, transition: { duration: 5 } },
+  exit: { opacity: 0, y: 0, transition: { duration: 0.3 } },
+};
 
 const dotFade = {
   initial: { opacity: 0, scale: 0.5 },
@@ -31,13 +30,25 @@ const dotFade = {
   exit: { opacity: 0, scale: 0.5, transition: { duration: 0.3 } },
 };
 
+// -------------------------
+// Hook for mobile detection
+// -------------------------
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  return isMobile;
+}
 
 // -------------------------
 // Subcomponents
 // -------------------------
 const BarebonesNav = () => (
   <nav className="nav-container">
-    {/* Empty div so layout stays consistent */}
     <div className="nav-links-container h-10" />
   </nav>
 );
@@ -56,22 +67,77 @@ const DotMenu = ({ onHover }: { onHover: () => void }) => (
     ))}
   </motion.div>
 );
-const AccountNav = ({ handleLogout }: { handleLogout: () => void; }) => (
+
+// -------------------------
+// Shared Mobile Toggle Button
+// -------------------------
+const MobileToggle = ({ open, toggle }: { open: boolean; toggle: () => void }) => (
+  <button
+    className="block md:hidden p-2 text-black focus:outline-none"
+    onClick={toggle}
+  >
+    {open ? "✕" : "☰"}
+  </button>
+);
+
+// -------------------------
+// Mobile Wrapper Nav 
+// -------------------------
+const MobileNavWrapper = ({
+  logoHref,
+  children,
+  handleLogout
+}: {
+  logoHref: string;
+  children: React.ReactNode;
+  handleLogout?: () => void;
+}) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  return (
+    <nav className="nav-container flex flex-col md:hidden bg-black text-black p-2">
+      <div className="flex justify-start items-center gap-3">
+        {/* Toggle on LEFT side */}
+        <MobileToggle open={menuOpen} toggle={() => setMenuOpen(!menuOpen)} />
+        <Link href={logoHref}>
+          <Image src="/icons/Note_Pilot_logo.svg" alt="Note Pilot Logo" width={44} height={44} />
+        </Link>
+      </div>
+
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0, y: -10 }}
+            animate={{ height: "auto", opacity: 1, y: 0 }}
+            exit={{ height: 0, opacity: 0, y: -10 }}
+            className="flex flex-col gap-3 mt-2 border-t border-gray-700 pt-3 pl-2"
+          >
+            {children}
+            {handleLogout && (
+              <a onClick={handleLogout} className="cursor-pointer text-red-400">
+                Logout
+              </a>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </nav>
+  );
+};
+
+// -------------------------
+// Desktop Navs 
+// -------------------------
+const AccountNav = ({ handleLogout }: { handleLogout: () => void }) => (
   <motion.nav
-    className="nav-container flex items-center justify-between"
+    className="nav-container hidden md:flex items-center justify-between"
     variants={navFadeIn}
     initial="initial"
     animate="animate"
     exit="exit"
   >
     <Link href="/dashboard">
-        <Image
-          src="/icons/Note_Pilot_logo.svg"
-          alt="Note Pilot Logo"
-          width={48}
-          height={48}
-          className="nav-logo"
-        />
+      <Image src="/icons/Note_Pilot_logo.svg" alt="Note Pilot Logo" width={48} height={48} />
     </Link>
     <div className="nav-account-section flex gap-2">
       <Link href="/dashboard">Dashboard</Link>
@@ -80,22 +146,16 @@ const AccountNav = ({ handleLogout }: { handleLogout: () => void; }) => (
   </motion.nav>
 );
 
-const DashboardNav = ({ handleLogout }: { handleLogout: () => void; }) => (
+const DashboardNav = ({ handleLogout }: { handleLogout: () => void }) => (
   <motion.nav
-    className="nav-container flex items-center justify-between"
+    className="nav-container hidden md:flex items-center justify-between"
     variants={navFadeIn}
     initial="initial"
     animate="animate"
     exit="exit"
   >
     <Link href="/dashboard">
-        <Image
-          src="/icons/Note_Pilot_logo.svg"
-          alt="Note Pilot Logo"
-          width={48}
-          height={48}
-          className="nav-logo"
-        />
+      <Image src="/icons/Note_Pilot_logo.svg" alt="Note Pilot Logo" width={48} height={48} />
     </Link>
     <div className="nav-account-section flex gap-2">
       <Link href="/account">Account</Link>
@@ -105,40 +165,23 @@ const DashboardNav = ({ handleLogout }: { handleLogout: () => void; }) => (
 );
 
 const UserNav = ({
-  username,
   aiLevel,
-  popAccountForm,
-  onhoverStart,
-  onhoverEnd,
   handleLogout,
   paperId
 }: {
-  username: string;
   aiLevel?: string;
-  popAccountForm: () => void;
-  onhoverStart:() => void;
-  onhoverEnd: () => void;
-  handleLogout:() => void;
-  paperId:number
-
+  handleLogout: () => void;
+  paperId: number;
 }) => (
   <motion.nav
-    className="nav-container flex items-center justify-between"
+    className="nav-container hidden md:flex items-center justify-between"
     variants={navFadeIn}
     initial="initial"
     animate="animate"
     exit="exit"
-    onHoverStart={onhoverStart}
-    onHoverEnd={onhoverEnd}
   >
     <Link href="/dashboard">
-      <Image
-        src="/icons/Note_Pilot_logo.svg"
-        alt="Note Pilot Logo"
-        width={48}
-        height={48}
-        className="nav-logo"
-      />
+      <Image src="/icons/Note_Pilot_logo.svg" alt="Note Pilot Logo" width={48} height={48} />
     </Link>
     <div className="nav-links-container flex gap-2">
       <Link href={`/paper_view/${paperId}/flashcards`}>Flash Cards</Link>
@@ -147,43 +190,37 @@ const UserNav = ({
       <Link href={`/paper_view/${paperId}/glossary`}>Glossary</Link>
       <Link href={`/paper_view/${paperId}/problemSets`}>Problem Sets</Link>
       <Link href={`/paper_view/${paperId}/pdfs`}>PDFs</Link>
-
     </div>
     <div className="nav-account-section flex gap-2 items-center">
       {aiLevel && (
-        <span 
-          className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full cursor-help"
-          title="Change AI level in Account Settings"
-        >
-          {aiLevel === 'child' ? 'Child' : aiLevel === 'student' ? 'Student' : 'Advanced'}
+        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+          {aiLevel}
         </span>
       )}
-      <a onClick={handleLogout}>Logout</a>
+      <Link href="/dashboard">Dashboard</Link>
       <Link href="/account">Account</Link>
+      <a onClick={handleLogout}>Logout</a>
     </div>
   </motion.nav>
 );
 
-
-const GuestNav = ({ onLoginClick, onSignUpClick }: { onLoginClick: () => void, onSignUpClick: () => void }) => (
+const GuestNav = ({
+  onLoginClick,
+  onSignUpClick
+}: {
+  onLoginClick: () => void;
+  onSignUpClick: () => void;
+}) => (
   <motion.nav
-    className="nav-container flex justify-between"
+    className="nav-container hidden md:flex justify-between"
     variants={guestNavFadeIn}
     initial="initial"
     animate="animate"
     exit="exit"
   >
     <Link href="/">
-        <Image
-          src="/icons/Note_Pilot_logo.svg"
-          alt="Note Pilot Logo"
-          width={48}
-          height={48}
-          className="nav-logo"
-        />
+      <Image src="/icons/Note_Pilot_logo.svg" alt="Note Pilot Logo" width={48} height={48} />
     </Link>
-    <div className="nav-links-container flex gap-4">
-    </div>
     <div className="nav-account-section flex gap-1">
       <a href="/about">About</a>
       <a onClick={onLoginClick}>Login</a>
@@ -195,51 +232,14 @@ const GuestNav = ({ onLoginClick, onSignUpClick }: { onLoginClick: () => void, o
 // -------------------------
 // Main Nav
 // -------------------------
-export default function Nav({ showAuth = true}: { showAuth?: boolean}) {
-  const [activeForm, setActiveForm] = useState<"signin" | "signup" | "account"| null>(
-    null
-  );
-  const router = useRouter();
+export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
+  const [activeForm, setActiveForm] = useState<"signin" | "signup" | "account" | null>(null);
   const { user, setUser, loading } = useSession();
-  const [collapsed, setCollapsed] = useState(false);
-  const [hover, setHover] = useState(false)
+  const router = useRouter();
   const pathname = usePathname();
-
   const params = useParams();
-  const paperId: number =  Number(params.paperId);
-  
-
-// Track inactivity → collapse after 5s without user activity
-useEffect(() => {
-  if (!showAuth || loading || !user || activeForm || hover) return;
-
-  let timer: ReturnType<typeof setTimeout> | null = null;
-
-  const start = () => {
-    if (timer) clearTimeout(timer);
-    timer = setTimeout(() => setCollapsed(true), 15000);
-  };
-
-  const onActivity = () => {
-    // If user interacts and we were collapsed, expand immediately
-    if (collapsed) setCollapsed(false);
-    start();
-  };
-
-  // Bind a few common activity events
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") onActivity();
-  });
-
-  // Kick off the first timer
-  start();
-
-  return () => {
-    if (timer) clearTimeout(timer);
-    window.removeEventListener("visibilitychange", onActivity);
-  };
-}, [showAuth, loading, collapsed]);
-
+  const paperId: number = Number(params.paperId);
+  const isMobile = useIsMobile();
 
   const handleLogout = async () => {
     try {
@@ -255,137 +255,65 @@ useEffect(() => {
     }
   };
 
-  const closeSignInModal = () => {
-    setActiveForm(null);
-    setTimeout(() => router.push("/dashboard"), 500);
-  };
-
   if (!showAuth) return null;
-
-  // Show barebones nav while loading state resolves
   if (loading) return <BarebonesNav />;
 
+  // -------------------------
+  // MOBILE VERSION 
+  // -------------------------
+  if (isMobile) {
+    if (user && !Number.isNaN(paperId)) {
+      return (
+        <MobileNavWrapper logoHref="/dashboard" handleLogout={handleLogout}>
+          <Link href={`/paper_view/${paperId}/flashcards`}>Flash Cards</Link>
+          <Link href={`/paper_view/${paperId}/summaries`}>Summaries</Link>
+          <Link href={`/paper_view/${paperId}/studyGuide`}>Study Guides</Link>
+          <Link href={`/paper_view/${paperId}/glossary`}>Glossary</Link>
+          <Link href={`/paper_view/${paperId}/problemSets`}>Problem Sets</Link>
+          <Link href={`/paper_view/${paperId}/pdfs`}>PDFs</Link>
+        </MobileNavWrapper>
+      );
+    }
+    if (user && Number.isNaN(paperId)) {
+      return (
+        <MobileNavWrapper logoHref="/dashboard" handleLogout={handleLogout}>
+          <Link href="/account">Account</Link>
+          <Link href="/dashboard">Dashboard</Link>
+        </MobileNavWrapper>
+      );
+    }
+    return (
+      <MobileNavWrapper logoHref="/">
+        <Link href="/about">About</Link>
+        <a onClick={() => setActiveForm("signin")}>Login</a>
+        <a onClick={() => setActiveForm("signup")}>Sign Up</a>
+      </MobileNavWrapper>
+    );
+  }
+
+  // -------------------------
+  // DESKTOP VERSION 
+  // -------------------------
   return (
     <>
-    {user && !Number.isNaN(paperId) &&  //User is logged in and has chosen a paper
-      (
-      <AnimatePresence mode="wait" initial={false}>
-        {collapsed ? 
-          (
-            <DotMenu key={"dot"} onHover={() => setCollapsed(false)} />
-          ): 
-            pathname.startsWith('/account') ? (
-              // If user is on an account page, show AccountNav
-              <AccountNav key="account" handleLogout={handleLogout} />
-          ):(
-            <UserNav
-            key={"user"} 
-            username={user.username} 
-            aiLevel={user.aiLevel}
-            onhoverStart={() => setHover(true)}
-            onhoverEnd={() => setHover(false)} 
-            popAccountForm={()=> setActiveForm("account")}
-            handleLogout={handleLogout} 
-            paperId={paperId}
-            />
-          )
-        }
-      </AnimatePresence>
-      )
-    }
-    {user && Number.isNaN(paperId) &&  //User is logged in no paper chosen yet
-      (
-      <AnimatePresence mode="wait" initial={false}>
-        {collapsed ? 
-          (
-            <DotMenu key={"dot"} onHover={() => setCollapsed(false)} />
-          ): 
-            pathname.startsWith('/account') ? (
-              // If user is on an account page, show AccountNav
-              <AccountNav key="account" handleLogout={handleLogout} />
-          ):(
-            <DashboardNav
-            key={"user"}
-            handleLogout={handleLogout} />
-          )
-        }
-      </AnimatePresence>
-      )
-    }
-    {
-    !user && (
-      <GuestNav key={"guest"} onLoginClick={() => setActiveForm("signin")} onSignUpClick={() => setActiveForm("signup")} />
+      {user && !Number.isNaN(paperId) && (
+        <UserNav aiLevel={user.aiLevel} handleLogout={handleLogout} paperId={paperId} />
+      )}
+      {user && Number.isNaN(paperId) && <DashboardNav handleLogout={handleLogout} />}
+      {!user && <GuestNav onLoginClick={() => setActiveForm("signin")} onSignUpClick={() => setActiveForm("signup")} />}
 
-    ) 
-    }
-
-      {/* {user ? 
-        (
-            <AnimatePresence mode="wait" initial={false}>
-              {collapsed ? 
-                (
-                  <DotMenu key={"dot"} onHover={() => setCollapsed(false)} />
-                ) : 
-                    pathname.startsWith('/account') ? (
-                      // If user is on an account page, show AccountNav
-                      <AccountNav key="account" handleLogout={handleLogout} />
-                    ):(
-                      <UserNav
-                      key={"user"} 
-                      username={user.username} 
-                      onhoverStart={() => setHover(true)}
-                      onhoverEnd={() => setHover(false)} 
-                      popAccountForm={()=> setActiveForm("account")}
-                      handleLogout={handleLogout} />
-                    )
-              }
-            </AnimatePresence>
-        ) : 
-        (
-          <GuestNav key={"guest"} onLoginClick={() => setActiveForm("signin")} onSignUpClick={() => setActiveForm("signup")} />
-        )
-      } */}
-
-
-      {/* Animate Presence for sign/sign/account up modals */}
       <AnimatePresence mode="wait" initial={false}>
         {activeForm === "signin" && (
-            <Modal
-            isOpen={activeForm === "signin"}
-            onClose={() => setActiveForm(null)}
-            key={"signin"}
-        >
-                <SignInForm closeForm={closeSignInModal} />
-            </Modal>
-        )
-        }
-        {
-          activeForm === "signup" &&(
-              <Modal
-                  isOpen={activeForm === "signup"}
-                  onClose={() => setActiveForm(null)}
-                  key={"signup"}
-              >
-                  <SignUpForm closeForm={closeSignInModal} />
-              </Modal>
-              )
-        }
-        {
-          activeForm === "account" && user &&(
-            <Modal
-              isOpen={activeForm === "account"}
-              onClose={() => setActiveForm(null)}
-              account={true}  
-              >
-                <div className="flex-gap-2 bg-black">
-                  <Link href={"/account-management"} className="">Account</Link>
-                  <Link href={"/account-management"} className="">Preferences</Link>
-                  <div onClick={handleLogout} className="cu">Logout</div>
-                </div>
-              </Modal>
-            )
-          }
-        </AnimatePresence>
+          <Modal isOpen onClose={() => setActiveForm(null)}>
+            <SignInForm closeForm={() => setActiveForm(null)} />
+          </Modal>
+        )}
+        {activeForm === "signup" && (
+          <Modal isOpen onClose={() => setActiveForm(null)}>
+            <SignUpForm closeForm={() => setActiveForm(null)} />
+          </Modal>
+        )}
+      </AnimatePresence>
     </>
   );
 }

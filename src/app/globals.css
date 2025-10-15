@@ -50,6 +50,23 @@ body {
   box-shadow: 0 1em 1em -1em rgba(0,0,0,0.3);
   z-index: 1000;
 }
+
+@media (max-width: 768px) {
+  .nav-container {
+    position: fixed;
+    top: 0;
+    margin-left: 0;
+    right: 0;
+    margin: 0;
+    padding: 0.8em 1em;
+    max-width: 100%;
+    border-radius: 0;
+    justify-content: space-between;
+    background-color: rgba(255, 255, 255, 0);
+    box-shadow: 0 0.5em 1em -0.5em rgba(0, 0, 0, 0.3);
+  }
+}
+
 .dark .nav-container{
   background-color: rgba(0, 0, 0, 0.057);
   color: white;
@@ -106,6 +123,9 @@ body {
   transition: 1s;
   animation-fill-mode:both;
 }
+
+
+
 .nav-modal-open{
       position: fixed;
       top:0;
