@@ -183,10 +183,9 @@ const GuestNav = ({ onLoginClick, onSignUpClick }: { onLoginClick: () => void, o
         />
     </Link>
     <div className="nav-links-container flex gap-4">
-      <a href="">About us</a>
-      <a href="">Pricing</a>
     </div>
     <div className="nav-account-section flex gap-1">
+      <a href="/about">About</a>
       <a onClick={onLoginClick}>Login</a>
       <a onClick={onSignUpClick}>Sign Up</a>
     </div>
