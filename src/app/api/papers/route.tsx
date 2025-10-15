@@ -3,9 +3,16 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import z from "zod";
 
+/**
+ * API route for managing user papers.
+ * Includes endpoints to get, add, update, and delete papers.
+*/
 
 
-//GET all the papers tied to the user.
+/**
+ * Get all papers for the authenticated user.
+ * @Returns a list of papers in JSON format.
+ */
 export async function GET(){
     const user = await getSessionUser();
     if(!user) return NextResponse.json({ error:"Unauthorized" }, {status : 401});
@@ -24,13 +31,18 @@ export async function GET(){
     }
 }
 
-//Add a new paper tied to the user.
-
+/** Structure to validate input data using Zod. */
 const addPaperSchema = z.object({
   name: z.string(),
   descr: z.string(),
   code: z.string(),
 });
+
+/**
+ * Add a new paper for the authenticated user.
+ * @param req the request object containing paper details.
+ * @returns the status, success or error message.
+ */
 export async function POST(req: Request){
     const user = await getSessionUser();
     if(!user) return NextResponse.json({ error:"Unauthorized" }, {status : 401});
@@ -62,13 +74,19 @@ export async function POST(req: Request){
     }
 }
 
-//Update Papers
+/** Structure to validate input data using Zod. */
 const updatePaperSchema = z.object({
   name: z.string(),
   descr: z.string(),
   code: z.string(),
   paper_id: z.number()
 });
+
+/**
+ * Update a paper for the authenticated user.
+ * @param req the request object containing paper details (to update)
+ * @returns the status, success or error message.
+ */
 export async function PUT(req: Request){
     const user = await getSessionUser();
     if(!user) return NextResponse.json({error: "Unauthorized"}, {status: 401});
@@ -104,9 +122,19 @@ export async function PUT(req: Request){
         return NextResponse.json({ error:"Internal Server error" }, {status: 500});
     }
 }
+
+/** Structure to validate input data using Zod. */
 const deletePaperSchema = z.object({
     paper_id: z.number()
 });
+
+
+
+/**
+ * Delete a paper for the authenticated user.
+ * @param req the request object containing paper details (to delete)
+ * @returns the status, success or error message.
+ */
 export async function DELETE(req: Request){
     const user = await getSessionUser();
     if(!user) return NextResponse.json({error: "Unauthorized"}, {status: 401});

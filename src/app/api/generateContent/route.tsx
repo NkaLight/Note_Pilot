@@ -2,9 +2,18 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { getLectureConentById } from "@/lib/prisma";
 
+/**
+ * A route for generating structured content from the user's lecture text using OpenRouter.
+ * The LLM is instructed to return valid JSON only.
+ */
 
 const API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
+/**
+ * POST function
+ * @param req the request object containing lectureId and contentType.
+ * @returns the generated summary in JSON format.
+ */
 export async function POST(req: Request) {
   try {
     // Check user authentication

@@ -6,6 +6,11 @@ import { Prisma } from "@prisma/client";
 import crypto from "crypto";
 import { cookies } from "next/headers";
 
+/**
+ * API route to handle user signup.
+ * Validates input, hashes password, creates user and session, and sets a cookie.
+ */
+
 // Validation schema for signup data
 const signupSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
@@ -13,6 +18,11 @@ const signupSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters")
 });
 
+/**
+ * This function handles user signup requests
+ * @param request the incoming request object containing user signup data
+ * @returns a JSON response with user info
+ */
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -39,7 +49,7 @@ export async function POST(request: Request) {
     });
 
 
-    //Generate and store session storage in DB
+    // Generate and store session storage in DB
     const token = crypto.randomBytes(32).toString("hex");
     
     // store session in DB
@@ -52,7 +62,7 @@ export async function POST(request: Request) {
       }
     });
     
-    // set cookie
+    // Set cookies
     (await cookies()).set({
       name: "session_token",
       value: token,
