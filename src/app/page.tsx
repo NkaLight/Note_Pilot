@@ -69,7 +69,7 @@ export default async function LandingPage() {
             className="flex flex-col items-center p-6 bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow text-center"
           >
             <div className="text-4xl mb-4">{box.icon}</div>
-            <h3 className="text-xl font-semibold mb-2">{box.title}</h3>
+            <h3 className="text-xl font-semibold mb-2 text-gray-900">{box.title}</h3>
             <p className="text-gray-600 text-sm sm:text-base">{box.description}</p>
           </div>
         ))}

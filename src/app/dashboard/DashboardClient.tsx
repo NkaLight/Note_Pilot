@@ -297,11 +297,11 @@ export default function DashboardPage(props: { onloadPapers: paper[] | null }) {
         {bentoBoxes.map((box, index) => (
           <div
             key={index}
-            className="bg-white/20 backdrop-blur-lg p-6 rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300"
+            className="bg-white/80 backdrop-blur-lg p-6 rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-all duration-300"
           >
             <div className="text-4xl mb-4">{box.icon}</div>
-            <h3 className="text-xl font-semibold mb-2 text-black">{box.title}</h3>
-            <p className="text-black text-sm">{box.description}</p>
+            <h3 className="text-xl font-semibold mb-2 text-gray-900 font-bold">{box.title}</h3>
+            <p className="text-gray-900 text-sm font-medium">{box.description}</p>
           </div>
         ))}
       </div>
