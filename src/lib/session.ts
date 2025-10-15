@@ -61,14 +61,28 @@ export async function  validateSession(token: string){
     }
 }
 
+const dbToUiLevel: Record<string, string> = {
+    early: "child",
+    intermediate: "student",
+    advanced: "advanced",
+};
+
 export async function getUserFromToken(token: string): Promise<SessionUser | null> {
   const session = await validateSession(token);
   if (!session) return null;
+
+  // Fetch user preferences to get aiLevel
+  const preferences = await prisma.preferences.findUnique({
+    where: { user_id: session.application_user.user_id },
+  });
+
+  const aiLevel = preferences?.learner_style ? dbToUiLevel[preferences.learner_style] : "student";
 
   return {
     user_id: session.application_user.user_id,
     username: session.application_user.username,
     email: session.application_user.email,
+    aiLevel,
   };
 }
 
@@ -76,4 +90,5 @@ export type SessionUser = {
   user_id: number;
   username: string;
   email: string;
+  aiLevel?: string;
 };

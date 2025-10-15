@@ -24,6 +24,7 @@ export type SessionUser = {
   user_id: number;
   username: string;
   email: string;
+  aiLevel?: string;
 };
 
 /** Lowest-level: cookie → user_id, with DB validation and activity touch. */

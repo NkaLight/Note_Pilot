@@ -42,7 +42,7 @@ export default function AccountPage() {
         if (!user) return;
         setUsername(user.username ?? "");
         setEmail(user.email ?? "");
-        setAiLevel("child");
+        setAiLevel((user.aiLevel as AILevel) ?? "student"); // Use actual aiLevel from user, default to "student"
         // set avatarPreview from user.avatarUrl when you add it later
     }, [user]);
 

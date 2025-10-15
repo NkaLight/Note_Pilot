@@ -106,6 +106,7 @@ const DashboardNav = ({ handleLogout }: { handleLogout: () => void; }) => (
 
 const UserNav = ({
   username,
+  aiLevel,
   popAccountForm,
   onhoverStart,
   onhoverEnd,
@@ -113,6 +114,7 @@ const UserNav = ({
   paperId
 }: {
   username: string;
+  aiLevel?: string;
   popAccountForm: () => void;
   onhoverStart:() => void;
   onhoverEnd: () => void;
@@ -147,7 +149,12 @@ const UserNav = ({
       <Link href={`/paper_view/${paperId}/pdfs`}>PDFs</Link>
 
     </div>
-    <div className="nav-account-section flex gap-2">
+    <div className="nav-account-section flex gap-2 items-center">
+      {aiLevel && (
+        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+          {aiLevel === 'child' ? 'Child' : aiLevel === 'student' ? 'Student' : 'Advanced'}
+        </span>
+      )}
       <a onClick={handleLogout}>Logout</a>
       <Link href="/account">Account</Link>
     </div>
@@ -272,6 +279,7 @@ useEffect(() => {
             <UserNav
             key={"user"} 
             username={user.username} 
+            aiLevel={user.aiLevel}
             onhoverStart={() => setHover(true)}
             onhoverEnd={() => setHover(false)} 
             popAccountForm={()=> setActiveForm("account")}
