@@ -14,6 +14,7 @@
  * - Chat history is automatically loaded when uploadId changes
  * - All messages persist across page refreshes and sessions
  */
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -208,7 +209,7 @@ export default function ChatUI({
     <div className="w-full h-full flex flex-col">
       {/* Header with context info and actions */}
       {hasActiveUploads && (
-        <div className="mb-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="mb-2 p-2 bg-blue-50 rounded-2xl border border-blue-200">
           <div className="flex justify-between items-center">
             <span className="text-sm text-blue-700">
               💬 Chat with {activeUploadIds.length === 1 ? 'selected lecture' : `${activeUploadIds.length} selected lectures`}

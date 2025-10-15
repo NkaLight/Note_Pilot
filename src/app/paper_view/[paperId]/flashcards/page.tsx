@@ -1,15 +1,4 @@
 // src/app/flashcards/page.tsx
-/**
- * FlashcardsPage
- *
- * WHAT IT DOES
- * - Layout with 3 panels:
- *   (1) ChatUI on the left
- *   (2) Flashcards in the middle
- *   (3) Upload widget on the right
- * - Lets the user click " Create Flashcards" on ChatUI → calls /api/flashcards
- * - Maps API response into flashcard cards that flip on click.
- */
 "use client";
 
 import ChatUI from "@/components/DashBoard/ChatUI";
@@ -17,29 +6,34 @@ import { usePaperViewContext } from "@/context/PaperViewContext";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-type Flashcard = { question: string; answer: string };
-type ApiFlashcard = { question_front: string; answer_back: string };
+type Flashcard = {
+  question: string;
+  answer: string;
+  learnt?: boolean;
+};
+
+type ApiFlashcard = {
+  question_front: string;
+  answer_back: string;
+};
 
 export default function FlashcardsPage() {
   const [chatWidth, setChatWidth] = useState("50%");
   const isResizing = useRef(false);
-  const {chosenLectureId, lectures, selectedLectureIds} = usePaperViewContext();
+  const { chosenLectureId, lectures, selectedLectureIds } = usePaperViewContext();
   const params = useParams();
   const paperId = params?.paperId ? Number(params.paperId) : null;
 
-  // Get the current selected lecture's upload ID
-  const selectedLecture = lectures?.find(lecture => lecture.id === chosenLectureId);
-  const uploadId = selectedLecture?.id || null;
-  // Use selected lecture IDs as upload IDs for context
+  const selectedLecture = lectures?.find((l) => l.id === chosenLectureId);
   const selectedUploadIds = selectedLectureIds;
 
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [flippedIndex, setFlippedIndex] = useState<number | null>(null);
 
-  const [genText, setGenText] = useState(""); // (optional free-text box if you keep it)
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
+  // --- Resizing Chat Panel ---
   const startResizing = () => {
     isResizing.current = true;
     document.addEventListener("mousemove", resize);
@@ -55,9 +49,20 @@ export default function FlashcardsPage() {
     document.removeEventListener("mousemove", resize);
     document.removeEventListener("mouseup", stopResizing);
   };
+
+  // --- Card Flip ---
   const toggleFlip = (i: number) => setFlippedIndex(flippedIndex === i ? null : i);
 
-  // Core: take some text and ask the server to make flashcards
+  // --- Toggle Learnt ---
+  const toggleLearnt = (i: number) => {
+    setFlashcards((prev) => {
+      const updated = [...prev];
+      updated[i].learnt = !updated[i].learnt;
+      return updated;
+    });
+  };
+
+  // --- Create Flashcards ---
   async function makeFlashcardsFrom(text: string) {
     if (!text?.trim()) return;
     setLoading(true);
@@ -83,7 +88,8 @@ export default function FlashcardsPage() {
       setLoading(false);
     }
   }
- // adds persistence to the flashcards when the page is refreshed
+
+  // --- Load flashcards on mount ---
   useEffect(() => {
     async function loadFlashcards() {
       try {
@@ -102,9 +108,12 @@ export default function FlashcardsPage() {
         console.error("Error loading flashcards:", err);
       }
     }
-  
     loadFlashcards();
   }, []);
+
+  // --- Progress ---
+  const learntCount = flashcards.filter((fc) => fc.learnt).length;
+  const totalCount = flashcards.length;
 
   return (
     <div className="h-screen w-full flex gap-10 pl-10 pr-0">
@@ -113,8 +122,11 @@ export default function FlashcardsPage() {
         className="rounded-3xl bg-white/0 overflow-y-auto mt-5 flex-shrink-0 h-full pb-10 pt-14"
         style={{ width: chatWidth }}
       >
-        {/* ✨ Pass the callback down */}
-        <ChatUI onMakeFlashcards={makeFlashcardsFrom} uploadIds={selectedUploadIds} paperId={paperId} />
+        <ChatUI
+          onMakeFlashcards={makeFlashcardsFrom}
+          uploadIds={selectedUploadIds}
+          paperId={paperId}
+        />
       </div>
 
       {/* Divider / Resizer */}
@@ -124,28 +136,70 @@ export default function FlashcardsPage() {
       />
 
       {/* Middle: Flashcards */}
-      <div className="rounded-3xl p-6 bg-black/70 overflow-y-auto mt-19 mb-5 mr-10 flex-grow flex justify-center items-start">
-        <div className="flex flex-col snap-y snap-mandatory gap-4 p-4 w-full items-center">
-          {loading && <p className="text-white/80">Generating flashcards…</p>}
-          {err && <p className="text-red-300">{err}</p>}
-          {!loading && flashcards.length === 0 && (
-            <p className="text-white/70">No flashcards yet — ask the AI and hit “Create Flashcards”.</p>
-          )}
-          {flashcards.map((card, index) => (
-            <div
-              key={index}
-              onClick={() => toggleFlip(index)}
-              className="snap-center cursor-pointer border rounded-lg shadow hover:shadow-lg transition-all text-black flex items-center justify-center text-center w-full max-w-lg aspect-square p-6"
-              style={{
-                flexShrink: 0,
-                background: "radial-gradient(circle at center, #ffffff, rgb(167, 200, 255))",
-              }}
-            >
-              {flippedIndex === index ? card.answer : card.question}
-            </div>
-          ))}
+<div className="relative rounded-3xl p-6 overflow-y-auto mt-19 mb-5 flex-grow flex justify-center items-start pr-10">
+  <div className="flex flex-col snap-y snap-mandatory gap-4 p-4 w-full items-center">
+    {loading && <p className="text-white/80">Generating flashcards…</p>}
+    {err && <p className="text-red-300">{err}</p>}
+    {!loading && flashcards.length === 0 && (
+      <p className="text-white/70">
+        No flashcards yet — ask the AI and hit “Create Flashcards”.
+      </p>
+    )}
+    {flashcards.map((card, index) => (
+      <div
+        key={index}
+        onClick={() => toggleFlip(index)}
+        className="snap-center cursor-pointer border rounded-lg shadow hover:shadow-lg transition-all flex flex-col items-center justify-center text-center w-full max-w-lg aspect-square p-6 relative"
+        style={{
+          flexShrink: 0,
+          background: `radial-gradient(circle at center, var(--bg-start), var(--bg-mid))`,
+          color: "var(--text)",
+          borderColor: card.learnt ? "limegreen" : "rgba(255,255,255,0.2)",
+        }}
+      >
+        <div className="flex-1 flex items-center justify-center">
+          {flippedIndex === index ? card.answer : card.question}
         </div>
+
+        {/* Learnt button */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setFlashcards((prev) => {
+              const newCards = [...prev];
+              newCards[index] = { ...newCards[index], learnt: !newCards[index].learnt };
+              return newCards;
+            });
+          }}
+          className={`mt-2 px-3 py-1 rounded-full text-xs font-semibold ${
+            card.learnt
+              ? "bg-green-500 text-white"
+              : "bg-white/30 text-black dark:text-white"
+          }`}
+        >
+          {card.learnt ? "Learnt ✅" : "Mark Learnt"}
+        </button>
       </div>
+    ))}
+  </div>
+
+  {/* Vertical Progress Bar */}
+  <div className="absolute top-0 right-0 w-4 h-full bg-gray-300 dark:bg-zinc-700 rounded-l-full overflow-hidden">
+    <div
+      className="w-full bg-blue-500 transition-all origin-bottom"
+      style={{
+        height: `${
+          flashcards.length > 0
+            ? (flashcards.filter((c) => c.learnt).length / flashcards.length) * 100
+            : 0
+        }%`,
+      }}
+    />
+  </div>
+</div>
+
+
     </div>
   );
 }

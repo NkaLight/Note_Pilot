@@ -39,7 +39,7 @@ body {
 
   max-width: 90%;   /* keeps spacing on sides */
   margin: 0.6em 12em; /* centers horizontally */
-  padding: 0.5em 2em;
+  padding: 0.5em 0.6em;
 
   display: flex;
   justify-content: space-between;
@@ -78,17 +78,17 @@ body {
   background-color: black;
 }
 .nav-links-container >a{
-  margin-left: 2em;
-
+  margin-left: 1em;
 }
+
 .nav-links-container >a:hover{
   text-decoration: underline;
 }
 
 .nav-account-section >*{
   padding: 0.5em 1em;
-  margin-right: 1em;
-  width: 100px;
+  margin-left: 1em;
+  width: auto;
   color:black;
   text-align: center;
   background-color: white;
@@ -96,9 +96,8 @@ body {
   cursor: pointer;
 }
 .nav-account-section >*:hover{
-  padding: 0.5em 1em;
-  margin-right: 1em;
-  width: 100px;
+  margin-right: 0em;
+  width: auto;
   color:white;
   text-align: center;
   background-color: black;

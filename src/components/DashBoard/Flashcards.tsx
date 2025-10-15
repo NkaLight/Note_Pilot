@@ -13,7 +13,7 @@ type SummaryType = {
   export default function Summary({ summary }: SummaryProps) {
     if (!summary) {
       return (
-        <div className="p-4 text-gray-500">
+        <div className="p-4 text-gray-500 dark:text-gray-400">
           No summary selected yet.
         </div>
       );
