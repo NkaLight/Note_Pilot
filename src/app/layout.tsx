@@ -23,7 +23,7 @@ export default async function RootLayout({children,}: Readonly<{children: React.
 
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
       <ThemeProviders attribute="class" defaultTheme="light" enableSystem={false}>
           <SessionProvider initialUser={user}>{/*Store User object as context for gobal accessiblity to add to user object see @/lib/auth & context/SessionContext.tsx ensure both remain compatible*/}
