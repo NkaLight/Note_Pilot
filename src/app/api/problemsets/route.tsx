@@ -1,35 +1,119 @@
+import { getAuthedUserId } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
-import { getAuthedUserId, getSessionUser } from "@/lib/auth";
-import { getLectureConentById } from "@/lib/prisma";
 
 /**
  * API route for managing problem sets.
- * Similar to generateContent, but focused on generating exam-style questions for the user.
- * Supports the evaluation of user answers using the LLM.
+ * Supports:
+ * - Generating exam-style questions (persistent)
+ * - Storing user answers (persistent)
+ * - Evaluating answers with feedback (temporary/not persistent)
  */
 
 const API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 /**
+ * GET function - Retrieve existing problem sets and user answers
+ */
+export async function GET(request: Request) {
+    try {
+        const userId = await getAuthedUserId();
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        const { searchParams } = new URL(request.url);
+        const uploadIds = searchParams.get("uploadIds");
+        
+        if (!uploadIds) {
+            return NextResponse.json({ error: "uploadIds parameter required" }, { status: 400 });
+        }
+
+        const targetUploadIds = uploadIds.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+        
+        if (targetUploadIds.length === 0) {
+            return NextResponse.json({ error: "No valid upload IDs provided" }, { status: 400 });
+        }
+
+        // Check if problem set exists for these uploads
+        const existingProblemSet = await prisma.problem_set.findFirst({
+            where: {
+                upload_id: { in: targetUploadIds }
+            },
+            include: {
+                problem: true
+            },
+            orderBy: { pset_id: 'desc' }
+        });
+
+        if (existingProblemSet) {
+            const questionsWithAnswers = existingProblemSet.problem.map((problem, index) => ({
+                id: problem.problem_id,
+                question: problem.question_text,
+                answer: problem.answer_text || "",
+                userAnswer: "", // We'll need to track this differently for now
+                userAnswerId: null
+            }));
+
+            return NextResponse.json({ 
+                success: true, 
+                questions: questionsWithAnswers,
+                problemSetId: existingProblemSet.pset_id,
+                cached: true
+            });
+        }
+
+        return NextResponse.json({ success: true, questions: null });
+
+    } catch (error) {
+        console.error("Error fetching problem set:", error);
+        return NextResponse.json({ error: "Failed to fetch problem set" }, { status: 500 });
+    }
+}
+
+/**
  * POST function
- * @param req the request object containing mode, lectureId, userAnswer, and questions.
- * @returns the generated questions or evaluation feedback in JSON format.
+ * @param req the request object containing mode, uploadIds, userAnswer, and questions.
+ * @returns the generated questions, saved user answer, or evaluation feedback in JSON format.
  */
 export async function POST(req: Request){
     try{
         const userId = await getAuthedUserId();
-        if(!userId) throw NextResponse.json({error: "Unauthorized", status: 401});
+        if(!userId) {
+            return NextResponse.json({error: "Unauthorized"}, {status: 401});
+        }
 
-        const {mode, lectureId, userAnswer, questions} = await req.json();
-        console.log(mode, lectureId, userAnswer, questions);
+        const {mode, uploadIds, lectureId, userAnswer, questions, problemId, userAnswerId} = await req.json();
+        console.log(mode, uploadIds, lectureId, userAnswer, questions);
 
-        if(!mode) throw NextResponse.json({error:"No mode selected", status: 400});
+        if(!mode) {
+            return NextResponse.json({error:"No mode selected"}, {status: 400});
+        }
 
-        // GENERATE QUESTIONS
-        if(mode == "generate"){
-            if(!lectureId) throw NextResponse.json({error:"Lecture Id must be selected", status: 400});
-            const lecture = await getLectureConentById(lectureId);
-            if (!lecture) return new NextResponse("Lecture not found", { status: 404 });
+        // GENERATE QUESTIONS (Persistent)
+        if(mode === "generate"){
+            if(!uploadIds || !Array.isArray(uploadIds) || uploadIds.length === 0) {
+                return NextResponse.json({error:"Upload IDs must be provided"}, {status: 400});
+            }
+
+            // Get text content from all selected uploads
+            let combinedContent = "";
+            for (const uploadId of uploadIds) {
+                const upload = await prisma.upload.findFirst({
+                    where: {
+                        upload_id: parseInt(uploadId),
+                        paper: { user_id: userId }
+                    }
+                });
+                
+                if (upload && upload.text_content) {
+                    combinedContent += `\n\n--- Content from ${upload.filename} ---\n${upload.text_content}`;
+                }
+            }
+
+            if (!combinedContent.trim()) {
+                return NextResponse.json({error: "No content available from selected uploads"}, {status: 400});
+            }
 
             const query = `You are an AI tutor. Generate 4–6 exam-style short answer questions based on the following lecture text. 
                     Each question must include:
@@ -42,78 +126,150 @@ export async function POST(req: Request){
                         {"question": "...", "answer": "..."}
                     ]
 
-                    Lecture text:
-                    """${lecture}"""
+                    Content to analyze:
+                    """${combinedContent.slice(0, 15000)}"""
                     `;
+
             const resp = await fetch(API_URL, {
-                    method: "POST",
-                    headers: {
+                method: "POST",
+                headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${process.env.NVIDIA_AI_API}`,
-                    },
-                    body: JSON.stringify({
+                },
+                body: JSON.stringify({
                     model: "nvidia/nemotron-nano-9b-v2:free",
                     messages: [{ role: "user", content: query }],
-                    }),
+                }),
+            });
+
+            const data = await resp.json();
+            console.log(data);
+            const jsonStr = data?.choices?.[0]?.message?.content ?? "[]";
+            
+            let parsed;
+            try {
+                parsed = JSON.parse(jsonStr);
+            } catch (e) {
+                console.error("Failed to parse AI response:", e);
+                return NextResponse.json({error: "Invalid AI response format"}, {status: 500});
+            }
+
+            // Save problem set to database
+            try {
+                const problemSet = await prisma.problem_set.create({
+                    data: {
+                        upload_id: uploadIds[0], // Store against first upload for simplicity
+                        text_data: `Problem set for uploads: ${uploadIds.join(', ')}`
+                    }
                 });
 
-                const data = await resp.json();
-                console.log(data);
-                const jsonStr = data?.choices?.[0]?.message?.content ?? "[]";
-                const parsed = JSON.parse(jsonStr);
+                // Save individual problems
+                const problems = await Promise.all(
+                    parsed.map(async (q: any, index: number) => {
+                        return await prisma.problem.create({
+                            data: {
+                                pset_id: problemSet.pset_id,
+                                question_text: q.question,
+                                answer_text: q.answer
+                            }
+                        });
+                    })
+                );
 
-                //Store problem sets later.
+                const questionsWithIds = problems.map(problem => ({
+                    id: problem.problem_id,
+                    question: problem.question_text,
+                    answer: problem.answer_text,
+                    userAnswer: "",
+                    userAnswerId: null
+                }));
 
-                console.log(parsed);
+                console.log(`Problem set saved with ${problems.length} questions`);
+                return NextResponse.json({questions: questionsWithIds, problemSetId: problemSet.pset_id});
 
-                return NextResponse.json({questions: parsed});
+            } catch (dbError) {
+                console.error("Failed to save problem set:", dbError);
+                // Return questions anyway, just not persisted
+                const questionsWithoutIds = parsed.map((q: any, index: number) => ({
+                    id: `temp_${index}`,
+                    question: q.question,
+                    answer: q.answer,
+                    userAnswer: "",
+                    userAnswerId: null
+                }));
+                return NextResponse.json({questions: questionsWithoutIds});
+            }
 
-        }else if(mode === "evaluate"){
+        // SAVE USER ANSWER (For now, we'll handle this on the client side with local storage)
+        } else if(mode === "saveAnswer") {
+            // TODO: Add user_answer table to schema for proper persistence
+            // For now, return success to maintain API compatibility
+            return NextResponse.json({ 
+                success: true, 
+                message: "Answer saved locally (database storage pending schema update)" 
+            });
+
+        // EVALUATE ANSWER (Temporary - Not Persistent)
+        } else if(mode === "evaluate"){
             const {question, answer} = questions;
             console.log(question, answer, userAnswer);
 
+            if (!question || !answer || !userAnswer) {
+                return NextResponse.json({error: "Question, answer, and user answer required"}, {status: 400});
+            }
+
             const evaluationPrompt = `
-            You are an exam evaluator.
-            Compare the student's answers with the correct ones and return feedback as JSON.
-            Format:
-            [
-                {"question": "...", "userAnswer": "...", "correctAnswer": "...", "feedback": "...", "score": 0-1}
-            ]
+            You are an exam evaluator. Compare the student's answer with the correct answer and provide constructive feedback.
+            
+            Return your response as valid JSON in this exact format:
+            {
+                "feedback": "Detailed feedback explaining what was good and what could be improved...",
+                "score": 0.85
+            }
+            
+            The score should be between 0 and 1, where 1 is perfect.
+            
+            Question: ${question}
+            Correct Answer: ${answer}
+            Student Answer: ${userAnswer}
             `;
 
-            const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            const resp = await fetch(API_URL, {
                 method: "POST",
                 headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${process.env.NVIDIA_AI_API}`,
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${process.env.NVIDIA_AI_API}`,
                 },
                 body: JSON.stringify({
-                model: "nvidia/nemotron-nano-9b-v2:free",
-                messages: [
-                    { role: "system", content: evaluationPrompt },
-                    {
-                    role: "user",
-                    content: JSON.stringify({ question: questions.question, userAnser:userAnswer, correctAnswer:questions.answer}),
-                    },
-                ],
+                    model: "nvidia/nemotron-nano-9b-v2:free",
+                    messages: [
+                        { role: "user", content: evaluationPrompt }
+                    ],
                 }),
-            })
+            });
 
             const data = await resp.json();
-            console.log(data)
-            const feedback = JSON.parse(data?.choices?.[0]?.message?.content ?? "[]");
-
-            console.log(feedback)
-            //Store evalutaions later.
-            return NextResponse.json({ feedback });
+            console.log(data);
             
+            try {
+                const feedbackJson = JSON.parse(data?.choices?.[0]?.message?.content ?? "{}");
+                return NextResponse.json({ 
+                    feedback: feedbackJson.feedback || "Unable to generate feedback", 
+                    score: feedbackJson.score || 0 
+                });
+            } catch (parseError) {
+                console.error("Failed to parse feedback:", parseError);
+                return NextResponse.json({ 
+                    feedback: "Unable to generate structured feedback", 
+                    score: 0 
+                });
+            }
 
-        }else{
-            return new NextResponse("Invalid mode", { status: 400 });
+        } else {
+            return NextResponse.json({error: "Invalid mode"}, {status: 400});
         }
     }catch(err: any){
-        console.error("Error at /api/problemsets");
-        console.error(err?.stack || err);
-        return new NextResponse("Internal server", {status: 500});
+        console.error("Error at /api/problemsets:", err);
+        return NextResponse.json({error: "Internal server error"}, {status: 500});
     }
 }
