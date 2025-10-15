@@ -151,7 +151,10 @@ const UserNav = ({
     </div>
     <div className="nav-account-section flex gap-2 items-center">
       {aiLevel && (
-        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+        <span 
+          className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full cursor-help"
+          title="Change AI level in Account Settings"
+        >
           {aiLevel === 'child' ? 'Child' : aiLevel === 'student' ? 'Student' : 'Advanced'}
         </span>
       )}
