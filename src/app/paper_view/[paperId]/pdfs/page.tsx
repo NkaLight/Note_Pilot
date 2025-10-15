@@ -260,7 +260,7 @@ export default function PDFsPage() {
                   className={`flex items-center p-3 rounded-lg border cursor-pointer transition-colors ${
                     selectedLectureIds.includes(lecture.id)
                       ? 'bg-blue-50 border-blue-300 text-blue-900'
-                      : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                      : 'bg-gray-50 border-gray-200 hover:bg-gray-100 text-gray-800'
                   }`}
                 >
                   <input
@@ -270,7 +270,7 @@ export default function PDFsPage() {
                     className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm truncate">{lecture.title}</div>
+                    <div className="font-medium text-sm truncate text-gray-800">{lecture.title}</div>
                     <div className="text-xs text-gray-500">
                       {lecture.createdAt.toLocaleDateString()}
                     </div>
@@ -280,13 +280,13 @@ export default function PDFsPage() {
             </div>
           )}
           
-          <div className="mt-3 text-sm text-gray-600">
+          <div className="mt-3 text-sm text-gray-700">
             {selectedLectureIds.length > 0 ? (
               <span className="text-blue-600 font-medium">
                 ✓ {selectedLectureIds.length} lecture{selectedLectureIds.length !== 1 ? 's' : ''} selected for AI context
               </span>
             ) : (
-              <span>Select lectures to provide context for AI chat</span>
+              <span className="text-gray-700">Select lectures to provide context for AI chat</span>
             )}
           </div>
         </div>
