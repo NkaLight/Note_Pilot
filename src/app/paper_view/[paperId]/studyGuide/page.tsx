@@ -74,7 +74,8 @@ export default function StudyGuidePage() {
         <h2 className="text-xl font-semibold mb-4 text-black dark:text-black">Study Guides</h2>
         <StudyGuideList 
           paperId={paperId} 
-          userAiLevel={user?.aiLevel || "student"} 
+          userAiLevel={user?.aiLevel || "student"}
+          selectedUploadIds={selectedLectureIds}
         />
       </div>
     </div>

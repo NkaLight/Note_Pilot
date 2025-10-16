@@ -17,9 +17,10 @@ import { StudyGuideType } from "./StudyGuideCard";
 type StudyGuideListProps = {
   paperId: number;
   userAiLevel?: string;
+  selectedUploadIds?: number[]; // Add selectedUploadIds prop
 };
 
-export default function StudyGuideList({ paperId, userAiLevel = "intermediate" }: StudyGuideListProps) {
+export default function StudyGuideList({ paperId, userAiLevel = "intermediate", selectedUploadIds }: StudyGuideListProps) {
   const [studyGuides, setStudyGuides] = useState<StudyGuideType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +32,9 @@ export default function StudyGuideList({ paperId, userAiLevel = "intermediate" }
       child: "early",
       student: "intermediate", 
       advanced: "advanced",
+      // Also handle direct database values
+      early: "early",
+      intermediate: "intermediate",
     };
     return uiToDbLevel[userAiLevel] || "intermediate";
   }, [userAiLevel]);
@@ -85,14 +89,17 @@ export default function StudyGuideList({ paperId, userAiLevel = "intermediate" }
       setIsGenerating(true);
       setError(null);
 
+      const requestBody = {
+        paperId,
+        title,
+        aiLevel,
+        ...(selectedUploadIds && selectedUploadIds.length > 0 && { uploadIds: selectedUploadIds }),
+      };
+
       const response = await fetch("/api/studyguides", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          paperId,
-          title,
-          aiLevel,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
@@ -168,6 +175,7 @@ export default function StudyGuideList({ paperId, userAiLevel = "intermediate" }
         onGenerate={handleGenerate}
         isGenerating={isGenerating}
         userAiLevel={userAiLevel}
+        selectedUploadIds={selectedUploadIds}
       />
 
       {/* Error Display */}

@@ -25,6 +25,7 @@ const CreateStudyGuideReq = z.object({
     paperId: z.number(),
     title: z.string().min(1).max(255),
     aiLevel: z.enum(["early", "intermediate", "advanced"]).optional(),
+    uploadIds: z.array(z.number()).optional(), // Add uploadIds for selected content
 });
 
 const UpdateStudyGuideReq = z.object({
@@ -146,17 +147,23 @@ export async function POST(req: NextRequest) {
         if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
         const body = await req.json();
+        
         const parsed = CreateStudyGuideReq.safeParse(body);
+        
         if (!parsed.success) {
-            return NextResponse.json({ error: parsed.error.message }, { status: 400 });
+            return NextResponse.json({ error: parsed.error.issues }, { status: 400 });
         }
 
-        const { paperId, title, aiLevel = "intermediate" } = parsed.data;
+        const { paperId, title, aiLevel = "intermediate", uploadIds } = parsed.data;
 
         // Verify user owns the paper
         const paper = await prisma.paper.findFirst({
             where: { paper_id: paperId, user_id: user.user_id },
-            include: { upload: true },
+            include: { 
+                upload: uploadIds && uploadIds.length > 0 
+                    ? { where: { upload_id: { in: uploadIds } } }
+                    : true 
+            },
         });
 
         if (!paper) {
@@ -170,7 +177,10 @@ export async function POST(req: NextRequest) {
             .join("\n\n");
 
         if (!textContent) {
-            return NextResponse.json({ error: "No content found for this paper" }, { status: 400 });
+            const uploadContext = uploadIds && uploadIds.length > 0 
+                ? `for selected uploads (${uploadIds.length} files)` 
+                : "for this paper";
+            return NextResponse.json({ error: `No content found ${uploadContext}` }, { status: 400 });
         }
 
         // Build AI prompt

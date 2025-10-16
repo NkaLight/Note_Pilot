@@ -7,20 +7,23 @@ type StudyGuideGeneratorProps = {
   onGenerate: (title: string, aiLevel?: string) => Promise<void>;
   isGenerating: boolean;
   userAiLevel?: string;
+  selectedUploadIds?: number[]; // Add selectedUploadIds prop
 };
 
 export default function StudyGuideGenerator({ 
   paperId, 
   onGenerate, 
   isGenerating, 
-  userAiLevel = "intermediate" 
+  userAiLevel = "intermediate",
+  selectedUploadIds
 }: StudyGuideGeneratorProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isGenerating) return;
     
-    await onGenerate("Study Guide", userAiLevel); // Use default title
+    // Don't pass userAiLevel directly - let handleGenerate use its dbLevel default
+    await onGenerate("Study Guide"); // Use default title and let handleGenerate use dbLevel
   };
 
   return (
@@ -47,7 +50,10 @@ export default function StudyGuideGenerator({
 
       {/* Info Text */}
       <p className="text-sm text-gray-600 mt-3 text-center">
-        Study guides use your AI level preference from Account Settings and are generated from your uploaded lecture content.
+        {selectedUploadIds && selectedUploadIds.length > 0 
+          ? `Study guides will be generated from ${selectedUploadIds.length} selected PDF${selectedUploadIds.length > 1 ? 's' : ''} using your AI level preference.`
+          : "Study guides use your AI level preference from Account Settings and are generated from your uploaded lecture content."
+        }
       </p>
     </div>
   );
