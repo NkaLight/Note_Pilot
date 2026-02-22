@@ -2,6 +2,7 @@
 import { useSession } from "@/context/SessionContext";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import LoadingCircles from "@/components/LoadingCircles";
 
 // Define the type for the props
 interface SignUpFormProps {
@@ -16,13 +17,13 @@ export default function SignUpForm({closeForm}: SignUpFormProps){
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const {setUser} = useSession()
-    const router = useRouter()
+    const {setUser} = useSession();
+    const router = useRouter();
     
 
-const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) =>  {
   e.preventDefault();
-  setIsLoading(true)
+  setIsLoading(true);
     try {
     const res = await fetch("/api/signup", {
       method: "POST",
@@ -40,15 +41,15 @@ const handleSubmit = async (e: React.FormEvent) => {
     router.prefetch("/account/setup"); //Maybe some performance gains from perfetching
     if (!res.ok) {
       // Server returned an error
-      setIsLoading(false)
-      setError(data.error || "Failed to create a user")
+      setIsLoading(false);
+      setError(data.error || "Failed to create a user");
       return;
     }
 
     if(res.ok) {
-      setIsLoading(false)
-      setUser(data)
-      router.push("/account")
+      setIsLoading(false);
+      setUser(data);
+      router.push("/account");
       //Implement some UI loading state here.
       closeForm();
     }
@@ -56,8 +57,8 @@ const handleSubmit = async (e: React.FormEvent) => {
     // Success
     } catch (error) {
     console.error(error);
-    setError("Unexpected server error")
-    setIsLoading(false)
+    setError("Unexpected server error");
+    setIsLoading(false);
   }
 };
 
@@ -113,9 +114,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               >
                 {isLoading ? <span className="text-white inline-flex items-center gap-2">
                                 <span className="animate-pulse">Loading</span>
-                                <span className="animate-bounce translate-y-[-0.1rem]">.</span>
-                                <span className="animate-bounce translate-y-[-0.1rem] delay-150">.</span>
-                                <span className="animate-bounce translate-y-[-0.1rem] delay-300">.</span>
+                                <LoadingCircles className={"w-6"}/>
                               </span> :
                         "Create Account"}
               </button>
@@ -136,5 +135,5 @@ const handleSubmit = async (e: React.FormEvent) => {
             }
           </form>
         </div>
-    )
+    );
 }

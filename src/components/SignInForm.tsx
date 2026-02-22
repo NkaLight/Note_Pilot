@@ -2,6 +2,7 @@
 import { useSession } from "@/context/SessionContext";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import LoadingCircles from "@/components/LoadingCircles";
 // Define the type for the props
 interface SignInFormProps {
   closeForm: () => void;
@@ -93,9 +94,7 @@ export default function SignInForm({closeForm}: SignInFormProps){
                     >
                         {isLoading ? <span className="text-white inline-flex items-center gap-2">
                                         <span className="animate-pulse">Loading</span>
-                                        <span className="animate-bounce translate-y-[-0.5rem]">.</span>
-                                        <span className="animate-bounce translate-y-[-0.5rem] delay-150">.</span>
-                                        <span className="animate-bounce translate-y-[-0.5rem] delay-300">.</span>
+                                        <LoadingCircles className={"w-6"}/>
                                     </span> :
                         "Sign In"}
                     </button>

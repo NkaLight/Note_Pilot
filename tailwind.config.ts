@@ -13,4 +13,12 @@ export default {
     "./components/**/*.{ts,tsx,js,jsx}",
     "./src/**/*.{ts,tsx,js,jsx}",
   ],
+  theme: {
+    extend: {
+      animation: {
+        // You can adjust '2s' to make it faster or slower
+        "spin-slow": "spin 3s linear infinite",
+      },
+    },
+  },
 } satisfies Config;
