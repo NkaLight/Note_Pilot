@@ -1,57 +1,145 @@
 "use client";
+import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState, useMemo } from "react";
+import { usePathname, useRouter, useParams } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+
+// Context & Components
+import { useSession } from "@/context/SessionContext";
+import { useAuthContext } from "@/context/AuthContext";
 import Modal from "@/components/Modal";
 import SignInForm from "@/components/SignInForm";
 import SignUpForm from "@/components/SignUpForm";
-import { useSession } from "@/context/SessionContext";
-import { AnimatePresence, motion } from "framer-motion";
-import Image from "next/image";
-import Link from "next/link";
-import { useParams, usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useAuthContext } from "@/context/AuthContext";
 
 // -------------------------
-// Animations
+// Navigation Configuration
 // -------------------------
-const navFadeIn = {
-  initial: { opacity: 0, y: -20 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  exit: { opacity: 0, y: -20, transition: { duration: 0.3 } },
-};
-
-const guestNavFadeIn = {
-  initial: { opacity: 1, y: 0 },
-  animate: { opacity: 1, y: 0, transition: { duration: 5 } },
-  exit: { opacity: 0, y: 0, transition: { duration: 0.3 } },
-};
-
-const dotFade = {
-  initial: { opacity: 0, scale: 0.5 },
-  animate: { opacity: 1, scale: 1, transition: { duration: 0.4 } },
-  exit: { opacity: 0, scale: 0.5, transition: { duration: 0.3 } },
-};
+const getNavLinks = (paperId?: string | string[]) => [
+  { name: "Flash Cards", href: `/paper_view/${paperId}/flashcards` },
+  { name: "Summaries", href: `/paper_view/${paperId}/summaries` },
+  { name: "Study Guides", href: `/paper_view/${paperId}/studyGuide` },
+  { name: "Glossary", href: `/paper_view/${paperId}/glossary` },
+  { name: "Problem Sets", href: `/paper_view/${paperId}/problemSets` },
+];
 
 // -------------------------
-// Hook for mobile detection
+// Main Nav
 // -------------------------
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
+export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
+  const { activeForm, setActiveForm } = useAuthContext();
+  const { user, setUser, loading } = useSession();
+  const [collapsed, setCollapsed] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  
+  const router = useRouter();
+  const pathname = usePathname();
+  const { paperId } = useParams();
+
+  // 1. Logic: Determine Current View
+  const isPaperView = !!paperId;
+  const isAccountPage = pathname.startsWith("/account");
+
+  // 2. Logic: Inactivity Timer
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-  return isMobile;
+    if (!user || activeForm || isHovered || isAccountPage) {
+        setCollapsed(false);
+        return;
+    }
+
+    const timer = setTimeout(() => setCollapsed(true), 500);
+    return () => clearTimeout(timer);
+  }, [user, activeForm, isHovered, pathname]);
+
+  const handleLogout = async () => {
+    const res = await fetch("/api/remove_session");
+    if (res.ok) {
+      setUser(null);
+      router.push("/");
+    }
+  };
+
+  if (!showAuth) return null;
+  if (loading) return <div className="h-16 w-full bg-transparent" />; // Barebones placeholder
+
+  return (
+    <>
+      <header className="fixed top-0 w-full z-50 px-4 py-2">
+        <AnimatePresence mode="wait">
+          {/* CASE 1: NOT LOGGED IN */}
+          {!user && (
+            <motion.nav key="guest" {...navFadeIn} className="nav-container hidden md:flex justify-between">
+              <Logo href="/" />
+              <div className="nav-account-section flex gap-1">
+                <Link href="/about">About</Link>
+                <button onClick={() => setActiveForm("signIn")}>Login</button>
+                <button onClick={() => setActiveForm("signUp")} className="btn-primary">Sign Up</button>
+              </div>
+            </motion.nav>
+          )}
+
+          {/* CASE 2: LOGGED IN & COLLAPSED */}
+          {user && collapsed && (
+            <DotMenu key="dots" onHover={() => setCollapsed(false)} />
+          )}
+
+          {/* CASE 3: LOGGED IN & EXPANDED */}
+          {user && !collapsed && (
+            <motion.nav 
+              key="user-nav" 
+              {...navFadeIn} 
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              className="nav-container flex justify-between items-center"
+            >
+              <Logo href="/dashboard" />
+              
+              <div className="flex gap-6 items-center">
+                {isPaperView && !isAccountPage && (
+                  <div className="nav-links-container flex gap-2">
+                    {getNavLinks(paperId).map(link => (
+                      <Link key={link.href} href={link.href} className="hover:text-blue-500 transition">
+                        {link.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="nav-account-section flex gap-1">
+                  <Link href="/dashboard">Dashboard</Link>
+                  <Link href="/account">Account</Link>
+                  <button onClick={handleLogout} className="text-red-400">Logout</button>
+                </div>
+              </div>
+            </motion.nav>
+          )}
+        </AnimatePresence>
+      </header>
+
+      {/* Auth Modals */}
+      <AnimatePresence>
+        {activeForm === "signIn" && (
+          <Modal isOpen onClose={() => setActiveForm(null)}>
+            <SignInForm closeForm={() => setActiveForm(null)} />
+          </Modal>
+        )}
+        {activeForm === "signUp" && (
+          <Modal isOpen onClose={() => setActiveForm(null)}>
+            <SignUpForm closeForm={() => setActiveForm(null)} />
+          </Modal>
+        )}
+      </AnimatePresence>
+    </>
+  );
 }
 
 // -------------------------
-// Subcomponents
+// Small Helper Components
 // -------------------------
-const BarebonesNav = () => (
-  <nav className="nav-container">
-    <div className="nav-links-container h-10" />
-  </nav>
+const Logo = ({ href }: { href: string }) => (
+  <Link href={href} className="shrink-0">
+    <Image src="/icons/Note_Pilot_logo.svg" alt="Logo" width={40} height={40} />
+  </Link>
 );
 
 const DotMenu = ({ onHover }: { onHover: () => void }) => (
@@ -69,252 +157,15 @@ const DotMenu = ({ onHover }: { onHover: () => void }) => (
   </motion.div>
 );
 
-// -------------------------
-// Shared Mobile Toggle Button
-// -------------------------
-const MobileToggle = ({ open, toggle }: { open: boolean; toggle: () => void }) => (
-  <button
-    className="block md:hidden p-2 text-black focus:outline-none"
-    onClick={toggle}
-  >
-    {open ? "✕" : "☰"}
-  </button>
-);
-
-// -------------------------
-// Mobile Wrapper Nav 
-// -------------------------
-const MobileNavWrapper = ({
-  logoHref,
-  children,
-  handleLogout
-}: {
-  logoHref: string;
-  children: React.ReactNode;
-  handleLogout?: () => void;
-}) => {
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  return (
-    <nav className="nav-container flex flex-col md:hidden bg-black text-black p-2">
-      <div className="flex justify-start items-center gap-3">
-        {/* Toggle on LEFT side */}
-        <MobileToggle open={menuOpen} toggle={() => setMenuOpen(!menuOpen)} />
-        <Link href={logoHref}>
-          <Image src="/icons/Note_Pilot_logo.svg" alt="Note Pilot Logo" width={44} height={44} />
-        </Link>
-      </div>
-
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0, y: -10 }}
-            animate={{ height: "auto", opacity: 1, y: 0 }}
-            exit={{ height: 0, opacity: 0, y: -10 }}
-            className="flex flex-col gap-3 mt-2 border-t border-gray-700 pt-3 pl-2"
-          >
-            {children}
-            {handleLogout && (
-              <a onClick={handleLogout} className="cursor-pointer text-red-400">
-                Logout
-              </a>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </nav>
-  );
+const navFadeIn = {
+  initial: { opacity: 0, y: -10 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -10 },
+  transition: { duration: 0.2 }
 };
 
-// -------------------------
-// Desktop Navs 
-// -------------------------
-const AccountNav = ({ handleLogout }: { handleLogout: () => void }) => (
-  <motion.nav
-    className="nav-container hidden md:flex items-center justify-between"
-    variants={navFadeIn}
-    initial="initial"
-    animate="animate"
-    exit="exit"
-  >
-    <Link href="/dashboard">
-      <Image src="/icons/Note_Pilot_logo.svg" alt="Note Pilot Logo" width={48} height={48} />
-    </Link>
-    <div className="nav-account-section flex gap-2">
-      <Link href="/dashboard">Dashboard</Link>
-      <a onClick={handleLogout}>Logout</a>
-    </div>
-  </motion.nav>
-);
-
-const DashboardNav = ({ handleLogout }: { handleLogout: () => void }) => (
-  <motion.nav
-    className="nav-container hidden md:flex items-center justify-between"
-    variants={navFadeIn}
-    initial="initial"
-    animate="animate"
-    exit="exit"
-  >
-    <Link href="/dashboard">
-      <Image src="/icons/Note_Pilot_logo.svg" alt="Note Pilot Logo" width={48} height={48} />
-    </Link>
-    <div className="nav-account-section flex gap-2">
-      <Link href="/account">Account</Link>
-      <a onClick={handleLogout}>Logout</a>
-    </div>
-  </motion.nav>
-);
-
-const UserNav = ({
-  aiLevel,
-  handleLogout,
-  paperId
-}: {
-  aiLevel?: string;
-  handleLogout: () => void;
-  paperId: number;
-}) => (
-  <motion.nav
-    className="nav-container hidden md:flex items-center justify-between"
-    variants={navFadeIn}
-    initial="initial"
-    animate="animate"
-    exit="exit"
-  >
-    <Link href="/dashboard">
-      <Image src="/icons/Note_Pilot_logo.svg" alt="Note Pilot Logo" width={48} height={48} />
-    </Link>
-    <div className="nav-links-container flex gap-2">
-      <Link href={`/paper_view/${paperId}/flashcards`}>Flash Cards</Link>
-      <Link href={`/paper_view/${paperId}/summaries`}>Summaries</Link>
-      <Link href={`/paper_view/${paperId}/studyGuide`}>Study Guides</Link>
-      <Link href={`/paper_view/${paperId}/glossary`}>Glossary</Link>
-      <Link href={`/paper_view/${paperId}/problemSets`}>Problem Sets</Link>
-      <Link href={`/paper_view/${paperId}/pdfs`}>PDFs</Link>
-    </div>
-    <div className="nav-account-section flex gap-2 items-center">
-      {aiLevel && (
-        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-          {aiLevel}
-        </span>
-      )}
-      <Link href="/dashboard">Dashboard</Link>
-      <Link href="/account">Account</Link>
-      <a onClick={handleLogout}>Logout</a>
-    </div>
-  </motion.nav>
-);
-
-const GuestNav = ({
-  onLoginClick,
-  onSignUpClick
-}: {
-  onLoginClick: () => void;
-  onSignUpClick: () => void;
-}) => (
-  <motion.nav
-    className="nav-container hidden md:flex justify-between"
-    variants={guestNavFadeIn}
-    initial="initial"
-    animate="animate"
-    exit="exit"
-  >
-    <Link href="/">
-      <Image src="/icons/Note_Pilot_logo.svg" alt="Note Pilot Logo" width={48} height={48} />
-    </Link>
-    <div className="nav-account-section flex gap-1">
-      <a href="/about">About</a>
-      <a onClick={onLoginClick}>Login</a>
-      <a onClick={onSignUpClick}>Sign Up</a>
-    </div>
-  </motion.nav>
-);
-
-// -------------------------
-// Main Nav
-// -------------------------
-export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
-  const {activeForm, setActiveForm} = useAuthContext();
-  const { user, setUser, loading } = useSession();
-  const router = useRouter();
-  const pathname = usePathname();
-  const params = useParams();
-  const paperId: number = Number(params.paperId);
-  const isMobile = useIsMobile();
-
-  const handleLogout = async () => {
-    try {
-      const res = await fetch("/api/remove_session", { method: "GET" });
-      if (res.ok) {
-        router.push("/");
-        setUser(null);
-      } else {
-        alert("Failed to log out.");
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  if (!showAuth) return null;
-  if (loading) return <BarebonesNav />;
-
-  // -------------------------
-  // MOBILE VERSION 
-  // -------------------------
-  if (isMobile) {
-    if (user && !Number.isNaN(paperId)) {
-      return (
-        <MobileNavWrapper logoHref="/dashboard" handleLogout={handleLogout}>
-          <Link href={`/paper_view/${paperId}/flashcards`}>Flash Cards</Link>
-          <Link href={`/paper_view/${paperId}/summaries`}>Summaries</Link>
-          <Link href={`/paper_view/${paperId}/studyGuide`}>Study Guides</Link>
-          <Link href={`/paper_view/${paperId}/glossary`}>Glossary</Link>
-          <Link href={`/paper_view/${paperId}/problemSets`}>Problem Sets</Link>
-          <Link href={`/paper_view/${paperId}/pdfs`}>PDFs</Link>
-        </MobileNavWrapper>
-      );
-    }
-    if (user && Number.isNaN(paperId)) {
-      return (
-        <MobileNavWrapper logoHref="/dashboard" handleLogout={handleLogout}>
-          <Link href="/account">Account</Link>
-          <Link href="/dashboard">Dashboard</Link>
-        </MobileNavWrapper>
-      );
-    }
-    return (
-      <MobileNavWrapper logoHref="/">
-        <Link href="/about">About</Link>
-        <a onClick={() => setActiveForm("signIn")}>Login</a>
-        <a onClick={() => setActiveForm("signUp")}>Sign Up</a>
-      </MobileNavWrapper>
-    );
-  }
-
-  // -------------------------
-  // DESKTOP VERSION 
-  // -------------------------
-  return (
-    <>
-      {user && !Number.isNaN(paperId) && (
-        <UserNav aiLevel={user.aiLevel} handleLogout={handleLogout} paperId={paperId} />
-      )}
-      {user && Number.isNaN(paperId) && <DashboardNav handleLogout={handleLogout} />}
-      {!user && <GuestNav onLoginClick={() => setActiveForm("signIn")} onSignUpClick={() => setActiveForm("signUp")} />}
-
-      <AnimatePresence mode="wait" initial={false}>
-        {activeForm === "signIn" && (
-          <Modal isOpen onClose={() => setActiveForm(null)}>
-            <SignInForm closeForm={() => setActiveForm(null)} />
-          </Modal>
-        )}
-        {activeForm === "signUp" && (
-          <Modal isOpen onClose={() => setActiveForm(null)}>
-            <SignUpForm closeForm={() => setActiveForm(null)} />
-          </Modal>
-        )}
-      </AnimatePresence>
-    </>
-  );
-}
+const dotFade = {
+  initial: { opacity: 0, scale: 0.8 },
+  animate: { opacity: 1, scale: 1 },
+  exit: { opacity: 0, scale: 0.8 }
+};

@@ -8,10 +8,7 @@ import LoadingCircles from "@/components/LoadingCircles";
 interface SignUpFormProps {
   closeForm: () => void;
 }
-
-
 export default function SignUpForm({closeForm}: SignUpFormProps){
-
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState(""); 
     const [password, setPassword] = useState("");
