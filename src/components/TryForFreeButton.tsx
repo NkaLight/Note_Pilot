@@ -4,10 +4,9 @@
 import { useAuthContext } from "@/context/AuthContext";
 
 export default function Button(){
-    const {activeForm, setActiveForm} = useAuthContext();
+    const {setActiveForm} = useAuthContext();
 
     function handleTryForFree():void{
-        console.log("Pressed", activeForm);
         setActiveForm("signUp");
     }
 
