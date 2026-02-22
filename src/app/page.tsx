@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { getSessionUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import Button from "@/components/TryForFreeButton";
 
 export default async function LandingPage() {
   const sessionToken = (await cookies()).get("session_token")?.value ?? null;
@@ -52,12 +53,7 @@ export default async function LandingPage() {
         </p>
 
         <div className="pt-4">
-          <a
-            href="/signUp"
-            className="inline-block bg-blue-600 text-white font-semibold rounded-full px-6 py-3 sm:px-8 sm:py-4 hover:bg-blue-700 transition-colors text-sm sm:text-base"
-          >
-            🚀 Try for free
-          </a>
+          <Button/>
         </div>
       </div>
 

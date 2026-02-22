@@ -10,6 +10,7 @@ import { ThemeProviders } from "@/components/Account/themeProvider";
 import { cookies } from "next/headers";
 import { getSessionUser } from '@/lib/auth';
 import { redirect } from "next/navigation";
+import { AuthContextProvider } from "@/context/AuthContext";
 
 
 export const metadata: Metadata = {
@@ -28,9 +29,11 @@ export default async function RootLayout({children,}: Readonly<{children: React.
       <ThemeProviders attribute="class" defaultTheme="light" enableSystem={false}>
           <SessionProvider initialUser={user}>{/*Store User object as context for gobal accessiblity to add to user object see @/lib/auth & context/SessionContext.tsx ensure both remain compatible*/}
             <ThemeInit /> {/* syncs theme to user preference if available */}
-            <Nav />
-            <main>{children}</main>
-            <Footer />
+              <AuthContextProvider initialAuth="">
+                <Nav />
+                <main>{children}</main>
+                <Footer />
+              </AuthContextProvider>
           </SessionProvider>
         </ThemeProviders>
       </body>

@@ -8,6 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useAuthContext } from "@/context/AuthContext";
 
 // -------------------------
 // Animations
@@ -233,7 +234,7 @@ const GuestNav = ({
 // Main Nav
 // -------------------------
 export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
-  const [activeForm, setActiveForm] = useState<"signin" | "signup" | "account" | null>(null);
+  const {activeForm, setActiveForm} = useAuthContext();
   const { user, setUser, loading } = useSession();
   const router = useRouter();
   const pathname = usePathname();
@@ -285,8 +286,8 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
     return (
       <MobileNavWrapper logoHref="/">
         <Link href="/about">About</Link>
-        <a onClick={() => setActiveForm("signin")}>Login</a>
-        <a onClick={() => setActiveForm("signup")}>Sign Up</a>
+        <a onClick={() => setActiveForm("signIn")}>Login</a>
+        <a onClick={() => setActiveForm("signUp")}>Sign Up</a>
       </MobileNavWrapper>
     );
   }
@@ -300,15 +301,15 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
         <UserNav aiLevel={user.aiLevel} handleLogout={handleLogout} paperId={paperId} />
       )}
       {user && Number.isNaN(paperId) && <DashboardNav handleLogout={handleLogout} />}
-      {!user && <GuestNav onLoginClick={() => setActiveForm("signin")} onSignUpClick={() => setActiveForm("signup")} />}
+      {!user && <GuestNav onLoginClick={() => setActiveForm("signIn")} onSignUpClick={() => setActiveForm("signUp")} />}
 
       <AnimatePresence mode="wait" initial={false}>
-        {activeForm === "signin" && (
+        {activeForm === "signIn" && (
           <Modal isOpen onClose={() => setActiveForm(null)}>
             <SignInForm closeForm={() => setActiveForm(null)} />
           </Modal>
         )}
-        {activeForm === "signup" && (
+        {activeForm === "signUp" && (
           <Modal isOpen onClose={() => setActiveForm(null)}>
             <SignUpForm closeForm={() => setActiveForm(null)} />
           </Modal>
