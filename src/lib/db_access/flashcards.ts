@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import type {Flashcard } from "../zod_schemas/flashcards";
 import { NextResponse } from "next/server";
+import { DbError } from "../error";
 
 export async function getFlashCards(uploadId:number, user_id:number){
     try{
@@ -16,8 +17,7 @@ export async function getFlashCards(uploadId:number, user_id:number){
         orderBy: { flashcard_id: "asc" },
       });
     }catch(error){
-        console.log("");
-        return null;
+        throw new DbError("Failed to fetch flashCards from DB");
     }
 }
 export async function createOrUpdateFlashCardSet(uploadId:number,flashcards:Flashcard [], sourceText:string){
@@ -47,7 +47,6 @@ export async function createOrUpdateFlashCardSet(uploadId:number,flashcards:Flas
             include:{flashcard:true},
         });
     }catch{
-        console.log("error creating or updating the flashcard set DB");
-        return null;
+        throw new DbError("Failed to upsert flashCards from DB");
     }
 }

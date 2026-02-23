@@ -14,6 +14,7 @@ import { getSessionUser } from "@/lib/auth";
 import { getFlashCards } from "@/lib/db_access/flashcards";
 import { FlashcardsReq, FlashcardArray } from "@/lib/zod_schemas/flashcards";
 import {generateFlashCardsSet} from "@/lib/services/flashcards";
+import { DbError, ServiceError } from "@/lib/error";
 
 // OpenRouter endpoint
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
@@ -42,16 +43,25 @@ export async function GET(req: Request) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const url = new URL(req.url);
   const uploadId = url.searchParams.get("uploadId");
+
+  if(!uploadId){
+    console.error(`UploadId can not be falsy, current value: ${uploadId}`);
+    return NextResponse.json({error: "Invalid request"}, {status:400});
+  }
   try {
     const flashcards = await getFlashCards(Number(uploadId), user.user_id);
-    console.log("FLASHCARDS: ", flashcards);
     return NextResponse.json({ flashcards }, {status:200});
   } catch (err) {
-    console.error("GET /api/flashcards error:", err);
-    return NextResponse.json(
-      { error: "Failed to load flashcards" },
-      { status: 500 }
-    );
+    if(err instanceof DbError || err instanceof ServiceError){
+      console.error(`[${err.name}]: ${err.message}`,{
+        status:err.status,
+        stack:err.stack,
+        ...(err instanceof ServiceError &&{type: err.type})
+      });
+    }else{
+      console.error("[UNEXPECTED_EXCEPTION]:", err);
+    }
+    return NextResponse.json({error: "Internal server error"}, {status: 500});
   }
 }
 /**
@@ -63,22 +73,24 @@ export async function POST(req: Request) {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();
-    console.log(body);
     const parsed = FlashcardsReq.safeParse(body);
     if (!parsed.success)
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     const uploadId = parsed.data.uploadId ?? null;
 
     const flashcards = await generateFlashCardsSet(uploadId, user.user_id);
-    if(!flashcards){
-      throw new Error("Error generating the flashcards");
-    }
-    console.log(flashcards);
+ 
     return NextResponse.json({ flashcards}, {status:200});
   } catch (err: any) {
-    console.error("POST flashcards error:", err);
-    const msg = err instanceof Error ? err.message : String(err);
-    const status = msg.includes("aborted") ? 504 : 500;
+    if(err instanceof DbError || err instanceof ServiceError){
+      console.error(`[${err.name}]: ${err.message}`,{
+        status:err.status,
+        stack:err.stack,
+        ...(err instanceof ServiceError &&{type: err.type})
+      });
+    }else{
+      console.error("[UNEXPECTED_EXCEPTION]:", err);
+    }
     return NextResponse.json({ error: "Internal server error" }, { status:500});
   }
 }

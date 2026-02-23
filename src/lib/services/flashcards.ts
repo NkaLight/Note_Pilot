@@ -1,7 +1,7 @@
 import {getSourceText} from "@/lib/db_access/upload";
-import { NextResponse } from "next/server";
 import { FlashcardArray } from "../zod_schemas/flashcards";
-import {createOrUpdateFlashCardSet} from "@/lib/db_access/flashcards"
+import {createOrUpdateFlashCardSet} from "@/lib/db_access/flashcards";
+import { DbError, ServiceError, ServiceType } from "../error";
 
 // OpenRouter endpoint
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
@@ -22,17 +22,13 @@ Example output:
 `.trim();
 
 export async function generateFlashCardsSet(uploadId:number, user_id:number){
-    //1. Get the source content using the uploadId
-    if(!uploadId){
-        //Should throw an error here.
-        console.log("Invalid input uploadId cannot be null");
-        return;
-    }
+    //1. Get the source content using the uploadId 
     const sourceText = await getSourceText(uploadId);
     if(!sourceText){
-        //Should throw an error here.
-        console.log("Invalid sourceText is null");
-        return;
+        throw new ServiceError(
+            "Source text is null", 
+            ServiceType.AI_GENERATION
+        );
     }
     // Prepares prompt
     const userPrompt = `
@@ -70,11 +66,11 @@ export async function generateFlashCardsSet(uploadId:number, user_id:number){
       }),
     }).finally(() => clearTimeout(timeout));
     //Check LLM response
-    const ctype = resp.headers.get("content-type") || "";
     if(!resp.ok){
-        const errText = ctype.includes("application/json") ? JSON.stringify(await resp.json()) : await resp.text();
-        console.error(`LLM error: ${resp.status} ${resp.statusText}`);
-        throw new Error(`AI Provider Error: ${resp.status}`);
+        throw new ServiceError(
+            "AI provider failed to return flashcards", 
+            ServiceType.AI_GENERATION
+        );
     }
     const data = await resp.json();
     const raw = (data?.choices?.[0]?.message?.content ?? "").trim();
@@ -85,17 +81,20 @@ export async function generateFlashCardsSet(uploadId:number, user_id:number){
     try{
         flashcards = FlashcardArray.parse(JSON.parse(jsonText));
     }catch{
-        console.log(jsonText);
-        console.log("LLM did not return valid flashcard JSON",raw.slice(0, 800));
-        throw new Error(`LLM did not return valid flashcard JSON: ${resp.status}`);
+        throw new ServiceError(
+            "AI provider did not return valid flashcard JSON", 
+            ServiceType.AI_GENERATION
+        );
     }
     let savedSet = null;
     try{
         //create of update flashcard_set this also adds updates to the flashcard too.
         savedSet = await createOrUpdateFlashCardSet(uploadId,flashcards, sourceText.text_content);
-        console.log(savedSet);
-    }catch{
-        return;
+    }catch(error:any){
+        if(error instanceof DbError){
+            throw error;
+        }
+        throw new ServiceError("Internal error! Flashcard generateFlashCardSet", ServiceType.AI_GENERATION);
     }
     return savedSet.flashcard;
 }

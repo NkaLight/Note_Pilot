@@ -55,30 +55,8 @@ export default function FlashcardsPage() {
       setFlashcards(cards);
     } catch (e: any) {
       console.log(`makeFlashcards error ${e.message}`);
-      setErr(`Error Generating flashcards`);
+      setErr("Error Generating flashcards");
     }
-  }
-
-  async function generateFlashCards(uploadId:number){
-    setLoading(true);
-    setErr(null);
-    try{
-      const res = await fetch(`/api/flashcards?uploadId=${uploadId}`, {
-        method:"GET",
-        headers:{"Content-Type":"application/json"
-        }
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Failed to generate flashcards");
-      const cards = (data.flashcards as ApiFlashcard[]).map((fc) => ({
-        question: fc.question_front,
-        answer: fc.answer_back,
-      }));
-      setFlashcards(cards);
-    }catch(error){
-      setErr("Error generating flashcards");
-    }
-    setLoading(false);
   }
 
   useEffect(()=>{
@@ -97,7 +75,6 @@ export default function FlashcardsPage() {
           setFlashcards(mappedCards);
          }else{
           // 3. Fallback: If no cards exist, trigger the generator (POST)
-          console.log("No existing cards found, generating new ones...");
           await makeFlashcardsFromUpload(chosenLectureId);
          }
       }catch(error){
