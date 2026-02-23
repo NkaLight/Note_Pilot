@@ -1,13 +1,50 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { getLectureConentById } from "@/lib/prisma";
+import { DbError, ServiceError } from "@/lib/error";
+import { getSummaries } from "@/lib/db_access/summaries";
+import { generateSummaries } from "@/lib/services/summaries";
+import { FlashcardsReq } from "@/lib/zod_schemas/summary";
 
 /**
  * A route for generating structured content from the user's lecture text using OpenRouter.
  * The LLM is instructed to return valid JSON only.
  */
 
-const API_URL = "https://openrouter.ai/api/v1/chat/completions"
+const API_URL = "https://openrouter.ai/api/v1/chat/completions";
+
+/**
+ * GET function 
+ * @param req the request object containing lectureId and contentType.
+ * @returns the generated summary in JSON format.
+ */
+export async function GET(req:Request){
+  try{
+    const user = await getSessionUser();
+    if(!user) return NextResponse.json({error:"Unauthorized"}, {status: 401});
+
+    const { searchParams } = new URL(req.url);
+    const lectureId = searchParams.get("uploadId");
+    if (!lectureId) {
+      return NextResponse.json({error:"Missing lectureId "}, { status: 400 });
+    }
+    //TO avoid prop drilling we directly access the data layer, getSummaries already performs authorization.
+    const summaries = await getSummaries(Number(lectureId), user.user_id);
+
+    return NextResponse.json({content:summaries}, {status:200});  
+  }catch(err){
+    if(err instanceof DbError || err instanceof ServiceError){
+      console.error(`[${err.name}]: ${err.message}`,{
+        status:err.status,
+        stack:err.stack,
+        ...(err instanceof ServiceError &&{type: err.type})
+      });
+    }else{
+      console.error("[UNEXPECTED_EXCEPTION]:", err);
+    }
+    return NextResponse.json({error:"Internal server error"}, {status:500});
+  }
+}
 
 /**
  * POST function
@@ -21,79 +58,30 @@ export async function POST(req: Request) {
     if (!user) {
       return new NextResponse("Unauthorized", { status: 401 }); // 401 is more standard than 404
     }
-
     // Parse request body (assuming JSON)
     const body = await req.json();
-    const { lectureId, contentType } = body;
+    const parsed = FlashcardsReq.safeParse(body);
+    if(!parsed.success) return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    const uploadId = parsed.data.uploadId ?? null;
 
-    if (!lectureId || !contentType) {
-      return new NextResponse("Missing lectureId or contentType", { status: 400 });
+    if (!uploadId) {
+      return new NextResponse("Missing lectureId", { status: 400 });
     }
 
-    // Fetch lecture content from DB
-    // Example function: getLectureTextById
-    const lecture = await getLectureConentById(lectureId);
+    //Generate the summaries
+    const summaries = await generateSummaries(uploadId, user.user_id);
+    return NextResponse.json({ content: summaries }, {status:200});
 
-    if (!lecture) {
-      return new NextResponse("Lecture not found", { status: 404 });
+  }catch (err: any) {
+    if(err instanceof DbError || err instanceof ServiceError){
+      console.error(`[${err.name}]: ${err.message}`,{
+        status:err.status,
+        stack:err.stack,
+        ...(err instanceof ServiceError &&{type: err.type})
+      });
+    }else{
+      console.error("[UNEXPECTED_EXCEPTION]:", err);
     }
-
-    //LLM Query
-    const aiQuery = `You are an AI that summarizes lecture content into a structured JSON array. 
-        Generate **at least 5 objects**, each with:
-        1. "header": a concise title.
-        2. "text": summarized text with <strong>...</strong> tags highlighting key concepts.
-
-        Return the data as a valid JSON array ONLY, with no extra text outside the array.
-
-        Lecture text:
-        """
-        ${lecture}
-        """
-
-        Example output:
-        [
-        {
-            "header": "Introduction to Algorithms",
-            "text": "Algorithms are <strong>step-by-step procedures</strong> for solving problems efficiently..."
-        },
-        {
-            "header": "Time Complexity",
-            "text": "We measure <strong>algorithm performance</strong> by..."
-        }
-        ]`;
-    // QUERY the LLM
-    const resp = await fetch(API_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${process.env.NVIDIA_AI_API}`
-            },
-            body: JSON.stringify({
-                model: "nvidia/nemotron-nano-9b-v2:free",
-                messages: [{ role: "system", content: "You are an AI that outputs JSON only, no explanations." }, { role: "user", content: aiQuery }], 
-                stream: false, // For streaming response currently not implemented.
-            }),
-        });
-
-    const data = await resp.json();
-    console.log(data);
-    const reply = data?.choices?.[0]?.message?.content ?? null;
-    console.log(reply)
-
-
-    let replyJson = {};
-        try {
-        replyJson = JSON.parse(reply);
-        console.log(replyJson)
-        } catch (e) {
-        console.error("Failed to parse LLM response as JSON:", reply);
-        replyJson = { text: reply };
-        }
-    
-    return NextResponse.json({ content: replyJson });
-  } catch (err: any) {
-    console.error("Error in POST /api/generateContent:", err);
     return NextResponse.json(
       { error: err.message || "Internal server error" },
       { status: 500 }
