@@ -19,10 +19,9 @@ import { z } from "zod";
 
 /** Client → /api/flashcards */
 export const FlashcardsReq = z.object({
-  text: z.string().min(1).optional(),
   uploadId: z.number().int().optional(),
-}).refine(v => v.text || v.uploadId, {
-  message: "Provide 'text' or 'uploadId'.",
+}).refine(v => v.uploadId, {
+  message: "UploadId not provided.",
 });
 
 export const FlashcardItem = z.object({

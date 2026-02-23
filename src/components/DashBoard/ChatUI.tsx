@@ -12,7 +12,7 @@
  * PERSISTENT STORAGE
  * - Messages are stored in the chat_message table linked to uploadId
  * - Chat history is automatically loaded when uploadId changes
- * - All messages persist across page refreshes and sessions
+ * - All messages persist across page refreshes and sessions for each uploadId
  */
 
 "use client";
@@ -27,12 +27,10 @@ type Message = {
 };
 
 export default function ChatUI({
-  onMakeFlashcards,
   paperId,
   uploadId,
   uploadIds,
 }: {
-  onMakeFlashcards?: (text: string) => void;
   paperId?: number;
   uploadId?: number;
   uploadIds?: number[];
@@ -272,19 +270,6 @@ export default function ChatUI({
               >
                 {m.content}
               </div>
-
-              {/* New: show a small button beside assistant replies */}
-              {isAssistant && m.content && onMakeFlashcards && (
-                <div className="mr-auto">
-                  <button
-                    onClick={() => onMakeFlashcards(m.content)}
-                    className="text-sm px-2 py-1 rounded-md border hover:bg-gray-80"
-                    title="Create flashcards from this reply"
-                  >
-                    Create Flashcards
-                  </button>
-                </div>
-              )}
             </div>
           );
         })}

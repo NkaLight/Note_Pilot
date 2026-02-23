@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from "react";
-import { usePaperViewContext } from "@/context/PaperViewContext"
+import { usePaperViewContext } from "@/context/PaperViewContext";
 import { useParams } from "next/navigation";
 
 type Lecture = {
@@ -56,6 +56,8 @@ export default function Upload({ onSaved }: { onSaved: () => void }) {
         const newLecture : Lecture = {id: lectures.length, title: lectureTitle, createdAt: new Date()};
         setLectures(prevState => [...prevState, newLecture]);
         setLectureTitle("");
+
+        //Trigger all the other data points being stored.
       }
     } catch {
       setError("Network or server error during upload.");

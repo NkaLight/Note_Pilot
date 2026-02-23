@@ -18,6 +18,7 @@ import ChatUI from "@/components/DashBoard/ChatUI";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import StudyLayout from "@/components/DashBoard/StudyLayout";
 
 type GlossaryItem = {
   term: string;
@@ -26,124 +27,47 @@ type GlossaryItem = {
 
 export default function DashboardPage() {
   // Chat width starts at 50% of viewport
-  const [chatWidth, setChatWidth] = useState("50%");
-  const isResizing = useRef(false);
   const {chosenLectureId, lectures, selectedLectureIds} = usePaperViewContext();
   const params = useParams();
   const paperId = params?.paperId ? Number(params.paperId) : null;
 
-  // Get the current selected lecture's upload ID
-  const selectedLecture = lectures?.find(lecture => lecture.id === chosenLectureId);
-  const uploadId = selectedLecture?.id || null;
-  // Use selected lecture IDs as upload IDs for context
-  const selectedUploadIds = selectedLectureIds;
 
   // Local UI state
   const [glossary, setGlossary] = useState<GlossaryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const [lastGeneratedWith, setLastGeneratedWith] = useState<string>("");
 
-  const startResizing = () => {
-    isResizing.current = true;
-    document.addEventListener("mousemove", resize);
-    document.addEventListener("mouseup", stopResizing);
-  };
-
-  const resize = (e: MouseEvent) => {
-    if (!isResizing.current) return;
-
-    // Minimum 200px, maximum viewport - 300px (so summaries don't collapse too much)
-    const newWidth = Math.min(Math.max(e.clientX, 200), window.innerWidth - 300);
-    setChatWidth(`${newWidth}px`);
-  };
-
-  const stopResizing = () => {
-    isResizing.current = false;
-    document.removeEventListener("mousemove", resize);
-    document.removeEventListener("mouseup", stopResizing);
-  };
 
   // Generate glossary automatically using selected uploads and chat context
   async function generateGlossary() {
-    if (selectedLectureIds.length === 0) {
+    if (chosenLectureId === null) {
       setErr("Please select at least one lecture from the PDFs page to generate a glossary.");
       return;
     }
-    
     setLoading(true);
     setErr(null);
     
     try {
-      // Get all uploads for this paper to access text content
-      const uploadsResponse = await fetch(`/api/uploads?paperId=${paperId}`);
-      if (!uploadsResponse.ok) {
-        throw new Error("Failed to fetch upload data");
-      }
-      
-      const uploadsData = await uploadsResponse.json();
-      if (!uploadsData.success) {
-        throw new Error(uploadsData.error || "Failed to fetch uploads");
-      }
-      
-      // Filter uploads to only selected ones and extract text content
-      let combinedText = "";
-      const selectedUploads = uploadsData.uploads.filter((upload: any) => 
-        selectedLectureIds.includes(upload.upload_id)
-      );
-      
-      for (const upload of selectedUploads) {
-        if (upload.text_content && upload.text_content.trim()) {
-          combinedText += `\n\n--- Content from ${upload.filename} ---\n${upload.text_content}`;
-        }
-      }
-      
-      // Get chat history for additional context
-      try {
-        const chatResponse = await fetch(`/api/chat?uploadIds=${selectedLectureIds.join(',')}`);
-        if (chatResponse.ok) {
-          const chatData = await chatResponse.json();
-          if (chatData.messages && chatData.messages.length > 0) {
-            const chatContext = chatData.messages
-              .filter((msg: any) => msg.role === 'user' || msg.role === 'assistant')
-              .slice(-10) // Get last 10 messages for context
-              .map((msg: any) => `${msg.role}: ${msg.content}`)
-              .join('\n');
-            
-            if (chatContext.trim()) {
-              combinedText += `\n\n--- Recent Chat History Context ---\n${chatContext}`;
-            }
-          }
-        }
-      } catch (e) {
-        console.warn("Failed to fetch chat history for context:", e);
-      }
-
-      if (!combinedText.trim()) {
-        setErr("No text content available from selected lectures. Please ensure PDFs have been uploaded and processed correctly.");
-        return;
-      }
-
-      // Generate glossary using combined context
-      const res = await fetch("/api/glossary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          text: combinedText.slice(0, 15000) // Limit text size for API
-        }),
+      //Get all the glossary data for the chosenLecturedId
+      const res = await fetch(`api/glossary?upload_id=${chosenLectureId}`, {
+        method: "GET", 
+        headers:{"Content-Type":"application/json"}, 
       });
 
       const data = await res.json();
+      console.log("Returned data: ", data);
       if (!res.ok) throw new Error(data?.error || "Failed to generate glossary");
-
+      console.log("Response data: ", data);
       setGlossary(data.glossary);
-      setLastGeneratedWith(`${selectedUploads.length} lecture${selectedUploads.length !== 1 ? 's' : ''} + chat history`);
+      setLoading(false);
     } catch (e: any) {
       setErr(e.message || "Something went wrong generating the glossary");
+      setLoading(false);
     } finally {
       setLoading(false);
     }
   }
+  console.log("Glossary:" ,glossary);
 
   // Auto-generate when selected lectures change
   useEffect(() => {
@@ -152,26 +76,11 @@ export default function DashboardPage() {
     } else {
       setGlossary([]);
       setErr(null);
-      setLastGeneratedWith("");
     }
-  }, [selectedLectureIds.join(',')]); // Re-run when selection changes
+  }, [chosenLectureId]); // chosenLectureId changes
 
   return (
-    <div className="h-screen w-full flex gap-10 pl-10 pr-0">
-      {/* Left: Chat */}
-      <div
-        className="rounded-3xl bg-white/0 overflow-y-auto mt-5 flex-shrink-0 h-full pb-10 pt-14"
-        style={{ width: chatWidth }}
-      >
-        <ChatUI uploadIds={selectedUploadIds} paperId={paperId} />
-      </div>
-
-      {/* Divider / Resizer */}
-      <div
-        onMouseDown={startResizing}
-        className="w-1 cursor-col-resize opacity-30 bg-white hover:bg-gray-400 rounded relative"
-      />
-
+    <StudyLayout>
       {/* Middle: Glossary */}
       <div className="rounded-3xl mb-5 mt-19 p-6 bg-white/50 mr-10 overflow-y-auto mt-5 flex-grow text-black">
         <div className="flex justify-between items-center mb-4">
@@ -188,7 +97,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Context info */}
-        {selectedLectureIds.length === 0 ? (
+        {chosenLectureId === null && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
             <div className="flex items-center">
               <div className="text-yellow-600 mr-2">ℹ️</div>
@@ -200,19 +109,7 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
-        ) : (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-            <p className="text-blue-800 text-sm">
-              📚 <strong>Auto-generating glossary</strong> from {selectedLectureIds.length} selected lecture{selectedLectureIds.length !== 1 ? 's' : ''} and chat history
-              {lastGeneratedWith && (
-                <span className="block text-blue-600 mt-1">
-                  Last generated from: {lastGeneratedWith}
-                </span>
-              )}
-            </p>
-          </div>
         )}
-
         {/* Error display */}
         {err && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
@@ -252,6 +149,6 @@ export default function DashboardPage() {
           ) : null}
         </div>
       </div>
-    </div>
+    </StudyLayout>
   );
 }
