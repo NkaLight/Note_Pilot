@@ -9,7 +9,7 @@ const API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 export async function generateSummaries(uploadId:number,userId:number){
     try{
-        const textContent = await getSourceText(uploadId);
+        const textContent = await getSourceText(uploadId, userId);
         if(!textContent) throw new AppError("Could not generateSummaries, getSourceText() is falsy");
 
         const aiQuery = `You are an AI that summarizes lecture content into a structured JSON array. 

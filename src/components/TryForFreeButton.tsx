@@ -9,7 +9,6 @@ export default function Button(){
     function handleTryForFree():void{
         setActiveForm("signUp");
     }
-
     return (
         <button
             onClick={handleTryForFree}

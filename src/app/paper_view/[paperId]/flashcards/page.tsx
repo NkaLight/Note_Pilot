@@ -3,16 +3,10 @@
  * FlashcardsPage
  *
  * WHAT IT DOES
- * - Layout with 3 panels:
- *   (1) ChatUI on the left
- *   (2) Flashcards in the middle
- *   (3) Upload widget on the right
- * - Lets the user click "📇 Create Flashcards" on ChatUI → calls /api/flashcards
- * - Maps API response into flashcard cards that flip on click.
+ * -Renders the FlashCards blob. 
+ * - on Mount, we perform GET request to /api/flashcards, on flashcards.length == 0:
+ *      Generate the flashcards and return the flashcards to be rendered. 
  *
- * CURRENT LIMITATION
- * - Flashcards are stored in React state only → disappear on page refresh.
- * - Future work: persist flashcards in DB (e.g. prisma.flashcard_set + prisma.flashcard)FYI my db for supabase us buggin.
  */
 "use client";
 

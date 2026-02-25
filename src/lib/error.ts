@@ -1,5 +1,6 @@
 export enum ServiceType {
-  AI_GENERATION = 'AI_GENERATION'
+  AI_GENERATION = 'AI_GENERATION',
+  
 }
 
 export class AppError extends Error {
