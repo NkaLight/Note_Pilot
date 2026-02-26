@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/db";
 import type {Flashcard } from "../zod_schemas/flashcards";
-import { NextResponse } from "next/server";
 import { DbError } from "../error";
 
 export async function getFlashCards(uploadId:number, user_id:number){

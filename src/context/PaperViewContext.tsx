@@ -28,7 +28,7 @@ const PaperViewContext = createContext<PaperViewContextType>({
   setSelectedLectureIds: () => {},
 });
 
-export const usePaperViewContext = ()=> useContext(PaperViewContext)
+export const usePaperViewContext = ()=> useContext(PaperViewContext);
 
 
 export const PaperViewProvider = ({

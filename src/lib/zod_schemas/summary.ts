@@ -7,12 +7,12 @@ export const FlashcardsReq = z.object({
   message: "UploadId not provided.",
 });
 
-export const SummaryItem = z.object({
+export const SummaryItemSchema = z.object({
   header: z.string().min(1),
   text: z.string().min(1),
 });
-//FlashcardArray ensures the LLM actually gave back an array of valid items, not random prose or malformed JSON.
-export const SummaryItemArray = z.array(SummaryItem).min(1);
+//SummaryItemArray ensures the LLM actually gave back an array of valid items, not random prose or malformed JSON.
+export const SummaryItemArray = z.array(SummaryItemSchema).min(1);
 
-export type FlashcardsRequest = z.infer<typeof FlashcardsReq>;
-export type SummaryEl = z.infer<typeof SummaryItem>;
+export type SummaryElReq = z.infer<typeof FlashcardsReq>;
+export type SummaryEl = z.infer<typeof SummaryItemSchema>;

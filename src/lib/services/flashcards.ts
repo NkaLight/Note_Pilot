@@ -23,7 +23,7 @@ Example output:
 
 export async function generateFlashCardsSet(uploadId:number, user_id:number){
     //1. Get the source content using the uploadId 
-    const sourceText = await getSourceText(uploadId);
+    const sourceText = await getSourceText(uploadId, user_id);
     if(!sourceText){
         throw new ServiceError(
             "Source text is null", 

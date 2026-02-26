@@ -54,7 +54,7 @@ export async function addProblemSet(uploadId: number, userId: number, questions:
                     answer_text: q.answer
                 }))
             });
-            return pSet;
+            return {pSet,  questions};// Here we return both the pSet and the q & A
         }, { timeout: 10000 }); // Bonus: give it 10s just in case
     } catch (error) {
         console.error(error);
