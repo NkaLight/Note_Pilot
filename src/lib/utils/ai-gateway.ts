@@ -47,6 +47,7 @@ export async function queryLLM(systemPrompt: string, userPrompt: string, options
   } catch (err: any) {
     if (err instanceof ServiceError) throw err;
     // Wrap generic fetch/network errors into your ServiceError
+    console.error(err);
     throw new ServiceError(err.message || "AI Network Failure", type, 503);
   }
 }

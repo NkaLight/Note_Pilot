@@ -63,10 +63,10 @@ export async function generateAndSaveProblems(uploadId:number, userId:number){
                     2. "answer": The ideal answer for evaluation later.
 
                     Format your response as a JSON array, like:
-                    [
+                    "[
                         {"question": "What is polymorphism in OOP?", "answer": "The ability of objects to take many forms..."},
                         {"question": "...", "answer": "..."}
-                    ]
+                    ]"
 
                     Content to analyze:
                     """${textContent.text_content}"""
@@ -75,25 +75,26 @@ export async function generateAndSaveProblems(uploadId:number, userId:number){
                 type: ServiceType.AI_GENERATION
             });
     // 3. Parse & Persist
+    console.error(jsonText);
   try {
+    console.error(jsonText);
     const parsed = JSON.parse(jsonText);
-    console.error("PARSED DATA before we pass to addProblemtSet currnetly throwing an error", parsed);
-    const savedSet = await addProblemSet(uploadId,userId, parsed);
+    console.error("PARSED DATA before we pass to addProblemtSet currently throwing an error", parsed);
+    const {pSet, questions} = await addProblemSet(uploadId,userId, parsed);
 
-    console.log(savedSet);
     // Transform to Frontend Format
     return {
-      problemSetId: savedSet.pset_id,
-      questions: savedSet.problem.map(p => ({
-        id: p.problem_id,
-        question: p.question_text,
-        answer: p.answer_text,
+      problemSetId: null,
+      questions: parsed.map(p => ({
+        question: p.question,
+        answer: p.answer,
         userAnswer: "",
         userAnswerId: null
       }))
     };
   } catch (err) {
     if (err instanceof ServiceError || err instanceof DbError) throw err;
+    console.error(err);
     throw new ServiceError("Invalid AI response format", ServiceType.AI_GENERATION);
   }
 }

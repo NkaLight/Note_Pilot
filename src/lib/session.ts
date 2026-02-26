@@ -18,6 +18,7 @@ export async function clearCache(){
 
 export async function  validateSession(token: string){
     let session = sessionCache.get(token);
+    const now = Date.now();
     if(!session){ 
         //fetch DB
         const sessionDb = await prisma.session.findFirst({
@@ -40,11 +41,17 @@ export async function  validateSession(token: string){
             sessionCache.delete(session.token);
             return null
         }
-        const newExpiry = new Date(Date.now() + 5 * 60 * 1000); // add an extra 5min
-        session.expires_at = newExpiry;
+        const buffer = 30 * 60 * 1000; 
+        const timeSinceLastUpdate = now - session.last_active_at.getTime();
         sessionCache.set(session.token, session); //update in cache
 
-        if(Date.now() - session.last_active_at.getTime() <= 60_000 ){ //avoid race conditions.
+        if(session.expires_at.getTime() - now < buffer || timeSinceLastUpdate > 5 * 60 * 1000){ //avoid race conditions.
+            const newExpiry = new Date(now + 60 * 60 * 1000);
+            session.expires_at = newExpiry;
+            session.last_active_at = new Date(now);
+            sessionCache.set(token, session);
+
+            //persist DB side.
             prisma.session.update({
                 where: { token: session.token },
                 data: { 
