@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { DbError } from "../error";
 
-export async function getSourceText(uploadId:number){
+export async function getSourceText(uploadId:number, userId:number){
     try{
         return prisma.upload.findFirst({
             select:{
@@ -9,6 +9,9 @@ export async function getSourceText(uploadId:number){
             },
             where:{
                 upload_id:uploadId,
+                paper:{
+                    user_id:userId,
+                }
             }
         });
     }catch(error){
