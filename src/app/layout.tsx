@@ -7,9 +7,7 @@ import Footer from "@/components/Footer";
 import { SessionProvider } from "@/context/SessionContext";
 import ThemeInit from "@/components/Account/themeInit";
 import { ThemeProviders } from "@/components/Account/themeProvider";
-import { cookies } from "next/headers";
 import { getSessionUser } from '@/lib/auth';
-import { redirect } from "next/navigation";
 import { AuthContextProvider } from "@/context/AuthContext";
 
 
@@ -19,9 +17,8 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({children,}: Readonly<{children: React.ReactNode;}>) {
-    const sessionToken = (await cookies()).get('session_token')?.value ?? null;
-    const user = sessionToken ? await getSessionUser() : null;
-
+    const user = await getSessionUser();
+    console.log(user);
 
   return (
     <html lang="en" suppressHydrationWarning>

@@ -12,6 +12,7 @@ import React from "react";
  */
 export default async function AIPageLayout({ children }: { children: ReactNode }) {
   const user = await getSessionUser();
+  console.error(user);
   if(!user){
     redirect("/");
   }

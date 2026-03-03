@@ -15,7 +15,7 @@ import z from "zod";
  */
 export async function GET(){
     const user = await getSessionUser();
-    if(!user) return NextResponse.json({ error:"Unauthorized" }, {status : 401});
+    if(!user || !user.user_id) return NextResponse.json({ error:"Unauthorized" }, {status : 401});
     try{
         const papers = await prisma.paper.findMany({
         where: {
@@ -24,7 +24,7 @@ export async function GET(){
         orderBy:{
             paper_id: 'desc'
         }
-        })
+        });
         return NextResponse.json({papers});
     }catch(error: any){
         return NextResponse.json( { error:"Internal Server error" }, {status: 500});
@@ -49,13 +49,13 @@ export async function POST(req: Request){
     
     //Validate input
     const body = await req.json();
-    const result = addPaperSchema.safeParse(body)
+    const result = addPaperSchema.safeParse(body);
     if(!result.success){
-        return NextResponse.json({error: result.error.flatten().fieldErrors, status: 400})
+        return NextResponse.json({error: result.error.flatten().fieldErrors, status: 400});
     }
-    const validatedInput = result.data
+    const validatedInput = result.data;
     if(!validatedInput){
-        return NextResponse.json({error: "Internal Server error", status:500})
+        return NextResponse.json({error: "Internal Server error", status:500});
     }
 
     try{
@@ -92,15 +92,15 @@ export async function PUT(req: Request){
     if(!user) return NextResponse.json({error: "Unauthorized"}, {status: 401});
 
     //ValidateSchema
-    const body = await req.json()
+    const body = await req.json();
     const validate = updatePaperSchema.safeParse(body);
     if(!validate.success){
-        return NextResponse.json({error: validate.error.flatten().fieldErrors}, {status: 400})
+        return NextResponse.json({error: validate.error.flatten().fieldErrors}, {status: 400});
     }
 
-    const data = validate.data
+    const data = validate.data;
     if(!data){
-        return NextResponse.json({error: "Internal Server Error"}, {status: 500})
+        return NextResponse.json({error: "Internal Server Error"}, {status: 500});
     }
 
     //Finally update the Paper
@@ -116,7 +116,7 @@ export async function PUT(req: Request){
                 user_id: user.user_id
             }
         });
-        return NextResponse.json({status:200})
+        return NextResponse.json({status:200});
 
     }catch(error:any){
         return NextResponse.json({ error:"Internal Server error" }, {status: 500});
@@ -144,7 +144,7 @@ export async function DELETE(req: Request){
     const validate = deletePaperSchema.safeParse(body);
     if(!validate.success) return NextResponse.json({error: validate.error.flatten().fieldErrors}, {status:500});
 
-    const data = validate.data
+    const data = validate.data;
     if(!data) return NextResponse.json({error: "Internal server error"}, {status: 500});
 
     try{
@@ -153,8 +153,8 @@ export async function DELETE(req: Request){
                 paper_id: data.paper_id,
                 user_id: user.user_id
             }
-        }) 
-        return NextResponse.json({status:200})
+        });
+        return NextResponse.json({status:200});
     }catch(error){
         return NextResponse.json({error: "Error deleting your paper"}, {status: 500});
     }

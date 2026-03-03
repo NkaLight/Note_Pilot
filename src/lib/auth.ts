@@ -15,10 +15,11 @@
  */
 
 import { prisma } from "@/lib/db";
-import { getUserFromToken } from "@/lib/session";
+import { jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
 export const SESSION_COOKIE = "session_token";
+const JWT_SECRET = new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRETE);
 
 export type SessionUser = {
   user_id: number;
@@ -27,42 +28,37 @@ export type SessionUser = {
   aiLevel?: string;
 };
 
-/** Lowest-level: cookie → user_id, with DB validation and activity touch. */
-export async function getAuthedUserId(): Promise<number | null> {
-  const user = await getSessionUser();
-  if(!user) return null;
-  return user.user_id;
-}
-
-/** Throws if not authenticated — handy for server actions or API routes. */
-export async function requireUserId(): Promise<number> {
-  const id = await getAuthedUserId();
-  if (!id) throw new Error("Unauthorized");
-  return id;
-}
-
 /**
- * User object by using validateSession lib, since it fetches from cache first O(1) read, if not in cache then it fetches from DB.
+ * Validate session gets the sessionUser at O(1) constant time from sessionCache
  */
-export async function getSessionUser(): Promise<SessionUser | null> {
+export async function getSessionUser():Promise<SessionUser | any>{
   const cookieJar = await cookies();
-  const token = cookieJar.get(SESSION_COOKIE)?.value;
-  if (!token) return null;
-
-  return await getUserFromToken(token);
+  const token = cookieJar.get("session_token")?.value;
+  if(!token) return null;
+  try{
+      const { payload } = await jwtVerify(token, JWT_SECRET); 
+      return{
+        user_id: payload.id, 
+        email:payload.email,
+        username: payload.username
+      };
+  }catch(error){
+    console.error(error);
+    return null;
+  }
 }
 
 //  
-export async function validatePaperId(paper_id: number){
-  const user_id = await getAuthedUserId();
-  if(user_id == null) return null;
+export async function validatePaperId(paper_id: number):Promise<boolean | null>{
+  const user = await getSessionUser();
+  if(user.user_id === null) return null;
 
   const isValid = await prisma.paper.count({
     where:{
       paper_id:paper_id,
-      user_id:user_id,
+      user_id:user.user_id,
     }
-  })
+  });
   if(isValid < 1) return null;
   return true;
 

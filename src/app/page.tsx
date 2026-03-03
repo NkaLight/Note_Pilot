@@ -4,9 +4,8 @@ import { redirect } from "next/navigation";
 import Button from "@/components/TryForFreeButton";
 
 export default async function LandingPage() {
-  const sessionToken = (await cookies()).get("session_token")?.value ?? null;
-  const user = sessionToken ? await getSessionUser() : null;
-
+  const user = await getSessionUser();
+  console.error(user);
   if (user) {
     redirect("/dashboard"); // Redirect if signed in
   }

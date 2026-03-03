@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAuthedUserId } from "@/lib/auth";
+import { getSessionUser } from "@/lib/auth";
 import { promises as fs } from "fs";
 import { v4 as uuidv4 } from "uuid";
 import PDFParser from "pdf2json";
@@ -19,7 +19,8 @@ import { prisma } from "@/lib/db";
 export async function POST(req: Request) {
   try {
     // Get the user ID from the authentication token
-    const userId = getAuthedUserId();
+    const user = await getSessionUser();
+    const userId = user.user_id;
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
     }

@@ -4,6 +4,8 @@ import crypto from "crypto";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { AUTH_POLICY } from "@/lib/utils/auth";
+import { SignJWT } from "jose";
 
 /**
  * API route for user sign-in.
@@ -48,30 +50,44 @@ export async function POST(request: Request) {
     }
 
     // Generate and store session storage in DB
-    const token = crypto.randomBytes(32).toString("hex");
+    const token = await new SignJWT({id:user.user_id, email:user.email, username:user.username})
+            .setProtectedHeader({ alg: "HS256" })
+            .setIssuedAt()
+            .setExpirationTime(AUTH_POLICY.access_expiry) 
+            .sign(AUTH_POLICY.getAccessSecret());
 
+    const refresh_token = crypto.randomBytes(32).toString("hex");
     // Store session in DB
     await prisma.session.create({
       data: {
         user_id: user.user_id,
-        token,
-        expires_at: new Date(Date.now() + 1000 * 60 * 60 * 1), // 1h
+        token:refresh_token,
+        expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
         last_active_at: new Date(),
       },
     });
 
-    // Set cookies
+    (await cookies()).set({
+      name: "refresh_token",
+      value: refresh_token,
+      httpOnly: true,
+      path: "/api/refresh_token",
+      maxAge: 60 * 60 * 24 * 7,// 7 days
+    });
+
+    /**Sets the access token for quick lookup*/
     (await cookies()).set({
       name: "session_token",
       value: token,
       httpOnly: true,
       path: "/",
-      maxAge: 60 * 60 * 24,
+      maxAge: 60 * 15,// 15min
     });
-    return NextResponse.json({ user: { id: user.user_id, email: user.email, usernane : user.username } });
+    
+    return NextResponse.json({ user: { id: user.user_id, email: user.email, username : user.username } });
 
   } catch (error: any) {
     console.error(error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

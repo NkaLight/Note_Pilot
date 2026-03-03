@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useState, useRef, useMemo, useEffect } from "react";
 
 type User = {
     user_id: number;
@@ -33,11 +33,52 @@ export const SessionProvider = ({
         initialUser?: User | null; // The prop can be optional or null
     }) => {
         const [user, setUser] = useState<User | null>(initialUser || null);
-        const [loading, setLoading] = useState(false);
+        const [loading, setLoading] = useState(!initialUser);
+        const isRefreshing = useRef(false);
+
+
+        useEffect(()=>{
+            //Run on mount when there is no user
+            if(!user && !isRefreshing.current){
+                const silentRefresh = async ()=>{
+                    isRefreshing.current = true;
+                    try{
+                        const res = await fetch("/api/refresh_token", {
+                            method:"POST",
+                        });
+                        if(res.ok){
+                            const data = await res.json();
+                            console.log(data);
+                            console.log(data.user);
+                            console.log(data.error);
+                            console.log(data.application_user);
+                            setUser(data.user);
+                        }else{
+                            setUser(null);
+                        }
+                    }catch(error){
+                        setUser(null);
+
+                    }finally{
+                        setLoading(false);
+                        isRefreshing.current = false;
+                    }
+                };
+                silentRefresh();       
+            }else{
+                setLoading(false);
+            }
+        }, []);
+
+        const contextValue = useMemo(() => ({ 
+        user, 
+        setUser, 
+        loading 
+    }), [user, loading]);
 
         return (
-            <SessionContext.Provider value={{ user, setUser, loading }}>
+            <SessionContext.Provider value={contextValue}>
             {children}
             </SessionContext.Provider>
         );
-    }
+    };

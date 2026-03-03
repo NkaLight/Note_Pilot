@@ -5,6 +5,8 @@ import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import crypto from "crypto";
 import { cookies } from "next/headers";
+import { SignJWT } from "jose";
+import { AUTH_POLICY } from "@/lib/utils/auth";
 
 /**
  * API route to handle user signup.
@@ -34,8 +36,8 @@ export async function POST(request: Request) {
         { status: 400 }
       ); 
     }
-    const validated = result.data
-    if(!validated) return NextResponse.json({errors: "Internal Sever error"}, {status: 404}) // This should never happen I was shutting up Next.js, since validated could be undefined but I know that could never happen
+    const validated = result.data;
+    if(!validated) return NextResponse.json({errors: "Internal Sever error"}, {status: 404});// This should never happen I was shutting up Next.js, since validated could be undefined but I know that could never happen
 
     // Hash password before storing
     const hashedPassword = await bcrypt.hash(validated.password, 10);
@@ -50,31 +52,46 @@ export async function POST(request: Request) {
 
 
     // Generate and store session storage in DB
-    const token = crypto.randomBytes(32).toString("hex");
+     const token = await new SignJWT({id:user.user_id, email:user.email, username:user.username})
+                .setProtectedHeader({ alg: "HS256" })
+                .setIssuedAt()
+                .setExpirationTime(AUTH_POLICY.access_expiry) 
+                .sign(AUTH_POLICY.getAccessSecret());
+
+    const refresh_token = crypto.randomBytes(32).toString("hex");
     
-    // store session in DB
+    // store refresh token in DB
     await prisma.session.create({
       data: {
         user_id: user.user_id,
-        token,
-        expires_at: new Date(Date.now() + 1000 * 60 * 60 * 1), // 1h
+        token:refresh_token,
+        expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
         last_active_at: new Date(),
       }
     });
     
+    //Store the refresh token
+    (await cookies()).set({
+      name:"refresh_token",
+      value:refresh_token,
+      httpOnly:true,
+      path:"/api/refresh_token",
+      maxAge:60 * 60 * 24 * 7, // 7 days
+    });
+
     // Set cookies
     (await cookies()).set({
       name: "session_token",
       value: token,
       httpOnly: true,
       path: "/",
-      maxAge: 60 * 60 * 24,
+      maxAge: 60 * 15,//15mins
     });
 
-    return NextResponse.json({ user: { id: user.user_id, email: user.email, usernane : user.username } });
-  } catch (error: any) {
+    return NextResponse.json({ user: { id: user.user_id, email: user.email, username : user.username } });
+  } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if(error.code ==  "P2002"){
+      if(error.code ===  "P2002"){
         const target = (error.meta as any)?.target ?? "field";
         return NextResponse.json({ error: `A user with this ${target} already exists.`}, { status: 400 });
       }
