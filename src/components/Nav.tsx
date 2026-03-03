@@ -52,7 +52,7 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
   }, [user, activeForm, isHovered, pathname]);
 
   const handleLogout = async () => {
-    const res = await fetch("/api/remove_session", {method:"PUT"});
+    const res = await fetch("/api/refresh_token", {method:"PUT"});
     if (res.ok) {
       setUser(null);
       router.push("/");

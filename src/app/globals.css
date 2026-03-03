@@ -80,16 +80,6 @@ body {
   color: white;
 }
 
-.dark .nav-account-section > a{
-  color: white;
-  background-color: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
-}
-.dark .nav-account-section > a:hover{
-  color: black;
-  background-color: white;
-}
-
 .nav-links-container >span{
   color:black;
   background-color: black;

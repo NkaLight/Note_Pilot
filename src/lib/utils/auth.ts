@@ -1,5 +1,6 @@
-// lib/util/auth.ts
 import crypto from "crypto";
+import { cookies } from "next/headers";
+
 export async function getRandomBytesHex(byteLength=32){
     return crypto.randomBytes(byteLength).toString("hex");
 }
@@ -29,4 +30,23 @@ export const AUTH_POLICY = {
         sameSite: "lax" as const,
         path: "/",
     }
+};
+export const setAuthCookies = async (token: string) => {
+  const jar = await cookies();
+  jar.set({
+    name: "refresh_token",
+    value: token,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    path: "/api/refresh_token",
+    maxAge: 60 * 60 * 24 * 7,
+  });
+  jar.set({
+    name:"session_token",
+    value:token, 
+    httpOnly:true,
+    secure:process.env.NODE_ENV === "production",
+    path:"/",
+    maxAge:60 * 15, 
+  });
 };

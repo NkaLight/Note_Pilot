@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { createContext, ReactNode, useContext, useState, useRef, useMemo, useEffect } from "react";
 
 type User = {
@@ -9,6 +10,7 @@ type User = {
     aiLevel?: string;
 }
 
+//user: { id: user.user_id, email: user.email, username : user.username }
 type SessionContextType = {
     user: User | null
     setUser: (user: User | null) => void;
@@ -35,7 +37,7 @@ export const SessionProvider = ({
         const [user, setUser] = useState<User | null>(initialUser || null);
         const [loading, setLoading] = useState(!initialUser);
         const isRefreshing = useRef(false);
-
+        const router = useRouter();
 
         useEffect(()=>{
             //Run on mount when there is no user
@@ -53,6 +55,7 @@ export const SessionProvider = ({
                             console.log(data.error);
                             console.log(data.application_user);
                             setUser(data.user);
+                            
                         }else{
                             setUser(null);
                         }

@@ -9,7 +9,7 @@ import { userAgent } from "next/server";
 /*Function should validate the refresh_token and return the new access_token */
 export async function refreshLogic(refresh_token:string){
     const session = await prisma.session.findUnique({
-        where:{token:refresh_token},
+        where:{token:refresh_token, is_used:false},
         include:{
             application_user:true
         }
@@ -101,6 +101,14 @@ export async function refreshLogic(refresh_token:string){
                 .setIssuedAt()
                 .setExpirationTime(AUTH_POLICY.access_expiry) 
                 .sign(AUTH_POLICY.getAccessSecret());
+                
+        (await cookies()).set({
+                name: "session_token",
+                value: access_token,
+                httpOnly: true,
+                path: "/",
+                maxAge: 60 * 60 * 24 * 7,// 7 days
+                });
         return user;
     }else{
         //Using an expired token.
