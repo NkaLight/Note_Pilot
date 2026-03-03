@@ -1,4 +1,4 @@
-import { getAuthedUserId } from "@/lib/auth";
+import { getSessionUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 
@@ -11,7 +11,8 @@ export async function DELETE(
 ) {
     try {
         // Get authenticated user
-        const userId = await getAuthedUserId();
+        const user = await getSessionUser();
+        const userId = user.user_id;
         if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
