@@ -1,6 +1,5 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { z } from "zod";  
 import { markAsUsed } from "@/lib/db_access/refresh_token";
 
 /**
@@ -8,7 +7,7 @@ import { markAsUsed } from "@/lib/db_access/refresh_token";
  * @description Retrieve access token from header, clear from cache, mark refresh token as used in DB.
  * @returns the user object or null if session is invalid/expired.
  */
-export async function POST(req:NextResponse){
+export async function PUT(req:NextRequest){
     try{
         const access_token = (await cookies()).get("access_token");
         const refresh_token =  (await cookies()).get("refresh_token");
