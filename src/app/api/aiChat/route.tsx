@@ -14,7 +14,7 @@ const chatMessageReqSchema = z.object({
     uploadId: z.number().optional(),
     uploadIds: z.array(z.number()).optional(),
     paperId: z.number().optional()
-})
+});
 
 /** IGNORE: This function is for RAG (Retrieval Augmented Generation)
 * however, the RAG implementation is not complete yet.
@@ -50,7 +50,7 @@ export async function POST(req: Request){
         
         const body = await req.json();
         const parsed = chatMessageReqSchema.safeParse(body);
-        if(!parsed.success) return NextResponse.json({error:"Invalid request body"}, {status:400})
+        if(!parsed.success) return NextResponse.json({error:"Invalid request body"}, {status:400});
         
         const {message, uploadId, uploadIds, paperId} = parsed.data;
 
@@ -92,7 +92,7 @@ export async function POST(req: Request){
         */
 
         //Construct message 
-        const aiAPIUrl = "https://openrouter.ai/api/v1/chat/completions"
+        const aiAPIUrl = "https://openrouter.ai/api/v1/chat/completions";
 
 
         // Construct message with context
@@ -123,7 +123,7 @@ export async function POST(req: Request){
         });
 
         if (!resp.ok){
-            return NextResponse.json({error: resp.statusText}, {status: resp.status})
+            return NextResponse.json({error: resp.statusText}, {status: resp.status});
         }
         
         const data = await resp.json();
@@ -139,7 +139,7 @@ export async function POST(req: Request){
             },
         }) */
     }catch (err: unknown){
-        console.error(err)
+        console.error(err);
         let normError: Error;
         if(err instanceof Error){
             normError = err;
@@ -150,9 +150,9 @@ export async function POST(req: Request){
         //Handling specific error types here.
         if (normError instanceof z.ZodError) {
         // For Zod validation errors, return the structured error messages.
-            console.log("ZOD")
+            console.log("ZOD");
             return NextResponse.json({ error: normError.message }, { status: 400 });
         }
-        return NextResponse.json({error: normError.message}, {status: 500}) //Return null 
+        return NextResponse.json({error: normError.message}, {status: 500}); //Return null 
     }
 }

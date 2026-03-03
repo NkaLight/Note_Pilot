@@ -23,7 +23,7 @@ type AILevel = "child" | "student" | "advanced"; // Define the level at which th
 export default function AccountPage() {
     const { theme } = useTheme();
     const { user, setUser } = useSession();
-    console.log(user)
+    console.log(user);
 
     // Local state for profile fields
     const [username, setUsername] = useState(user?.username ?? "");

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import {getSessionUser} from  "@/lib/auth"
+import {getSessionUser} from  "@/lib/auth";
 import { redirect } from "next/navigation";
 
 /** Account Page React Component
@@ -9,7 +9,7 @@ import { redirect } from "next/navigation";
 export default async function AccountPage({ children }: { children: ReactNode }) {
   const user = await getSessionUser();
   if(!user){
-    redirect("/") // Enforce Authenticated users accessing this page
+    redirect("/");
   }
   return (
     <div className="min-h-screen flex flex-col">

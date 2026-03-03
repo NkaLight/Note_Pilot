@@ -3,7 +3,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
-import { getAuthedUserId } from "@/lib/auth"; // returns user ID or null
+import { getSessionUser } from "@/lib/auth"; // returns user ID or null
 
 /**
  * API route for updating/deleting user account (Node runtime)
@@ -39,7 +39,8 @@ const dbToUiLevel: Record<string, string> = {
  * @returns JSON
  */
 export async function PUT(req: NextRequest) {
-    const userId = await getAuthedUserId();
+    const user = await getSessionUser();
+    const userId = user.user_id;
     if (!userId) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
