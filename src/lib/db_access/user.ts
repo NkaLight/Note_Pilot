@@ -14,3 +14,10 @@ export async function getUser(refresh_token:string){
         }
     });
 }
+export async function getUserByEmail(email:string){
+    return await prisma.application_user.findUnique({
+        where:{
+            email:email,
+        }
+    });
+}
