@@ -17,15 +17,17 @@ const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 export default defineConfig({
   testDir: "tests",
   /* Run tests in files in parallel */
-  fullyParallel: true,
+  fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1, 
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
+  //Global timeout
+  timeout: 60000,
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
@@ -33,23 +35,41 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+    actionTimeout: 5000,
+    navigationTimeout: 7500,
+  },
+  expect: {
+    // 10s timeout for assertions like expect(locator).toBeVisible()
+    timeout: 10000,
   },
 
   /* Configure projects for major browsers */
   projects: [
+    //Start with the setup projects
+    // 1. Define the Setup Project
+    {
+      name: 'setup',
+      testMatch: /auth\.setup\.ts/, 
+      // Increase timeout for DB push and Auth flow
+      timeout: 180 * 1000,
+    },
+
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Chrome'], storageState: 'playwright/.auth/user.json',},
+      dependencies: ['setup'],
     },
 
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: { ...devices['Desktop Firefox'], storageState: 'playwright/.auth/user.json',},
+      dependencies: ['setup'],
     },
 
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      use: { ...devices['Desktop Safari'], storageState: 'playwright/.auth/user.json', },
+      dependencies: ['setup'],
     },
 
     /* Test against mobile viewports. */
@@ -78,5 +98,8 @@ export default defineConfig({
     command: 'npm run dev',
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
+    env: {
+      DATABASE_URL: process.env.DATABASE_URL_TEST,
+  },
   },
 });

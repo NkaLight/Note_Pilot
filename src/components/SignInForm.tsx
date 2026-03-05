@@ -20,7 +20,7 @@ export default function SignInForm({closeForm}: SignInFormProps){
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsLoading(true)
+        setIsLoading(true);
     try {
     const res = await fetch("/api/signin", {
       method: "POST",
@@ -37,23 +37,23 @@ export default function SignInForm({closeForm}: SignInFormProps){
 
     if (!res.ok) {
       // Server returned an error
-      setError(data.error)
-      setIsLoading(false)
+      setError(data.error);
+      setIsLoading(false);
       return;
     }
 
     // Success
-    setUser(data)
-    setIsLoading(false)
-    closeForm()
+    setUser(data);
+    setIsLoading(false);
+    closeForm();
     
     // Redirect to dashboard after successful login
     router.push("/dashboard");
     
     } catch (error) {
     console.error(error);
-    setIsLoading(false)
-    setError("Unexpected server error")
+    setIsLoading(false);
+    setError("Unexpected server error");
   }
 };
 
@@ -68,6 +68,7 @@ export default function SignInForm({closeForm}: SignInFormProps){
                     <input
                         id="email"
                         type="email"
+                        name="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className="mt-1 block w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -81,6 +82,7 @@ export default function SignInForm({closeForm}: SignInFormProps){
                     <input
                         id="password"
                         type="password"
+                        name="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="mt-1 block w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -114,5 +116,5 @@ export default function SignInForm({closeForm}: SignInFormProps){
                  </div>)}
             </form>
         </div>
-    )
+    );
 }

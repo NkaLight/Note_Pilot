@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import {getSessionUser} from  "@/lib/auth";
 import { redirect } from "next/navigation";
 import React from "react";
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+  description: "",
+};
+
 
 /** Dashboard React Component
  * @description 

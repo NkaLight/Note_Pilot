@@ -6,14 +6,16 @@ import type { paper } from "@prisma/client";
 import { AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 /* ---------- AddPaperForm Component ---------- */
-const AddPaperForm = ({ closeForm }: { closeForm: () => void }) => {
+const AddPaperForm = ({ closeForm, onRefresh }: { closeForm: () => void;onRefresh: ()=> void},) => {
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [descr, setDescr] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +23,7 @@ const AddPaperForm = ({ closeForm }: { closeForm: () => void }) => {
     try {
       const res = await fetch("/api/papers", {
         method: "POST",
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code, name, descr }),
       });
       if (!res.ok) {
@@ -33,6 +35,7 @@ const AddPaperForm = ({ closeForm }: { closeForm: () => void }) => {
       const data = await res.json();
       if (data.status === 200) {
         setIsSubmitting(false);
+        onRefresh();
         closeForm();
       }
     } catch {
@@ -47,6 +50,7 @@ const AddPaperForm = ({ closeForm }: { closeForm: () => void }) => {
       <input
         type="text"
         value={name}
+        name="title"
         onChange={(e) => setName(e.target.value)}
         placeholder="Paper Title"
         className="w-full p-2 border rounded"
@@ -55,6 +59,7 @@ const AddPaperForm = ({ closeForm }: { closeForm: () => void }) => {
       <input
         type="text"
         value={code}
+        name="paper_code"
         onChange={(e) => setCode(e.target.value)}
         placeholder="Paper Code"
         className="w-full p-2 border rounded"
@@ -63,6 +68,7 @@ const AddPaperForm = ({ closeForm }: { closeForm: () => void }) => {
       <textarea
         value={descr}
         onChange={(e) => setDescr(e.target.value)}
+        name="descr"
         placeholder="Paper Description"
         className="w-full p-2 border rounded"
         rows={5}
@@ -84,15 +90,18 @@ const AddPaperForm = ({ closeForm }: { closeForm: () => void }) => {
 const EditPaper = ({
   closeForm,
   paperItem,
+  onRefresh
 }: {
   closeForm: () => void;
   paperItem: paper;
+  onRefresh:()=>void;
 }) => {
   const [name, setName] = useState(paperItem.name ?? "");
   const [code, setCode] = useState(paperItem.code ?? "");
   const [descr, setDescr] = useState(paperItem.description ?? "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const router = useRouter();
 
   const handleUpdate = async () => {
     setIsSubmitting(true);
@@ -115,6 +124,7 @@ const EditPaper = ({
       }
       await res.json();
       setIsSubmitting(false);
+      onRefresh();
       closeForm();
     } catch {
       setError("Unexpected Server error");
@@ -138,6 +148,7 @@ const EditPaper = ({
       }
       if (res.status === 200) {
         setIsSubmitting(false);
+        onRefresh();
         closeForm();
       }
     } catch {
@@ -154,6 +165,7 @@ const EditPaper = ({
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Paper Title"
+        name="paper_title"
         className="w-full p-2 border rounded"
         required
       />
@@ -161,6 +173,7 @@ const EditPaper = ({
         type="text"
         value={code}
         onChange={(e) => setCode(e.target.value)}
+        name="paper_code"
         placeholder="Paper Code"
         className="w-full p-2 border rounded"
         required
@@ -169,6 +182,7 @@ const EditPaper = ({
         value={descr}
         onChange={(e) => setDescr(e.target.value)}
         placeholder="Paper Description"
+        name="paper_desc"
         className="w-full p-2 border rounded"
         rows={5}
         required
@@ -202,9 +216,7 @@ export default function DashboardPage(props: { onloadPapers: paper[] | null }) {
     "addPaper" | "confirmRemovePaper" | "editPaper" | null
   >(null);
   const [selectedPaper, setSelectedPaper] = useState<paper | null>();
-
-  useEffect(() => {
-    async function fetchSummaries() {
+  const fetchSummaries = async () => {
       setLoading(true);
       try {
         const res = await fetch("/api/papers", {
@@ -216,7 +228,9 @@ export default function DashboardPage(props: { onloadPapers: paper[] | null }) {
       } finally {
         setLoading(false);
       }
-    }
+    };
+
+  useEffect(() => {
     fetchSummaries();
   }, []);
 
@@ -277,8 +291,9 @@ export default function DashboardPage(props: { onloadPapers: paper[] | null }) {
                     e.preventDefault();
                     handleSelectPaper(paper);
                   }}
+                  data-testid={paper.code}
                 >
-                  <EditIcon className="w-5 h-5 text-black hover:text-blue-500 transition duration-1000" />
+                  <EditIcon className="w-5 h-5 text-black hover:text-blue-500 transition duration-1000"/>
                 </div>
                 <p>{paper.code}</p>
               </div>
@@ -314,7 +329,7 @@ export default function DashboardPage(props: { onloadPapers: paper[] | null }) {
             onClose={() => setActiveForm(null)}
             key={"addPaper"}
           >
-            <AddPaperForm closeForm={handleCloseModal} />
+            <AddPaperForm closeForm={handleCloseModal} onRefresh={fetchSummaries}/>
           </Modal>
         )}
         {activeForm === "editPaper" && selectedPaper && (
@@ -323,7 +338,7 @@ export default function DashboardPage(props: { onloadPapers: paper[] | null }) {
             onClose={() => setActiveForm(null)}
             key={"editPaper"}
           >
-            <EditPaper closeForm={handleCloseModal} paperItem={selectedPaper} />
+            <EditPaper closeForm={handleCloseModal} paperItem={selectedPaper} onRefresh={fetchSummaries} />
           </Modal>
         )}
       </AnimatePresence>
