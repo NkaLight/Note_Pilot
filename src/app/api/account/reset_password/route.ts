@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { resetPassword } from "@/lib/services/user";
 
 export async function POST(req:NextRequest){
     const {token, newPassword} = await req.json();
