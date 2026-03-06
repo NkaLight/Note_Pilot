@@ -16,6 +16,8 @@ const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
  */
 export default defineConfig({
   testDir: "tests",
+  globalSetup: require.resolve('./tests/global-setup'),
+
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -23,7 +25,7 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: 1, 
+  workers: process.env.CI ? '50%' : undefined, 
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   //Global timeout
@@ -46,7 +48,6 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     //Start with the setup projects
-    // 1. Define the Setup Project
     {
       name: 'setup',
       testMatch: /auth\.setup\.ts/, 
@@ -100,6 +101,7 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     env: {
       DATABASE_URL: process.env.DATABASE_URL_TEST,
+    },
   },
-  },
+
 });
