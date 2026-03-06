@@ -2,8 +2,6 @@ import { test as setup, expect } from '@playwright/test';
 import { execSync } from 'child_process';
 import { PrismaClient } from "@prisma/client";
 import bcrypt from 'bcryptjs';
-import fs from 'fs';
-import path from 'path';
 
 
 setup('database-and-auth-setup', async ({ page }) => {
