@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 
 export async function getPapersByUserId() {
   const user = await getSessionUser();
-  if (!user.user_id) return null;
+  if (!user?.user_id) return null;
 
   try {
     const papers = await prisma.paper.findMany({

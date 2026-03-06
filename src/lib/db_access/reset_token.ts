@@ -1,11 +1,12 @@
 import { prisma } from "../db";
+import { DbError } from "../error";
 
-export async function storeResetTokenHash(tokenHash, user){
-    await prisma.refresh_token.create({
+export async function storeResetTokenHash(tokenHash:string, user){
+    await prisma.reset_token.create({
         data:{
             token_hash:tokenHash,
-            user_id:user.user_id
-        }
+            user_id:user.user_id,
+        },
     });
 }
 

@@ -54,6 +54,7 @@ export const SessionProvider = ({
                             console.log(data.user);
                             console.log(data.error);
                             console.log(data.application_user);
+                            router.refresh();
                             setUser(data.user);
                             
                         }else{

@@ -1,11 +1,9 @@
-import { cookies } from "next/headers";
-import { getSessionUser } from "@/lib/auth";
+import {getSessionUser} from  "@/lib/auth";
 import { redirect } from "next/navigation";
 import Button from "@/components/TryForFreeButton";
 
 export default async function LandingPage() {
   const user = await getSessionUser();
-  console.error(user);
   if (user) {
     redirect("/dashboard"); // Redirect if signed in
   }
