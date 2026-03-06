@@ -6,7 +6,7 @@ export async function getRandomBytesHex(byteLength=32){
 }
 export const AUTH_POLICY = {
     getAccessSecret: () => {
-        const secret = process.env.ACCESS_TOKEN_SECRETE;
+        const secret = process.env.ACCESS_TOKEN_SECRET;
         if (!secret) throw new Error("ACCESS_TOKEN_SECRET is not defined in environment variables");
         return new TextEncoder().encode(secret);
     },
@@ -20,8 +20,8 @@ export const AUTH_POLICY = {
     
     // Centralized Secrets
     secrets: {
-        access: new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRETE),
-        refresh: new TextEncoder().encode(process.env.REFRESH_TOKEN_SECRETE),
+        access: new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET),
+        refresh: new TextEncoder().encode(process.env.REFRESH_TOKEN_SECRET),
     },
     
     // Cookie Policies

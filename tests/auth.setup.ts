@@ -3,7 +3,6 @@ import { execSync } from 'child_process';
 import { PrismaClient } from "@prisma/client";
 import bcrypt from 'bcryptjs';
 
-
 setup('database-and-auth-setup', async ({ page }) => {
   console.log('🏗️  Resetting test schema structure...');
   const adminPrisma = new PrismaClient({

@@ -17,9 +17,10 @@
 import { prisma } from "@/lib/db";
 import { jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { AUTH_POLICY } from "./utils/auth";
 
 export const SESSION_COOKIE = "session_token";
-const JWT_SECRET = new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRETE);
+const JWT_SECRET = new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET);
 
 export type SessionUser = {
   user_id: number;
@@ -36,7 +37,7 @@ export async function getSessionUser():Promise<SessionUser | any>{
   const token = cookieJar.get("session_token")?.value;
   if(!token) return null;
   try{
-      const { payload } = await jwtVerify(token, JWT_SECRET); 
+      const { payload } = await jwtVerify(token, AUTH_POLICY.getAccessSecret()); 
       return{
         user_id: payload.id, 
         email:payload.email,
