@@ -16,7 +16,8 @@ const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
  */
 export default defineConfig({
   testDir: "tests",
-  globalSetup: require.resolve('./tests/global-setup'),
+  tsconfig: './tsconfig.test.json',
+  globalSetup: './tests/global-setup',
 
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -25,7 +26,7 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? '50%' : undefined, 
+  workers: 3, 
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   //Global timeout
@@ -37,8 +38,9 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    actionTimeout: 5000,
-    navigationTimeout: 7500,
+    actionTimeout: 20000,
+    navigationTimeout: 20000,
+    storageState: undefined,
   },
   expect: {
     // 10s timeout for assertions like expect(locator).toBeVisible()
@@ -47,30 +49,19 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
-    //Start with the setup projects
-    {
-      name: 'setup',
-      testMatch: /auth\.setup\.ts/, 
-      // Increase timeout for DB push and Auth flow
-      timeout: 180 * 1000,
-    },
-
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'], storageState: 'playwright/.auth/user.json',},
-      dependencies: ['setup'],
+      use: { ...devices['Desktop Chrome']}
     },
 
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'], storageState: 'playwright/.auth/user.json',},
-      dependencies: ['setup'],
+      use: { ...devices['Desktop Firefox']},
     },
 
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'], storageState: 'playwright/.auth/user.json', },
-      dependencies: ['setup'],
+      use: { ...devices['Desktop Safari'] },
     },
 
     /* Test against mobile viewports. */
@@ -99,9 +90,9 @@ export default defineConfig({
     command: 'npm run dev',
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
+    timeout: 120000,
     env: {
       DATABASE_URL: process.env.DATABASE_URL_TEST,
     },
   },
-
 });

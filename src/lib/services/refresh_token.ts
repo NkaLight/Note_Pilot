@@ -2,14 +2,14 @@ import { prisma } from "@/lib/db";
 import crypto from "crypto";
 import { cookies } from "next/headers";
 import { SignJWT } from "jose";
-import { AUTH_POLICY } from "../utils/auth";
+import { AUTH_POLICY, setAccessToken, setAuthCookies } from "../utils/auth";
 import { userAgent } from "next/server";
 
 
 /*Function should validate the refresh_token and return the new access_token */
-export async function refreshLogic(refresh_token:string){
+export async function refreshLogic(curr_refresh_token:string){
     const session = await prisma.session.findUnique({
-        where:{token:refresh_token, is_used:false},
+        where:{token:curr_refresh_token, is_used:false},
         include:{
             application_user:true
         }
@@ -49,43 +49,29 @@ export async function refreshLogic(refresh_token:string){
                 .setIssuedAt()
                 .setExpirationTime(AUTH_POLICY.access_expiry) 
                 .sign(AUTH_POLICY.getAccessSecret());
-        const refresh_token = crypto.randomBytes(32).toString("hex");
+        const new_refresh_token = crypto.randomBytes(32).toString("hex");
         try{
             console.error(session);
             const result = await prisma.session.create({
                 data: {
                     user_id: session.user_id,
-                    token:refresh_token,
+                    token:new_refresh_token,
                     expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // +7 days
                     last_active_at: new Date(),
                     family_id:session.family_id
                 },
             });
-            //Mark the old refresh_token as used.
+            //Mark the current refresh_token as used.
             await prisma.session.update({
                 where:{
-                    token:refresh_token,
+                    token:curr_refresh_token,
                 },
                 data:{
                     is_used:true
                 }
             });
             //Store in session cookie
-            (await cookies()).set({
-                name: "refresh_token",
-                value: result.token,
-                httpOnly: true,
-                path: "/api/refresh_token",
-                maxAge: 60 * 60 * 24 * 7,// 7 days
-                });
-            (await cookies()).set({
-                name: "session_token",
-                value: access_token,
-                httpOnly: true,
-                path: "/",
-                maxAge: 60 * 60 * 24 * 7,// 7 days
-                });
-            
+            await setAuthCookies(access_token, new_refresh_token);
             return user;//Return the user object on complete
         }catch(error){
             console.error(error);
@@ -102,13 +88,7 @@ export async function refreshLogic(refresh_token:string){
                 .setExpirationTime(AUTH_POLICY.access_expiry) 
                 .sign(AUTH_POLICY.getAccessSecret());
                 
-        (await cookies()).set({
-                name: "session_token",
-                value: access_token,
-                httpOnly: true,
-                path: "/",
-                maxAge: 60 * 60 * 24 * 7,// 7 days
-                });
+        await setAccessToken(access_token);
         return user;
     }else{
         //Using an expired token.

@@ -17,10 +17,8 @@ import { ServiceError, DbError } from "@/lib/error";
 export async function GET(request: Request) {
     try {
         const user = await getSessionUser();
-        const userId = user.user_id;
-        if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        if(!user || !user.user_id) return NextResponse.json({ error:"Unauthorized" }, {status : 401});
+        const userId  = user.user_id;
         const { searchParams } = new URL(request.url);
         const uploadId = searchParams.get("uploadId");
         if (!uploadId) {
@@ -52,11 +50,8 @@ export async function GET(request: Request) {
 export async function POST(req: Request){
     try{
         const user = await getSessionUser();
-        const userId = user.user_id;
-        if(!userId) {
-            return NextResponse.json({error: "Unauthorized"}, {status: 401});
-        }
-
+        if(!user || !user.user_id) return NextResponse.json({ error:"Unauthorized" }, {status : 401});
+        const userId  = user.user_id;
         const {mode, uploadId, lectureId, userAnswer, questions, problemId, userAnswerId} = await req.json();
         console.log(mode, uploadId, lectureId, userAnswer, questions);
 

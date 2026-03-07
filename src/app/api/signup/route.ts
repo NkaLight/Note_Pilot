@@ -6,7 +6,7 @@ import { Prisma } from "@prisma/client";
 import crypto from "crypto";
 import { cookies } from "next/headers";
 import { SignJWT } from "jose";
-import { AUTH_POLICY } from "@/lib/utils/auth";
+import { AUTH_POLICY, setAuthCookies } from "@/lib/utils/auth";
 
 /**
  * API route to handle user signup.
@@ -52,11 +52,15 @@ export async function POST(request: Request) {
 
 
     // Generate and store session storage in DB
-     const token = await new SignJWT({id:user.user_id, email:user.email, username:user.username})
-                .setProtectedHeader({ alg: "HS256" })
-                .setIssuedAt()
-                .setExpirationTime(AUTH_POLICY.access_expiry) 
-                .sign(AUTH_POLICY.getAccessSecret());
+     const token = await new SignJWT({
+      id:user.user_id, 
+      email:user.email, 
+      username:user.username
+    })
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime(AUTH_POLICY.access_expiry) 
+      .sign(AUTH_POLICY.getAccessSecret());
 
     const refresh_token = crypto.randomBytes(32).toString("hex");
     
@@ -70,23 +74,8 @@ export async function POST(request: Request) {
       }
     });
     
-    //Store the refresh token
-    (await cookies()).set({
-      name:"refresh_token",
-      value:refresh_token,
-      httpOnly:true,
-      path:"/api/refresh_token",
-      maxAge:60 * 60 * 24 * 7, // 7 days
-    });
-
-    // Set cookies
-    (await cookies()).set({
-      name: "session_token",
-      value: token,
-      httpOnly: true,
-      path: "/",
-      maxAge: 60 * 15,//15mins
-    });
+    //Store the token pairs
+    await setAuthCookies(token, refresh_token);
 
     return NextResponse.json({ user: { id: user.user_id, email: user.email, username : user.username } });
   } catch (error) {
