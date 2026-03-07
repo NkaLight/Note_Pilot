@@ -4,8 +4,9 @@ import crypto from "crypto";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { AUTH_POLICY } from "@/lib/utils/auth";
+import { AUTH_POLICY, setAuthCookies} from "@/lib/utils/auth";
 import { SignJWT } from "jose";
+
 
 /**
  * API route for user sign-in.
@@ -66,26 +67,10 @@ export async function POST(request: Request) {
         last_active_at: new Date(),
       },
     });
-
-    (await cookies()).set({
-      name: "refresh_token",
-      value: refresh_token,
-      httpOnly: true,
-      path: "/api/refresh_token",
-      maxAge: 60 * 60 * 24 * 7,// 7 days
-    });
-
-    /**Sets the access token for quick lookup*/
-    (await cookies()).set({
-      name: "session_token",
-      value: token,
-      httpOnly: true,
-      path: "/",
-      maxAge: 60 * 15,// 15min
-    });
+    //Set http-only cookies
+    await setAuthCookies(token,refresh_token);
     
     return NextResponse.json({ user: { id: user.user_id, email: user.email, username : user.username } });
-
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

@@ -18,12 +18,6 @@ export const AUTH_POLICY = {
     // 7 days * 24h * 60m * 60s * 1000ms
     refresh_ms: 7 * 24 * 60 * 60 * 1000, 
     
-    // Centralized Secrets
-    secrets: {
-        access: new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET),
-        refresh: new TextEncoder().encode(process.env.REFRESH_TOKEN_SECRET),
-    },
-    
     // Cookie Policies
     cookie: {
         httpOnly: true,
@@ -31,22 +25,34 @@ export const AUTH_POLICY = {
         path: "/",
     }
 };
-export const setAuthCookies = async (token: string) => {
+export const setAuthCookies = async (accessToken: string,refreshToken:string) => {
   const jar = await cookies();
   jar.set({
     name: "refresh_token",
-    value: token,
+    value: refreshToken,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     path: "/api/refresh_token",
-    maxAge: 60 * 60 * 24 * 7,
+    maxAge: 60 * 60 * 24 * 7, // 7 days
   });
   jar.set({
     name:"session_token",
-    value:token, 
+    value:accessToken, 
     httpOnly:true,
     secure:process.env.NODE_ENV === "production",
     path:"/",
-    maxAge:60 * 15, 
+    maxAge:60 * 15, // 15min
+  });
+};
+
+export const setAccessToken = async (accessToken:string) =>{
+    const jar = await cookies();
+    jar.set({
+    name:"session_token",
+    value:accessToken, 
+    httpOnly:true,
+    secure:process.env.NODE_ENV === "production",
+    path:"/",
+    maxAge:60 * 15, // 15min
   });
 };
