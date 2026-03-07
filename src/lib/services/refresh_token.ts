@@ -4,7 +4,6 @@ import { cookies } from "next/headers";
 import { SignJWT } from "jose";
 import { AUTH_POLICY, setAccessToken, setAuthCookies } from "../utils/auth";
 
-
 /*Function should validate the refresh_token and return the new access_token */
 export async function refreshLogic(curr_refresh_token:string){
     const session = await prisma.session.findUnique({
