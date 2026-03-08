@@ -11,6 +11,7 @@ import { useAuthContext } from "@/context/AuthContext";
 import Modal from "@/components/Modal";
 import SignInForm from "@/components/SignInForm";
 import SignUpForm from "@/components/SignUpForm";
+import ResetPasswordForm from "@/components/ResetPasswordForm";
 
 // -------------------------
 // Navigation Configuration
@@ -126,6 +127,11 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
         {activeForm === "signUp" && (
           <Modal isOpen onClose={() => setActiveForm(null)}>
             <SignUpForm closeForm={() => setActiveForm(null)} />
+          </Modal>
+        )}
+        {activeForm === "forgotPassword" && (
+          <Modal isOpen onClose={() => setActiveForm(null)}>
+            <ResetPasswordForm closeForm={() => setActiveForm(null)} />
           </Modal>
         )}
       </AnimatePresence>

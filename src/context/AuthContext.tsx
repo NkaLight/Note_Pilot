@@ -2,7 +2,7 @@
 
 import React, { createContext, ReactNode, useContext, useState } from 'react';
 
-type AuthStatus = "signUp" | "signIn" | "";
+type AuthStatus = "signUp" | "signIn" | "forgotPassword" | "";
 
 type AuthContextType = {
   // New state for this context

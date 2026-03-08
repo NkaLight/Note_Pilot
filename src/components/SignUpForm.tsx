@@ -3,6 +3,7 @@ import { useSession } from "@/context/SessionContext";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import LoadingCircles from "@/components/LoadingCircles";
+import { useAuthContext } from "@/context/AuthContext";
 
 // Define the type for the props
 interface SignUpFormProps {
@@ -16,7 +17,7 @@ export default function SignUpForm({closeForm}: SignUpFormProps){
     const [isLoading, setIsLoading] = useState(false);
     const {setUser} = useSession();
     const router = useRouter();
-    
+    const { activeForm, setActiveForm } = useAuthContext();
 
 const handleSubmit = async (e: React.FormEvent) =>  {
   e.preventDefault();
@@ -39,7 +40,7 @@ const handleSubmit = async (e: React.FormEvent) =>  {
     if (!res.ok) {
       // Server returned an error
       setIsLoading(false);
-      setError(data.error || "Failed to create a user");
+      setError("Failed to create a user");
       return;
     }
 
@@ -122,7 +123,7 @@ const handleSubmit = async (e: React.FormEvent) =>  {
               <span className="px-3 text-sm text-gray-500">Or</span>
               <div className="flex-grow border-t border-gray-300"></div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-3" onClick={()=> setActiveForm("forgotPassword")}>
               Forgot Password
             </div>
             {error &&( 
