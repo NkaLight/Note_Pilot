@@ -46,4 +46,3 @@ test.describe("API endpoints unauthenticated", ()=>{
         expect((await request.get("/api/problemsets", {data: {uploadId:9}})).status()).toBe(401);
     });
 });
-

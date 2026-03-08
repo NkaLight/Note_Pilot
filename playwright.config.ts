@@ -15,9 +15,9 @@ const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: "tests",
+  testDir: './tests/e2e',
   tsconfig: './tsconfig.test.json',
-  globalSetup: './tests/global-setup',
+  globalSetup: './tests/e2e/global-setup',
 
   /* Run tests in files in parallel */
   fullyParallel: true,

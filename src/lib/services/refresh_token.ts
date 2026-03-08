@@ -3,7 +3,6 @@ import crypto from "crypto";
 import { cookies } from "next/headers";
 import { SignJWT } from "jose";
 import { AUTH_POLICY, setAccessToken, setAuthCookies } from "../utils/auth";
-import { userAgent } from "next/server";
 
 
 /*Function should validate the refresh_token and return the new access_token */
