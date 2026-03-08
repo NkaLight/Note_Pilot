@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { createIsolatedUser, cleanupUser } from './helpers/create-test-user';
+import { createIsolatedUser, cleanupUser } from '../../../helpers/create-test-user';
 
 let userId: number;
 
