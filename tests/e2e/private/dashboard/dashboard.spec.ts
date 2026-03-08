@@ -1,16 +1,18 @@
-import { test, expect } from '@playwright/test';
+/* eslint-disable quotes */
+import { test as base, expect } from '@playwright/test';
 import { createIsolatedUser, cleanupUser } from '../../../helpers/create-test-user';
-
-let userId: number;
-
-test.beforeEach(async ({ context }) => {
-  const { user } = await createIsolatedUser(context);
-  userId = user.user_id;
-  console.error("DASHBAORD user: ",  userId);
-});
-
-test.afterEach(async () => {
-  await cleanupUser(userId);
+const test = base.extend<{
+  testUser: { userId: number };
+}>({
+  testUser: async ({ context }, Use) => {
+    const { user } = await createIsolatedUser(context);
+    // Run the test with this user
+    await Use({
+      userId: user.user_id,
+    });
+    // Teardown after test completes
+    await cleanupUser(user.user_id);
+  },
 });
 
 test.describe('Dashboard auth guards', () => {
