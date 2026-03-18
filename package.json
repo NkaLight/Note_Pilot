@@ -11,7 +11,8 @@
     "lint:fix": "next lint --fix",
     "lint:report": "next lint --output-file eslint-report.json --format json",
     "setup_python": "node scripts/setup_python.js",
-    "test": "npx kill-port 3000 && dotenv -e .env -- npx playwright test"
+    "test:e2e": "docker compose -f docker-compose.test.yml up -d --wait && dotenv -e .env -e .env.test -- npx playwright test", 
+    "test:e2e:stop": "docker compose -f docker-compose.test.yml down --volumes"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.888.0",

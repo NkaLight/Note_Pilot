@@ -37,7 +37,7 @@ export default function Verify(){
                 }),
             });
             const data = await result.json();
-            if(result.status){
+            if(result.ok){
                 setOutput(data.message);
             }else{
                 setError(data.error());

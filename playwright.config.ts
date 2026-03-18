@@ -4,10 +4,10 @@ import { defineConfig, devices } from '@playwright/test';
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
-
+import dotenv from 'dotenv';
+import path from 'path';
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+dotenv.config({ path: path.resolve(__dirname, '.env.test'), override: true });
 const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 
@@ -26,7 +26,7 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: 2, 
+  workers: process.env.CI ? 3 : 2, 
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   //Global timeout
@@ -53,7 +53,6 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome']}
     },
-
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox']},
@@ -87,12 +86,9 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run dev',
+    command: 'dotenv -e .env -e .env.test -- npm run dev',
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
-    timeout: 120000,
-    env: {
-      DATABASE_URL: process.env.DATABASE_URL_TEST,
-    },
+    timeout: 120000
   },
 });

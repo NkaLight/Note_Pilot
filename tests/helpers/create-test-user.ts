@@ -4,9 +4,15 @@ import { SignJWT } from 'jose';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { AUTH_POLICY } from '@/lib/utils/auth';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Each worker process loads env vars independently
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+dotenv.config({ path: path.resolve(process.cwd(), '.env.test'), override: true });
 
 const prisma = new PrismaClient({
-  datasources: { db: { url: process.env.DATABASE_URL_TEST } },
+  datasources: { db: { url: process.env.DATABASE_URL }},
 });
 
 export async function createIsolatedUser(context: BrowserContext) {

@@ -53,10 +53,14 @@ test("Email link valid", async ({browser, testUser })=>{
 
     // Generate Magic Link Token (The "Email Ownership" Key)
     await page.goto(`/auth/reset_password?token=${rawToken}`);
+    // Log how long verify takes
+    const start = Date.now();
+    await page.waitForLoadState("networkidle");
+    console.error(`networkidle after: ${Date.now() - start}ms`);
     await page.getByPlaceholder("Password", {exact:true}).fill(newPassword);
     await page.getByPlaceholder("Confirm Password", {exact:true}).fill(newPassword);
-    await page.getByText("RESET", {exact:true}).click();
-
+    await page.getByRole("button", { name: "RESET" }).click();
+    await page.waitForLoadState("networkidle"); 
     await expect(page.getByText("Password reset successfully")).toBeVisible();
     await freshContext.close();
 });
