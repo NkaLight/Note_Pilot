@@ -9,8 +9,6 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL_TEST: ${{ secrets.DATABASE_URL_TEST }}
-      DIRECT_URL_TEST: ${{ secrets.DIRECT_URL_TEST }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DIRECT_URL: ${{ secrets.DIRECT_URL }}
       ACCESS_TOKEN_SECRET : ${{ secrets.ACCESS_TOKEN_SECRET}}

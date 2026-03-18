@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams ,useRouter } from "next/navigation";
 import LoadingCircles from "@/components/LoadingCircles";
 import { useAuthContext } from "@/context/AuthContext";
+import {Lock, Eye, EyeOff} from "lucide-react";
 
 export default function Verify(){
     const searchParams = useSearchParams();
@@ -15,7 +16,9 @@ export default function Verify(){
     const hasCalled = useRef(false); 
     const {setActiveForm} = useAuthContext();
 
-    const [passowrd, setPassword] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+    const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
     const [confirmPassword, setConfirmPassword] = useState<string>("");
 
     const handleSubmit = async (e:React.FormEvent) =>{
@@ -30,7 +33,7 @@ export default function Verify(){
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    password:passowrd, 
+                    password:password, 
                     confirmPassword:confirmPassword,
                     token: token,
 
@@ -97,15 +100,79 @@ export default function Verify(){
                     </>
                 )}
                 {showForm && (
-                    <>
-                        <div>Reset password</div>
-                        <form action="POST" onSubmit={handleSubmit}>
-                            <input type="password" name="password" id=""placeholder="Password" value={passowrd} onChange={(e)=> setPassword(e.target.value)}/>
-                            <input type="password" name="confirm-password" id=""placeholder="Confirm Password" value={confirmPassword} onChange={(e)=>setConfirmPassword(e.target.value)}/>
-                            <input hidden value={token} name="token"/>
-                            <button>RESET</button>
-                        </form>
-                    </>
+                    <div className={"w-full max-w-md bg-grey-950 rounded-2xl shadow-xl p-8"}>
+                        <div className="text-center mb-8">
+                            <div className="mx-auto w-16 h-16 bg-gray-900 rounded-full flex items-center justify-center mb-4">
+                                <Lock className={"w-6 text-blue-900"}/>
+                            </div>
+                            <h1 className="text-3xl font-semibold text-indigo-900 mb-2">RESET PASSWORD</h1>
+                             <p className="text-gray-600">
+                                Enter your new password below
+                            </p>
+                            <form action="POST" onSubmit={handleSubmit}>
+                                <div>
+                                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                                        New Password
+                                    </label>
+                                    <div className="relative">
+                                        <input 
+                                            type={showPassword ? "text":"password"} 
+                                            name="password" 
+                                            id=""
+                                            placeholder="Password" 
+                                            value={password} 
+                                            className="w-full px-4 py-3 pr-12 fill-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition rounded-2xl"
+                                            required
+                                            onChange={(e)=> setPassword(e.target.value)}/>
+                                        <button
+                                            onClick={()=> setShowPassword(!showPassword)}
+                                            type="button"
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                        >
+                                            {showPassword ? (
+                                                <EyeOff className="w-5 h-5 cursor-pointer" />
+                                            ) : (
+                                                <Eye className="w-5 h-5 cursor-pointer" />
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Confirm Password
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            id="confirmPassword"
+                                            type={showConfirmPassword ? 'text' : 'password'}
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
+                                            placeholder="Confirm new password"
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                        >
+                                            {showConfirmPassword ? (
+                                                <EyeOff className="w-5 h-5 cursor-pointer" />
+                                            ) : (
+                                                <Eye className="w-5 h-5 cursor-pointer" />
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                                <input hidden value={token} name="token"/>
+                                <button 
+                                    type="submit" 
+                                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200 shadow-md hover:shadow-lg mt-4 cursor-pointer">
+                                        RESET
+                                    </button>
+                            </form>
+                        </div>
+                    </div>
                 )}
             </main>
         </div>
