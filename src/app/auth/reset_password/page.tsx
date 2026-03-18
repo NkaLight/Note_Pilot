@@ -98,7 +98,7 @@ export default function Verify(){
                 )}
                 {showForm && (
                     <>
-                        <div>Reset password form goes here</div>
+                        <div>Reset password</div>
                         <form action="POST" onSubmit={handleSubmit}>
                             <input type="password" name="password" id=""placeholder="Password" value={passowrd} onChange={(e)=> setPassword(e.target.value)}/>
                             <input type="password" name="confirm-password" id=""placeholder="Confirm Password" value={confirmPassword} onChange={(e)=>setConfirmPassword(e.target.value)}/>
