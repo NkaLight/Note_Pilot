@@ -20,7 +20,7 @@ async function sendMailService(recipientEmail:string, html:string, subject:strin
                 ],
                 Subject: subject,
                 HTMLPart: html,
-                TextPart: 'Dear passenger, welcome to Mailjet! May the delivery force be with you!'
+                TextPart: 'Hey please find the reset link here. Valid for 5 minutes'
             }
         ]
     };
@@ -35,15 +35,10 @@ async function sendMailService(recipientEmail:string, html:string, subject:strin
 
 
 export async function sendResetLink(recipientEmail:string, rawToken:string){
-    const loginUrl = `${baseUrl}/auth/confirming?token=${rawToken}`;
+    const resetUrl = `${baseUrl}/auth/reset_password?token=${rawToken}`;
     const html =`<div>
-                    <a href="${loginUrl}">Login link</a>
+                    <a href="${resetUrl}">Reset Password</a>
                  </div>`;
     const subject = "login";
-    try{
-        await sendMailService(recipientEmail, html, subject);
-    }catch (error) {
-        console.error(error);
-        throw error;
-    }
+     await sendMailService(recipientEmail, html, subject);
 }

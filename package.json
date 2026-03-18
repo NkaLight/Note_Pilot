@@ -11,7 +11,7 @@
     "lint:fix": "next lint --fix",
     "lint:report": "next lint --output-file eslint-report.json --format json",
     "setup_python": "node scripts/setup_python.js",
-    "test": "npx kill-port 3000 && dotenv -e .env -- npx playwright test --only-changed"
+    "test": "npx kill-port 3000 && dotenv -e .env -- npx playwright test"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.888.0",

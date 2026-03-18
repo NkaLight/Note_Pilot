@@ -123,7 +123,7 @@ const handleSubmit = async (e: React.FormEvent) =>  {
               <span className="px-3 text-sm text-gray-500">Or</span>
               <div className="flex-grow border-t border-gray-300"></div>
             </div>
-            <div className="flex gap-3" onClick={()=> setActiveForm("forgotPassword")}>
+            <div className="flex gap-3 cursor-pointer" onClick={()=> setActiveForm("forgotPassword")}>
               Forgot Password
             </div>
             {error &&( 

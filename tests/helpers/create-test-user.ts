@@ -61,8 +61,26 @@ export async function createIsolatedUser(context: BrowserContext) {
 
   return { user };
 }
+export async function createTestPasswordResetToken(email: string) {
+  const user = await prisma.application_user.findUnique({ where: { email } });
+  if (!user) throw new Error(`No test user found for email: ${email}`);
+
+  const rawToken = crypto.randomBytes(32).toString('hex');
+  const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+  await prisma.reset_token.create({
+    data: {
+      token_hash: tokenHash,
+      user_id: user.user_id,
+    },
+  });
+
+  return rawToken;
+}
+
 
 export async function cleanupUser(userId: number) {
   await prisma.session.deleteMany({ where: { user_id: userId } });
+  await prisma.reset_token.deleteMany({where: {user_id:userId}});
   await prisma.application_user.delete({where : {user_id:userId}});
 }
