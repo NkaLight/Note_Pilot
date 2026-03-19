@@ -84,6 +84,21 @@ export async function createTestPasswordResetToken(email: string) {
   return rawToken;
 }
 
+export async function createExpiredPasswordResetToken(email: string): Promise<string> {
+    const rawToken = crypto.randomUUID();
+    const hashedToken = await bcrypt.hash(rawToken, 10);
+    
+    await prisma.reset_token.create({
+        data: {
+            token_hash: hashedToken,
+            expires_at: new Date(Date.now() - 1000), // 1 second in the past
+            is_used: false
+        }
+    });
+    
+    return rawToken;
+}
+
 
 export async function cleanupUser(userId: number) {
   await prisma.session.deleteMany({ where: { user_id: userId } });

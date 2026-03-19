@@ -23,6 +23,9 @@ export async function verifyResetToken(rawToken:string){
         where:{
             token_hash:tokenHash, 
             is_used:false, 
+            expires_at:{
+                gt: new Date()
+            },
         }
     });
     return result ? true : false;

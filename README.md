@@ -1,16 +1,11 @@
-# Note Pilot COSC345 project an interactive "LLM powererd" study dashboard.
+# Note Pilot an "LLM-powered" study dashboard.
+
+![E2E Tests](https://github.com/NkaLight/Note_Pilot/actions/workflows/playwright.yml/badge.svg)
 
 ## Description:
-Note pilot is a study dashboard focused on helping users learn faster and more efficiently using LLMs in a more safer and reliable manner. Unlike regular chatbot sessions, we use lecture pdfs to generate study content based on those specific lectures such as flash-cards, exam style questions, summaries etc. 
+Note pilot is a study dashboard focused on helping users learn faster and more efficiently using LLMs in a more safer and reliable manner. Unlike regular chatbot sessions, lecture pdfs are used to generate study content based on those specific lectures such as flash-cards, exam style questions, summaries etc. 
 
 
-## To run dev build
-1. ```
-    npm install 
-
-2. ```
-    npm run dev
-    ```
 
 
 ## Tech Stack
@@ -23,12 +18,25 @@ Note pilot is a study dashboard focused on helping users learn faster and more e
 | **Deployment** | ![Vercel](https://img.shields.io/badge/vercel-black?style=for-the-badge&logo=vercel&logoColor=white) |
 
 
+## Live Deployment
+https://note-pilot-nu.vercel.app
+
+## Core Features
+- AI study content generation from uploaded lecture notes
+- Secure authentication with dual token system (JWT + opaque token)
+- Password reset with one-time cryptographic tokens via Mailjet
+- E2E tested with Playwright against a containerized PostgreSQL.
+
+## Testing
+- E2E: Playwright with containerized database via Docker
+- Unit: Jest
+
 # Architecture
 
 ### Authentication & Authorization
-Originally, the project utilized a simple HTTP-only cookie validated against the database on every request. To improve scalability and latency, we transitioned to a **Hybrid JWT Model**:
+Originally, the project utilized a simple HTTP-only cookie validated against the database on every request. To improve scalability and latency, the system uses a **Hybrid JWT Model**:
 * **Access Token:** Short-lived JWT validated server-side for speed.
 * **Refresh Token:** Long-lived token used to rotate access tokens, maintaining security without sacrificing user experience.
 
 ### Study Material generation
-* **User uploads lecture pdf:** text data is extracted and stored in a relational database. This data is used as context when prompting our LLMs, for the various features we delivered.
+* **User uploads lecture pdf:** text data is extracted and stored in a relational database. This data is used as context when prompting the LLM, for the various features delivered.

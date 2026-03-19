@@ -78,7 +78,6 @@ export default function Verify(){
         handleVerfiry(token);
     }, [token, router]);
 
-    
     return(
         <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
             <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
@@ -148,7 +147,7 @@ export default function Verify(){
                                             value={confirmPassword}
                                             onChange={(e) => setConfirmPassword(e.target.value)}
                                             className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
-                                            placeholder="Confirm new password"
+                                            placeholder="Confirm Password"
                                             required
                                         />
                                         <button

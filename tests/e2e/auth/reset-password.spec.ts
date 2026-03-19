@@ -18,7 +18,7 @@ const test = base.extend<{
   },
 });
 
-test("Email exists - Forgot passwowrd", async ({browser, testUser })=>{
+test("Email exists - Click forgot passwowrd", async ({browser, testUser })=>{
     const freshContext = await browser.newContext();
     const page = await freshContext.newPage();
 
@@ -27,11 +27,12 @@ test("Email exists - Forgot passwowrd", async ({browser, testUser })=>{
     await page.getByText("Forgot Password").click();
     await page.getByPlaceholder("yourEmail@example.com").fill(testUser.email);
     await page.getByRole("button", { name: "Submit" }).click();
+    await page.waitForLoadState("networkidle");
     await expect(page.getByText("You should get an email if you are signed up with us.")).toBeVisible();
     await freshContext.close();
 });
 
-test("Email does not exist - Forgot passwowrd", async ({browser})=>{
+test("Email does not exist - Clicks forgot passwowrd", async ({browser})=>{
     const freshContext = await browser.newContext();
     const page = await freshContext.newPage();
 
@@ -40,6 +41,7 @@ test("Email does not exist - Forgot passwowrd", async ({browser})=>{
     await page.getByText("Forgot Password").click();
     await page.getByPlaceholder("yourEmail@example.com").fill("nonExistentEmail@email.com");
     await page.getByRole("button", { name: "Submit" }).click();
+    await page.waitForLoadState("networkidle");
     await expect(page.getByText("You should get an email if you are signed up with us.")).toBeVisible();
     await freshContext.close();
 });
@@ -73,5 +75,26 @@ test("Invalid token could be expired", async ({browser})=>{
 
     await page.goto(`/auth/reset_password?token=${rawToken}`);
     await expect(page.getByText("Link expired please click forgot password again")).toBeVisible();
+    await freshContext.close();
+});
+test("Token exists in the database but has been already used.", async ({browser, testUser})=>{
+    const freshContext = await browser.newContext();
+    const page = await freshContext.newPage();
+
+    const newPassword = "newPasswordtest123";
+    const rawToken = await createTestPasswordResetToken(testUser.email); 
+
+    //Here I am triggering logic to invalidate the token;
+    await page.goto(`/auth/reset_password?token=${rawToken}`);
+    await page.waitForLoadState("networkidle");
+    await page.getByPlaceholder("Password", {exact:true}).fill(newPassword);
+    await page.getByPlaceholder("Confirm Password", {exact:true}).fill(newPassword);
+    await page.getByRole("button", {name:"RESET"}).click();
+
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    await page.goto(`/auth/reset_password?token=${rawToken}`);
+    await expect(page.getByText("Link expired please click forgot password again")).toBeVisible();
+
     await freshContext.close();
 });
