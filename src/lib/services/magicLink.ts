@@ -1,5 +1,5 @@
 const VERIFIED_EMAIL = process.env.Verified_Email_Sender as string;
-const baseUrl = process.env.NEXT_PUBLIC_BASE_APP_URL || "http://localhost:3000";
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL|| "http://localhost:3000";
 import { Client, SendEmailV3_1, LibraryResponse } from 'node-mailjet';
 const mailjet = new Client({
   apiKey: process.env.MJ_API_KEY_PUBLIC,
