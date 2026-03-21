@@ -18,6 +18,7 @@ export async function POST(req:NextRequest){
         return NextResponse.json({message:"You should get an email if you are signed up with us."}, {status:200});
     }catch(error){
         console.error(error);
+        console.error("EMAIL: ", safe.data.email);
         return NextResponse.json({message:"You should get an email if you are signed up with us."}, {status:200});
     }
     

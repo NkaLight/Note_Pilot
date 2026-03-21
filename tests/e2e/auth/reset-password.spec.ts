@@ -98,3 +98,24 @@ test("Token exists in the database but has been already used.", async ({browser,
 
     await freshContext.close();
 });
+test("Token expired", async ({browser, testUser})=>{
+    const freshContext = await browser.newContext();
+    const page = await freshContext.newPage();
+
+    const newPassword = "newPasswordtest123";
+    const rawToken = await createTestPasswordResetToken(testUser.email); 
+
+    //Here I am triggering logic to invalidate the token;
+    await page.goto(`/auth/reset_password?token=${rawToken}`);
+    await page.waitForLoadState("networkidle");
+    await page.getByPlaceholder("Password", {exact:true}).fill(newPassword);
+    await page.getByPlaceholder("Confirm Password", {exact:true}).fill(newPassword);
+    await page.getByRole("button", {name:"RESET"}).click();
+
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+    await page.goto(`/auth/reset_password?token=${rawToken}`);
+    await expect(page.getByText("Link expired please click forgot password again")).toBeVisible();
+
+    await freshContext.close();
+});
