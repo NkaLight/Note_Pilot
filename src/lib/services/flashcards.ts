@@ -2,6 +2,7 @@ import {getSourceText} from "@/lib/db_access/upload";
 import { FlashcardArray } from "../zod_schemas/flashcards";
 import {createOrUpdateFlashCardSet} from "@/lib/db_access/flashcards";
 import { DbError, ServiceError, ServiceType } from "../error";
+import { queryLLM } from "../utils/ai-gateway";
 
 // OpenRouter endpoint
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
@@ -43,40 +44,7 @@ export async function generateFlashCardsSet(uploadId:number, user_id:number){
         `.trim();
     
     // Calls OpenRouter LLM
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 45000);
-
-    const resp = await fetch(OPENROUTER_URL, {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.NVIDIA_AI_API}`,
-        "HTTP-Referer": process.env.APP_URL || "http://localhost:3000",
-        "X-Title": "Note Pilot Flashcards",
-      },
-      body: JSON.stringify({
-        model: "nvidia/nemotron-nano-9b-v2:free",
-        temperature: 0.2,
-        stream: false,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userPrompt },
-        ],
-      }),
-    }).finally(() => clearTimeout(timeout));
-    //Check LLM response
-    if(!resp.ok){
-        throw new ServiceError(
-            "AI provider failed to return flashcards", 
-            ServiceType.AI_GENERATION
-        );
-    }
-    const data = await resp.json();
-    const raw = (data?.choices?.[0]?.message?.content ?? "").trim();
-    const jsonText = raw.replace(/^\s*```(?:json)?/i, "").replace(/```\s*$/i, "");
-    
-    //Validates JSON schema
+    const jsonText = await queryLLM("Generate flashcards from the following content. Output JSON ONLY as:", userPrompt, {type:ServiceType.AI_GENERATION});
     let flashcards;
     try{
         flashcards = FlashcardArray.parse(JSON.parse(jsonText));

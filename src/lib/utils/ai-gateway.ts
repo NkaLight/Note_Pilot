@@ -9,8 +9,11 @@ interface LLMOptions {
   type: ServiceType; 
 }
 
+export type ChatMessage = { role: "user" | "assistant"; content: string };
+
 /**
  * Centralized LLM fetcher alongside making our LLM queries more declarative
+ * Returns data as json
  * 
  */
 export async function queryLLM(systemPrompt: string, userPrompt: string, options: LLMOptions){
@@ -51,3 +54,38 @@ export async function queryLLM(systemPrompt: string, userPrompt: string, options
     throw new ServiceError(err.message || "AI Network Failure", type, 503);
   }
 }
+
+export async function queryLLMChat( 
+  systemPrompt: string,
+  history: ChatMessage[],
+  options: LLMOptions){
+    const { model = DEFAULT_MODEL, temperature = 0.7, type } = options;
+    try{
+      const resp = await fetch(API_URL, {
+        method:"POST", 
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.NVIDIA_AI_API}`,
+          "HTTP-Referer": process.env.APP_URL || "http://localhost:3000",
+          "X-Title": "Note Pilot",
+        },
+        body: JSON.stringify({
+          model,
+          temperature,
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...history,
+          ],
+        }),
+      });
+      if(!resp.ok){
+        throw new ServiceError(`AI Provider Error: ${resp.status}`, type, 502);
+      }
+      const data = await resp.json();
+      return (data?.choices?.[0]?.message?.content ?? "").trim();
+    }catch(err){
+      if (err instanceof ServiceError) throw err;
+      console.error(err);
+      throw new ServiceError(err.message || "AI Network Failure", type, 503);
+    }
+};

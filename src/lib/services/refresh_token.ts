@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/db";
 import crypto from "crypto";
-import { cookies } from "next/headers";
 import { SignJWT } from "jose";
 import { AUTH_POLICY, setAccessToken, setAuthCookies } from "../utils/auth";
 
@@ -42,7 +41,7 @@ export async function refreshLogic(curr_refresh_token:string){
     if(expiryDate.getTime() - today.getTime() < ONE_DAY_MS){
         //Generate new access and refresh token
         const user = session.application_user;
-        const access_token = await new SignJWT({id:user.user_id, email:user.email, username:user.username})
+        const access_token = await new SignJWT({id:user.user_id, email:user.email})
                 .setProtectedHeader({ alg: "HS256" })
                 .setIssuedAt()
                 .setExpirationTime(AUTH_POLICY.access_expiry) 
@@ -50,7 +49,7 @@ export async function refreshLogic(curr_refresh_token:string){
         const new_refresh_token = crypto.randomBytes(32).toString("hex");
         try{
             console.error(session);
-            const result = await prisma.session.create({
+            await prisma.session.create({
                 data: {
                     user_id: session.user_id,
                     token:new_refresh_token,
@@ -73,14 +72,14 @@ export async function refreshLogic(curr_refresh_token:string){
             return user;//Return the user object on complete
         }catch(error){
             console.error(error);
-            return;
+            return null;
         }
 
     }else if(expiryDate.getTime() >= today.getTime()){
         //just generate new access token
         console.error("we just generate access token");
         const user = session.application_user;
-        const access_token = await new SignJWT({id:user.user_id, email:user.email, username:user.username})
+        const access_token = await new SignJWT({id:user.user_id, email:user.email})
                 .setProtectedHeader({ alg: "HS256" })
                 .setIssuedAt()
                 .setExpirationTime(AUTH_POLICY.access_expiry) 

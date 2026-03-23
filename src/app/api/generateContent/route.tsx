@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
-import { getLectureConentById } from "@/lib/prisma";
 import { DbError, ServiceError } from "@/lib/error";
 import { getSummaries } from "@/lib/db_access/summaries";
 import { generateSummaries } from "@/lib/services/summaries";

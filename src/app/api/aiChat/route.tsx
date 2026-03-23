@@ -1,7 +1,7 @@
 import { getSessionUser } from "@/lib/auth";
-import { getLectureConentById } from "@/lib/prisma";
+import {getSourceText} from "@/lib/db_access/upload";
 import { NextResponse } from "next/server";
-import { z } from "zod";
+import z from "zod";
 
 /**
  * A route for AI chat interactions (Node runtime).
@@ -11,9 +11,8 @@ import { z } from "zod";
 /** Schema validation for incoming chat message requests */
 const chatMessageReqSchema = z.object({
     message: z.string(),
-    uploadId: z.number().optional(),
-    uploadIds: z.array(z.number()).optional(),
-    paperId: z.number().optional()
+    uploadId: z.number(),
+    paperId: z.number()
 });
 
 /** IGNORE: This function is for RAG (Retrieval Augmented Generation)
@@ -41,6 +40,7 @@ function retrieveTopK(queryVec: number[], vectors: number[][], chunks: string[],
 
 /**
  * Handles POST requests to /api/aiChat.
+ * Queries the LLM additionally saves the current conversation to the database.
 */
 export async function POST(req: Request){
     try{
@@ -50,32 +50,19 @@ export async function POST(req: Request){
         
         const body = await req.json();
         const parsed = chatMessageReqSchema.safeParse(body);
+        console.error(body);
         if(!parsed.success) return NextResponse.json({error:"Invalid request body"}, {status:400});
         
-        const {message, uploadId, uploadIds, paperId} = parsed.data;
+        const {message, uploadId, paperId} = parsed.data;
 
         // Gather context from uploads
         let contextText = "";
-        const activeUploadIds = uploadIds && uploadIds.length > 0 ? uploadIds : (uploadId ? [uploadId] : []);
+        const activeUploadIds = uploadId;
         
-        if (activeUploadIds.length > 0) {
-            console.log(`Fetching context from ${activeUploadIds.length} uploads: ${activeUploadIds.join(', ')}`);
-            
+        if (activeUploadIds) {
             // Fetch content from all selected uploads
-            const contextPromises = activeUploadIds.map(async (id) => {
-                try {
-                    const content = await getLectureConentById(id.toString());
-                    return content ? `--- Content from Upload ${id} ---\n${content}\n` : "";
-                } catch (error) {
-                    console.error(`Failed to fetch content for upload ${id}:`, error);
-                    return "";
-                }
-            });
-            
-            const contextArray = await Promise.all(contextPromises);
-            contextText = contextArray.filter(content => content.length > 0).join("\n");
-            
-            console.log(`Context gathered: ${contextText.length} characters from ${contextArray.filter(c => c.length > 0).length} uploads`);
+            const content = await getSourceText(uploadId, user.user_id);
+            console.log(`Context gathered: \n${content}`);
         } else {
             console.log("No upload context provided");
         }
@@ -129,6 +116,9 @@ export async function POST(req: Request){
         const data = await resp.json();
         const reply = data?.choices?.[0]?.message?.content ?? null;
         if(!reply) return NextResponse.json({message: ""});
+
+        //SAVE the message
+
         return NextResponse.json({message: reply});
         
         /* This code section for implementing streaming, but the front-end has to be updated to handle that first.
@@ -150,7 +140,7 @@ export async function POST(req: Request){
         //Handling specific error types here.
         if (normError instanceof z.ZodError) {
         // For Zod validation errors, return the structured error messages.
-            console.log("ZOD");
+            console.error("ZOD");
             return NextResponse.json({ error: normError.message }, { status: 400 });
         }
         return NextResponse.json({error: normError.message}, {status: 500}); //Return null 

@@ -1,7 +1,10 @@
 import { getSessionUser } from "@/lib/auth";
+import {getChatMessages, clearChatMessages } from "@/lib/db_access/chat_message";
 import { prisma } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { getSourceText } from "@/lib/db_access/upload";
+import { generateChat } from "@/lib/services/chat";
 
 /**
  * Chat API endpoints for persistent chat message management
@@ -20,13 +23,13 @@ const getChatSchema = z.object({
 
 const postChatSchema = z.object({
   uploadId: z.number(),
-  role: z.enum(['user', 'assistant']),
   content: z.string(),
 });
 
 const deleteChatSchema = z.object({
   uploadId: z.coerce.number(),
 });
+
 
 export async function GET(request: NextRequest) {
   try {
@@ -48,32 +51,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Invalid uploadId" }, { status: 400 });
     }
 
-    console.log(`Fetching chat history for uploadId: ${parsed.data.uploadId}, user: ${user_id}`);
-
-    // Verify the upload belongs to the user
-    const upload = await prisma.upload.findFirst({
-      where: {
-        upload_id: parsed.data.uploadId,
-        paper: {
-          user_id: user_id
-        }
-      }
-    });
-
-    if (!upload) {
-      return NextResponse.json({ error: "Upload not found or unauthorized" }, { status: 404 });
-    }
-
     // Fetch chat messages for this upload
-    const messages = await prisma.chat_message.findMany({
-      where: {
-        upload_id: parsed.data.uploadId,
-        user_id: user_id
-      },
-      orderBy: {
-        created_at: 'asc'
-      }
-    });
+    const messages = await getChatMessages(Number(uploadId), user_id);
 
     console.log(`Found ${messages.length} chat messages for upload ${parsed.data.uploadId}`);
 
@@ -109,40 +88,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
 
-    const { uploadId, role, content } = parsed.data;
-
-    console.log(`Saving chat message for uploadId: ${uploadId}, user: ${user_id}, role: ${role}`);
-
-    // Verify the upload belongs to the user
-    const upload = await prisma.upload.findFirst({
-      where: {
-        upload_id: uploadId,
-        paper: {
-          user_id: user_id
-        }
-      }
-    });
-
+    const { uploadId, content } = parsed.data;
+    console.error(uploadId);
+    const upload = (await getSourceText(uploadId, user_id));
     if (!upload) {
       return NextResponse.json({ error: "Upload not found or unauthorized" }, { status: 404 });
     }
-
-    // Save the chat message
-    const message = await prisma.chat_message.create({
-      data: {
-        upload_id: uploadId,
-        user_id: user_id,
-        role: role,
-        content: content
-      }
-    });
-
-    console.log(`Chat message saved with ID: ${message.message_id}`);
-
+    const textContent = upload.text_content;
+    const message = await generateChat(textContent, uploadId, user_id,content);
+    
     return NextResponse.json({
       success: true,
       message: {
-        message_id: message.message_id,
         role: message.role,
         content: message.content,
         created_at: message.created_at.toISOString()
@@ -177,27 +134,9 @@ export async function DELETE(request: NextRequest) {
 
     console.log(`Clearing chat history for uploadId: ${parsed.data.uploadId}, user: ${user_id}`);
 
-    // Verify the upload belongs to the user
-    const upload = await prisma.upload.findFirst({
-      where: {
-        upload_id: parsed.data.uploadId,
-        paper: {
-          user_id: user_id
-        }
-      }
-    });
-
-    if (!upload) {
-      return NextResponse.json({ error: "Upload not found or unauthorized" }, { status: 404 });
-    }
 
     // Delete all chat messages for this upload and user
-    const result = await prisma.chat_message.deleteMany({
-      where: {
-        upload_id: parsed.data.uploadId,
-        user_id: user_id
-      }
-    });
+    const result = await clearChatMessages(Number(uploadId), user_id);
 
     console.log(`Deleted ${result.count} chat messages for upload ${parsed.data.uploadId}`);
 

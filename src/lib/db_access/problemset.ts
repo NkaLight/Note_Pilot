@@ -37,13 +37,11 @@ export async function addProblemSet(uploadId: number, userId: number, questions:
             // 2. Ensure ProblemSet exists (Upsert without the nested problems)
             const pSet = await tx.problem_set.upsert({
                 where: { upload_id: uploadId },
-                update: { text_data: `Updated: ${new Date().toISOString()}` },
-                create: { 
-                    upload_id: uploadId, 
-                    text_data: `Created: ${new Date().toISOString()}` 
+                create:{
+                    upload_id: uploadId,
                 },
+                update: {},
             });
-
             // 3. Clean and Bulk Insert (Faster than nested create)
             await tx.problem.deleteMany({ where: { pset_id: pSet.pset_id } });
             

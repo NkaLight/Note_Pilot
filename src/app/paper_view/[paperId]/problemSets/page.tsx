@@ -65,7 +65,7 @@ export default function DashboardPage() {
 
   // Generate new problem sets
   async function generateNewProblemSets() {
-    if (!chosenLectureId === null) {
+    if (!chosenLectureId) {
       setError("Please select at least one lecture from the PDFs page to generate problem sets.");
       return;
     }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { useParams } from "next/navigation";
 
@@ -17,7 +17,7 @@ export default function Upload({ onSaved }: { onSaved: () => void }) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
   const {lectures, setChosenLectureId, setLectures, chosenLectureId} = usePaperViewContext();
-
+  const fileInputRef = useRef(null);
   const paperId = useParams().paperId?.toString();
 
   // Handler for when a file is selected
@@ -96,6 +96,11 @@ export default function Upload({ onSaved }: { onSaved: () => void }) {
           onChange={(e) => setLectureTitle(e.target.value)}
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-black mb-3 focus:ring-blue-500 focus:border-blue-500"
           disabled={isUploading}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !isUploading && lectureTitle.trim()) {
+              fileInputRef.current?.click();
+            }
+          }}
         />
         
         {/* File Upload Button (linked to hidden input) */}
@@ -114,6 +119,7 @@ export default function Upload({ onSaved }: { onSaved: () => void }) {
         <input
           id="file-upload-input"
           type="file"
+          ref={fileInputRef}
           // Update accepted file types as needed
           accept=".pdf" 
           className="hidden"

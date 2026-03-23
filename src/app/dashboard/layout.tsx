@@ -19,7 +19,7 @@ export const metadata: Metadata = {
  */
 export default async function AIPageLayout({ children }: { children: ReactNode }) {
   const user = await getSessionUser();
-  console.error(user);
+  console.log(user);
   if(!user){
     redirect("/");
   }

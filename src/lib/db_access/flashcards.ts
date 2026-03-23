@@ -24,7 +24,6 @@ export async function createOrUpdateFlashCardSet(uploadId:number,flashcards:Flas
         return await prisma.flashcard_set.upsert({
             where:{upload_id:uploadId},
             update:{
-                text_data:sourceText,
                 flashcard:{
                     deleteMany:{},
                     create:flashcards.map((fc)=>({
@@ -35,7 +34,6 @@ export async function createOrUpdateFlashCardSet(uploadId:number,flashcards:Flas
             },
             create:{
                 upload_id:uploadId,
-                text_data:sourceText,
                 flashcard:{
                     create: flashcards.map((fc)=>({
                         question_front:fc.question_front,

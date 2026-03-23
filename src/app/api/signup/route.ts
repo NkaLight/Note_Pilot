@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import crypto from "crypto";
-import { cookies } from "next/headers";
 import { SignJWT } from "jose";
 import { AUTH_POLICY, setAuthCookies } from "@/lib/utils/auth";
 
@@ -15,7 +14,6 @@ import { AUTH_POLICY, setAuthCookies } from "@/lib/utils/auth";
 
 // Validation schema for signup data
 const signupSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters")
 });
@@ -43,19 +41,16 @@ export async function POST(request: Request) {
     const hashedPassword = await bcrypt.hash(validated.password, 10);
 
     const user = await prisma.application_user.create({
-      data: {
-        username: validated.username,
-        email: validated.email,
-        password: hashedPassword // Store hashed password
-      },
+      data:{
+        email:validated.email,
+        password:hashedPassword
+      }
     });
-
 
     // Generate and store session storage in DB
      const token = await new SignJWT({
       id:user.user_id, 
-      email:user.email, 
-      username:user.username
+      email:user.email,
     })
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
@@ -77,7 +72,7 @@ export async function POST(request: Request) {
     //Store the token pairs
     await setAuthCookies(token, refresh_token);
 
-    return NextResponse.json({ user: { id: user.user_id, email: user.email, username : user.username } });
+    return NextResponse.json({ user: { id: user.user_id, email: user.email}});
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if(error.code ===  "P2002"){

@@ -31,6 +31,7 @@ export default function DashboardPage() {
   const params = useParams();
   const paperId = params?.paperId ? Number(params.paperId) : null;
 
+  console.log(selectedLectureIds, chosenLectureId);
 
   // Local UI state
   const [glossary, setGlossary] = useState<GlossaryItem[]>([]);
@@ -49,10 +50,7 @@ export default function DashboardPage() {
     
     try {
       //Get all the glossary data for the chosenLecturedId
-      const res = await fetch(`api/glossary?upload_id=${chosenLectureId}`, {
-        method: "GET", 
-        headers:{"Content-Type":"application/json"}, 
-      });
+      const res = await fetch(`api/glossary?uploadId=${chosenLectureId}`);
 
       const data = await res.json();
       console.log("Returned data: ", data);
@@ -85,7 +83,7 @@ export default function DashboardPage() {
       <div className="rounded-3xl mb-5 mt-19 p-6 bg-white/50 mr-10 overflow-y-auto mt-5 flex-grow text-black">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-black">Glossary</h2>
-          {selectedLectureIds.length > 0 && (
+          {chosenLectureId && (
             <button
               onClick={generateGlossary}
               disabled={loading}
@@ -142,7 +140,7 @@ export default function DashboardPage() {
                 </div>
               ))}
             </>
-          ) : !loading && selectedLectureIds.length > 0 ? (
+          ) : !loading && chosenLectureId ? (
             <p className="text-gray-500 text-center py-8">No glossary terms generated yet.</p>
           ) : !loading ? (
             <p className="text-gray-500 text-center py-8">Select lectures from the PDFs page to start generating your glossary.</p>

@@ -11,8 +11,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import ChatUI from "@/components/DashBoard/ChatUI";
-import Upload from "@/components/DashBoard/Upload";
 import StudyLayout from "@/components/DashBoard/StudyLayout";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 

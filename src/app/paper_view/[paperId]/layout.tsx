@@ -1,4 +1,4 @@
-import { getLecturesForPaper } from "@/lib/prisma";
+import { getLecturesForPaper } from "@/lib/db_access/upload";
 import { getSessionUser } from "@/lib/auth";
 import ClientProviderWrapper from "./ClientProviderWrapper";
 import { redirect } from "next/navigation";

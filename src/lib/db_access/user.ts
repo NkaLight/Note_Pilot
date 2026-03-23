@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { DbError } from "../error";
 import { prisma } from "../db";
 

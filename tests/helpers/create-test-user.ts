@@ -20,7 +20,6 @@ export async function createIsolatedUser(context: BrowserContext) {
   const hashPassword = await bcrypt.hash('testPassword123', 10);
   const user = await prisma.application_user.create({
     data: {
-      username: `user-${uniqueId}`,
       email: `test-${uniqueId}@test.com`,
       password: hashPassword,
     },
@@ -29,7 +28,6 @@ export async function createIsolatedUser(context: BrowserContext) {
   const accessToken = await new SignJWT({
     id: user.user_id,
     email: user.email,
-    username: user.username,
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
