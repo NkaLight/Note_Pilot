@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     console.log("Received file:", uploadedFile.name, uploadedFile.size, uploadedFile.type);
 
     const fileBuffer = Buffer.from(await uploadedFile.arrayBuffer());
-    const parser = new PDFParse({data:fileBuffer});
+    const parser = new PDFParse({data:fileBuffer, verbosity: 0 });
     const parsed = await parser.getText();
     const parsedText = parsed.text;
     parser.destroy();
