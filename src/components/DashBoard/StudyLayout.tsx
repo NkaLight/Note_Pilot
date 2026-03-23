@@ -11,7 +11,7 @@ interface StudyLayoutProps {
   paperId?: number | null;
 }
 
-export default function StudyLayout({ children,  uploadIds, paperId }: StudyLayoutProps) {
+export default function StudyLayout({ children }: StudyLayoutProps) {
     const [chatWidth, setChatWidth] = useState(450);
     const [isResizing, setIsResizing] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -42,7 +42,7 @@ export default function StudyLayout({ children,  uploadIds, paperId }: StudyLayo
     <div ref={containerRef} className="h-screen w-full flex pl-10 gap-10 pr-0 overflow-hidden bg-black">
       {/* (1) Chat Panel */}
       <div style={{ width: `${chatWidth}px` }} className="flex-shrink-0 h-full pb-10 pt-14">
-        <ChatUI uploadIds={uploadIds} paperId={paperId} />
+        <ChatUI />
       </div>
 
       {/* (2) The Resizer */}

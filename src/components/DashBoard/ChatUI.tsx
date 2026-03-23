@@ -26,28 +26,19 @@ type Message = {
   created_at?: string;
 };
 
-export default function ChatUI({
-  paperId,
-  uploadId,
-  uploadIds,
-}: {
-  paperId?: number;
-  uploadId?: number;
-  uploadIds?: number[];
-}) {
+export default function ChatUI() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
-  const {chosenLectureId} = usePaperViewContext();
+  const {chosenLectureId, chatMessages, setChatMessages} = usePaperViewContext();
 
   // Load chat history when activeUploadIds changes
   useEffect(() => {
-    if (chosenLectureId) {
-      loadChatHistory(chosenLectureId);
-    } else {
-      setMessages([]); // Clear messages if no upload selected
-    }
+     if (!chosenLectureId) return;
+     if(chatMessages.length > 0) return;
+
+     loadChatHistory(chosenLectureId);
   }, [chosenLectureId]); // Watch for changes in the array
 
   // Load existing chat messages for the selected upload
