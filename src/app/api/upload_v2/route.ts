@@ -1,15 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
-import { promises as fs } from "fs";
-import { v4 as uuidv4 } from "uuid";
-import PDFParser from "pdf2json";
-import os from "os";
-import path from "path";
+import { PDFParse} from 'pdf-parse';
 import { prisma } from "@/lib/db";
-
-/** The current upload API route */
-
-
 
 /**
  * A function to handle file uploads (PDF and TXT).
@@ -42,34 +34,11 @@ export async function POST(req: Request) {
 
     console.log("Received file:", uploadedFile.name, uploadedFile.size, uploadedFile.type);
 
-    // Write temp PDF file
-    const fileName = uuidv4();
-    const tmpFilePath = path.join(os.tmpdir(), `${fileName}.pdf`);
     const fileBuffer = Buffer.from(await uploadedFile.arrayBuffer());
-    console.log("File buffer size:", fileBuffer.length);
-    await fs.writeFile(tmpFilePath, fileBuffer);
-
-    // Parse PDF
-    const pdfParser = new (PDFParser as any)(null, 1); 
-    let parsedText = "";
-
-    await new Promise<void>((resolve, reject) => {
-      pdfParser.on("pdfParser_dataError", (errData: any) => {
-        console.error("PDF parsing error:", errData.parserError);
-        reject(errData.parserError);
-      });
-
-      pdfParser.on("pdfParser_dataReady", () => {
-        parsedText = pdfParser.getRawTextContent();
-        console.log("Parsed text:", parsedText);
-        resolve();
-      });
-
-      pdfParser.loadPDF(tmpFilePath);
-    });
-
-    await fs.unlink(tmpFilePath).catch(() => {});
-
+    const parser = new PDFParse({data:fileBuffer});
+    const parsed = await parser.getText();
+    const parsedText = parsed.text;
+    parser.destroy();
 
     //Send to DB
     const papId = parseInt(paperId, 10); // convert to int
