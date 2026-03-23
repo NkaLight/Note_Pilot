@@ -59,7 +59,7 @@ export default function StudyGuidePage() {
         className="rounded-3xl bg-white/0 overflow-y-auto mt-5 flex-shrink-0 h-full pb-10 pt-14"
         style={{ width: chatWidth }}
       >
-        <ChatUI uploadIds={selectedUploadIds} paperId={paperId} />
+        <ChatUI/>
       </div>
 
       {/* Divider / Resizer */}

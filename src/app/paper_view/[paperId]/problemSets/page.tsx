@@ -69,7 +69,6 @@ export default function DashboardPage() {
       setError("Please select at least one lecture from the PDFs page to generate problem sets.");
       return;
     }
-  
     setIsLoading(true);
     setError(null);
     
