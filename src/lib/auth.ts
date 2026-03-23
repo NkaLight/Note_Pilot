@@ -64,4 +64,3 @@ export async function validatePaperId(paper_id: number):Promise<boolean | null>{
   return true;
 
 }
-

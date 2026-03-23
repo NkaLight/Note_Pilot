@@ -1,7 +1,9 @@
 "use client";
 
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { useRouter } from "next/navigation";
 import { createContext, ReactNode, useContext, useState, useRef, useMemo, useEffect } from "react";
+import { clearInterval } from "timers";
 
 type User = {
     user_id: number;
@@ -40,39 +42,51 @@ export const SessionProvider = ({
         const router = useRouter();
 
         useEffect(()=>{
+            if(initialUser) return; 
             //Run on mount when there is no user
-            if(!user && !isRefreshing.current){
-                const silentRefresh = async ()=>{
-                    isRefreshing.current = true;
-                    try{
-                        const res = await fetch("/api/refresh_token", {
-                            method:"POST",
-                        });
-                        if(res.ok){
-                            const data = await res.json();
-                            console.log(data);
-                            console.log(data.user);
-                            console.log(data.error);
-                            console.log(data.application_user);
-                            router.refresh();
-                            setUser(data.user);
-                            
-                        }else{
-                            setUser(null);
-                        }
-                    }catch(error){
-                        setUser(null);
+            setLoading(true);
 
-                    }finally{
-                        setLoading(false);
-                        isRefreshing.current = false;
+            const loadSession = async() =>{
+                try{
+                    const res =  await fetchWithAuth("/api/auth/me");
+                    if(res.ok){
+                        const data = await res.json();
+                        setUser(data.user);
+                    }else{
+                        setUser(null);
                     }
-                };
-                silentRefresh();       
-            }else{
-                setLoading(false);
-            }
+                }catch(error){
+                    setUser(null);
+                }finally{
+                    setLoading(false);
+                }
+            };
+            loadSession();
         }, []);
+
+        useEffect(()=>{
+            if(!user) return;
+
+            const REFRESH_INTERVAL = 13 * 60 * 1000; //At 13min refresh silently
+            const interval = setInterval(async()=>{
+                try{
+                    const res = await fetchWithAuth("/api/refresh_token", {
+                        method:"POST", 
+                        credentials:"include"
+                    });
+                    if(res.ok){
+                         const data = await res.json();
+                         setUser(data.user);
+                    }else{
+                        setUser(null);
+                    }
+                }catch{
+                    setUser(null);
+                }
+            }, REFRESH_INTERVAL);
+            return ()=> clearInterval(interval);
+        }, [user]);
+
 
         const contextValue = useMemo(() => ({ 
         user, 
