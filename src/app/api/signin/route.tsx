@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     }
 
     // Generate and store session storage in DB
-    const token = await new SignJWT({id:user.user_id, email:user.email, username:user.username})
+    const token = await new SignJWT({id:user.user_id, email:user.email})
             .setProtectedHeader({ alg: "HS256" })
             .setIssuedAt()
             .setExpirationTime(AUTH_POLICY.access_expiry) 
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     //Set http-only cookies
     await setAuthCookies(token,refresh_token);
     
-    return NextResponse.json({ user: { id: user.user_id, email: user.email, username : user.username } });
+    return NextResponse.json({ user: { id: user.user_id, email: user.email} });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

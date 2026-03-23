@@ -3,7 +3,6 @@
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { useRouter } from "next/navigation";
 import { createContext, ReactNode, useContext, useState, useRef, useMemo, useEffect } from "react";
-import { clearInterval } from "timers";
 
 type User = {
     user_id: number;
@@ -38,8 +37,6 @@ export const SessionProvider = ({
     }) => {
         const [user, setUser] = useState<User | null>(initialUser || null);
         const [loading, setLoading] = useState(!initialUser);
-        const isRefreshing = useRef(false);
-        const router = useRouter();
 
         useEffect(()=>{
             if(initialUser) return; 
@@ -55,7 +52,7 @@ export const SessionProvider = ({
                     }else{
                         setUser(null);
                     }
-                }catch(error){
+                }catch{
                     setUser(null);
                 }finally{
                     setLoading(false);
@@ -64,11 +61,13 @@ export const SessionProvider = ({
             loadSession();
         }, []);
 
+        const intervalRef = useRef<number | null>(null);
         useEffect(()=>{
             if(!user) return;
 
             const REFRESH_INTERVAL = 13 * 60 * 1000; //At 13min refresh silently
-            const interval = setInterval(async()=>{
+        
+            intervalRef.current = window.setInterval(async()=>{
                 try{
                     const res = await fetchWithAuth("/api/refresh_token", {
                         method:"POST", 
@@ -84,7 +83,9 @@ export const SessionProvider = ({
                     setUser(null);
                 }
             }, REFRESH_INTERVAL);
-            return ()=> clearInterval(interval);
+            return ()=>{
+                if(intervalRef.current) window.clearInterval(intervalRef.current);
+            };
         }, [user]);
 
 
