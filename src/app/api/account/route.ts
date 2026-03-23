@@ -82,7 +82,6 @@ export async function PUT(req: NextRequest) {
             }
         } else {
             const json = await req.json();
-            username = json.username;
             email = json.email;
             password = json.password;
             aiLevel = json.aiLevel;
@@ -93,7 +92,6 @@ export async function PUT(req: NextRequest) {
         const updatedUser = await prisma.application_user.update({
             where: { user_id: userId },
             data: {
-                username: username || undefined,
                 email: email || undefined,
                 password: password ? await bcrypt.hash(password, 10) : undefined,
                 // later add avatar_url column, write it here:
@@ -118,7 +116,6 @@ export async function PUT(req: NextRequest) {
         return NextResponse.json({
             user: {
                 id: updatedUser.user_id,
-                username: updatedUser.username,
                 email: updatedUser.email,
                 aiLevel: prefs.learner_style ? dbToUiLevel[prefs.learner_style] : "student",
                 darkMode: !!prefs.dark_mode,
