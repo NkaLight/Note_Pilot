@@ -1,10 +1,8 @@
-import { parsedType } from "zod/v4/locales/en.cjs";
 import { addProblemSet, getProblemSet } from "../db_access/problemset";
 import { getSourceText } from "../db_access/upload";
 import { ServiceType, DbError, ServiceError } from "../error";
 import { queryLLM } from "../utils/ai-gateway";
 
-const API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 export async function getQuestionsWithAnswers(uploadId:number, userId:number){
     const problemsets = await getProblemSet(uploadId, userId);
@@ -74,18 +72,14 @@ export async function generateAndSaveProblems(uploadId:number, userId:number){
     const jsonText = await queryLLM(systemPrompt, query, {
                 type: ServiceType.AI_GENERATION
             });
-    // 3. Parse & Persist
-    console.error(jsonText);
   try {
-    console.error(jsonText);
     const parsed = JSON.parse(jsonText);
-    console.error("PARSED DATA before we pass to addProblemtSet currently throwing an error", parsed);
     const {pSet, questions} = await addProblemSet(uploadId,userId, parsed);
 
     // Transform to Frontend Format
     return {
       problemSetId: null,
-      questions: parsed.map(p => ({
+      questions: questions.map(p => ({
         question: p.question,
         answer: p.answer,
         userAnswer: "",
@@ -94,7 +88,6 @@ export async function generateAndSaveProblems(uploadId:number, userId:number){
     };
   } catch (err) {
     if (err instanceof ServiceError || err instanceof DbError) throw err;
-    console.error(err);
     throw new ServiceError("Invalid AI response format", ServiceType.AI_GENERATION);
   }
 }

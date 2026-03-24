@@ -24,13 +24,8 @@ async function sendMailService(recipientEmail:string, html:string, subject:strin
             }
         ]
     };
-    try{    
-        const result = await mailjet.post('send', { version: 'v3.1' }).request(data);
-        return result.body;
-    } catch (error){
-        console.error(error);
-        throw error;
-    }
+    const result = await mailjet.post('send', { version: 'v3.1' }).request(data);
+    return result.body;
 } 
 
 

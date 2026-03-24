@@ -1,6 +1,7 @@
 export enum ServiceType {
   AI_GENERATION = 'AI_GENERATION',
-  CHAT_AI = 'CHAT_LLM_QUERY'
+  CHAT_AI = 'CHAT_LLM_QUERY',
+  USER_ACC = 'USER_ACCOUNT_MANAGEMENT'
   
 }
 

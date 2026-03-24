@@ -1,22 +1,19 @@
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
-import { getUserByEmail, setNewPassword } from "../db_access/user";
 import { prisma } from "../db";
-import { NextResponse } from "next/server";
+import { getUserByEmail, setNewPassword } from "../db_access/user";
+import { storeResetTokenHash } from "../db_access/reset_token";
+import { ServiceError, ServiceType } from "../error";
 
 export async function createPasswordResetToken(email:string){
     const rawToken = crypto.randomBytes(32).toString("hex");
     const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
     const user = await getUserByEmail(email);
-    if(!user) throw new Error("User does not exist");
-    await prisma.reset_token.create({
-        data:{
-            token_hash:tokenHash,
-            user_id:user.user_id
-        }
-    });
+    if(!user) throw new ServiceError("User does not exist",ServiceType.USER_ACC, 404);
+    await storeResetTokenHash(tokenHash, user);
     return rawToken;
 }
+
 export async function verifyResetToken(rawToken:string){
     const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
     const result = await prisma.reset_token.findUnique({
