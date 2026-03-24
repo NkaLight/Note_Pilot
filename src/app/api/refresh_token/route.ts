@@ -26,7 +26,7 @@ export async function POST(req:NextRequest){
 /**
  * Removes the user session.
  * @description Retrieve access token from header, clear from cache, mark refresh token as used in DB.
- * @returns the user object or null if session is invalid/expired.
+ * @returns {status:200} on success.
  */
 export async function PUT(req:NextRequest){
     try{
