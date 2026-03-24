@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
-import { PDFParse} from 'pdf-parse';
+import { CanvasFactory } from 'pdf-parse/worker';
+import { PDFParse } from 'pdf-parse';
 import { prisma } from "@/lib/db";
 
 /**
