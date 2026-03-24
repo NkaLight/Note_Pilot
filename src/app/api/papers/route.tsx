@@ -14,8 +14,9 @@ import z from "zod";
  * @Returns a list of papers in JSON format.
  */
 export async function GET(){
-    const user = await getSessionUser();
-    if(!user || !user.user_id) return NextResponse.json({ error:"Unauthorized" }, {status : 401});
+    const {user} = await getSessionUser();
+    console.error(user);
+    if(!user) return NextResponse.json({ error:"Unauthorized" }, {status : 401});
     try{
         const papers = await prisma.paper.findMany({
         where: {
@@ -44,7 +45,7 @@ const addPaperSchema = z.object({
  * @returns the status, success or error message.
  */
 export async function POST(req: Request){
-    const user = await getSessionUser();
+    const {user} = await getSessionUser();
     if(!user) return NextResponse.json({ error:"Unauthorized" }, {status : 401});
     
     //Validate input
@@ -88,7 +89,7 @@ const updatePaperSchema = z.object({
  * @returns the status, success or error message.
  */
 export async function PUT(req: Request){
-    const user = await getSessionUser();
+    const {user} = await getSessionUser();
     if(!user) return NextResponse.json({error: "Unauthorized"}, {status: 401});
 
     //ValidateSchema
@@ -136,7 +137,8 @@ const deletePaperSchema = z.object({
  * @returns the status, success or error message.
  */
 export async function DELETE(req: Request){
-    const user = await getSessionUser();
+    const {user} = await getSessionUser();
+    console.error(user);
     if(!user) return NextResponse.json({error: "Unauthorized"}, {status: 401});
 
     //Validate input 

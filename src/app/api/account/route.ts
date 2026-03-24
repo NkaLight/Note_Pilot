@@ -39,7 +39,7 @@ const dbToUiLevel: Record<string, string> = {
  * @returns JSON
  */
 export async function PUT(req: NextRequest) {
-    const user = await getSessionUser();
+    const {user} = await getSessionUser();
     const userId = user.user_id;
     if (!userId) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

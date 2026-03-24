@@ -20,7 +20,6 @@ import { cookies } from "next/headers";
 import { AUTH_POLICY } from "./utils/auth";
 
 export const SESSION_COOKIE = "session_token";
-const JWT_SECRET = new TextEncoder().encode(process.env.ACCESS_TOKEN_SECRET);
 
 export type SessionUser = {
   user_id: number;
@@ -35,24 +34,26 @@ export type SessionUser = {
 export async function getSessionUser():Promise<SessionUser | any>{
   const cookieJar = await cookies();
   const token = cookieJar.get("session_token")?.value;
-  if(!token) return null;
+  if(!token) return {status:"invalid"};
   try{
       const { payload } = await jwtVerify(token, AUTH_POLICY.getAccessSecret()); 
-      return{
-        user_id: payload.id, 
-        email:payload.email,
+      const user = {
+        user_id: payload.id,
+        email: payload.email,
         username: payload.username
       };
+      return { status: "ok", user };
   }catch(error){
     console.error(error);
-    return null;
+    if (error?.code === "ERR_JWT_EXPIRED") return { status: "expired" };
+    return {status:"invalid"};
   }
 }
 
 //  
 export async function validatePaperId(paper_id: number):Promise<boolean | null>{
   const user = await getSessionUser();
-  if(user.user_id === null) return null;
+  if(user.status === "invalid" || user.status === "expired") return null;
 
   const isValid = await prisma.paper.count({
     where:{

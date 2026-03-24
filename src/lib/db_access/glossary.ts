@@ -4,6 +4,11 @@ import { prisma } from "@/lib/db";
 
 export async function saveGlossary(uploadId:number, terms:any[]){
     try{
+        
+        // Wipe existing glossary for this upload (handles regenerate)
+        await prisma.glossary.deleteMany({
+            where: { upload_id: uploadId }
+        });
         return await prisma.glossary.create({
             data: {
                 upload_id: uploadId,

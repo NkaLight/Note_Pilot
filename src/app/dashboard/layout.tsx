@@ -19,7 +19,7 @@ export const metadata: Metadata = {
  */
 export default async function AIPageLayout({ children }: { children: ReactNode }) {
   const user = await getSessionUser();
-  if(!user){
+  if(user.status === "invalid"){ // Only redirect when token is not valid
     redirect("/");
   }
   return (

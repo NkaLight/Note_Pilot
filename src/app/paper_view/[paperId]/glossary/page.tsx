@@ -40,7 +40,7 @@ export default function DashboardPage() {
 
 
   // Generate glossary automatically using selected uploads and chat context
-  async function generateGlossary() {
+  async function generateGlossary(regenerate) {
     if (chosenLectureId === null) {
       setErr("Please select at least one lecture from the PDFs page to generate a glossary.");
       return;
@@ -50,12 +50,22 @@ export default function DashboardPage() {
     
     try {
       //Get all the glossary data for the chosenLecturedId
-      const res = await fetch(`api/glossary?uploadId=${chosenLectureId}`);
+      const res = await fetch(`/api/glossary?uploadId=${chosenLectureId}`);
 
-      const data = await res.json();
+      let data = await res.json();
       console.log("Returned data: ", data);
       if (!res.ok) throw new Error(data?.error || "Failed to generate glossary");
       console.log("Response data: ", data);
+      if(!data.glossary.length || regenerate){
+        const resp = await fetch(`/api/glossary?uploadId=${chosenLectureId}`, {
+          method:"POST", 
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            uploadId: chosenLectureId
+          })
+        });
+        data = await resp.json();
+      }
       setGlossary(data.glossary);
       setLoading(false);
     } catch (e: any) {
@@ -69,8 +79,8 @@ export default function DashboardPage() {
 
   // Auto-generate when selected lectures change
   useEffect(() => {
-    if (selectedLectureIds.length > 0) {
-      generateGlossary();
+    if (chosenLectureId) {
+      generateGlossary(false);
     } else {
       setGlossary([]);
       setErr(null);
@@ -85,7 +95,7 @@ export default function DashboardPage() {
           <h2 className="text-xl font-semibold text-black">Glossary</h2>
           {chosenLectureId && (
             <button
-              onClick={generateGlossary}
+              onClick={()=> generateGlossary(true)}
               disabled={loading}
               className="px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 transition-colors"
             >
@@ -119,7 +129,7 @@ export default function DashboardPage() {
         {loading && (
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-3 text-gray-600">Generating glossary from your lectures and chat history...</span>
+            <span className="ml-3 text-gray-600">Generating glossary from your lecture...</span>
           </div>
         )}
 

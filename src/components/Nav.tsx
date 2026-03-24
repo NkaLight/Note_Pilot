@@ -19,7 +19,6 @@ import ResetPasswordForm from "@/components/ResetPasswordForm";
 const getNavLinks = (paperId?: string | string[]) => [
   { name: "Flash Cards", href: `/paper_view/${paperId}/flashcards` },
   { name: "Summaries", href: `/paper_view/${paperId}/summaries` },
-  { name: "Study Guides", href: `/paper_view/${paperId}/studyGuide` },
   { name: "Glossary", href: `/paper_view/${paperId}/glossary` },
   { name: "Problem Sets", href: `/paper_view/${paperId}/problemSets` },
 ];

@@ -39,7 +39,7 @@ Example output:
  * This allows persistence across page refreshes.
  */
 export async function GET(req: Request) {
-  const user = await getSessionUser();
+  const {user} = await getSessionUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const url = new URL(req.url);
   const uploadId = url.searchParams.get("uploadId");
@@ -69,7 +69,7 @@ export async function GET(req: Request) {
  */
 export async function POST(req: Request) {
   try {
-    const user = await getSessionUser();
+    const {user} = await getSessionUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await req.json();

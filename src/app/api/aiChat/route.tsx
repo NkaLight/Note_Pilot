@@ -3,40 +3,12 @@ import {getSourceText} from "@/lib/db_access/upload";
 import { NextResponse } from "next/server";
 import z from "zod";
 
-/**
- * A route for AI chat interactions (Node runtime).
- * Contains some redundant code for future RAG implementation.
- */
-
 /** Schema validation for incoming chat message requests */
 const chatMessageReqSchema = z.object({
     message: z.string(),
     uploadId: z.number(),
     paperId: z.number()
 });
-
-/** IGNORE: This function is for RAG (Retrieval Augmented Generation)
-* however, the RAG implementation is not complete yet.
-* Load the chunks and vectors at startup
-* const chunks: string[] = JSON.parse(fs.readFileSync("src/data/chunks.json", "utf-8"));
-* const vectors: number[][] = JSON.parse(fs.readFileSync("src/data/vectors.json", "utf-8"));
-*/
-function cosineSimilarity(a: number[], b: number[]) {
-    let dot = 0, normA = 0, normB = 0;
-    for (let i = 0; i < a.length; i++) {
-        dot += a[i] * b[i];
-        normA += a[i] * a[i];
-        normB += b[i] * b[i];
-    }
-    return dot / (Math.sqrt(normA) * Math.sqrt(normB));
-}
-
-/** IGNORE: This function is for RAG (Retrieval Augmented Generation) */
-function retrieveTopK(queryVec: number[], vectors: number[][], chunks: string[], k = 3) {
-    const scores = vectors.map((vec, i) => ({ i, score: cosineSimilarity(queryVec, vec) }));
-    scores.sort((a, b) => b.score - a.score);
-    return scores.slice(0, k).map(s => chunks[s.i]);
-}
 
 /**
  * Handles POST requests to /api/aiChat.
@@ -45,7 +17,7 @@ function retrieveTopK(queryVec: number[], vectors: number[][], chunks: string[],
 export async function POST(req: Request){
     try{
 
-        const user = await getSessionUser();
+        const {user} = await getSessionUser();
         if(!user) return new NextResponse("Unauthorized", {status: 401});
         
         const body = await req.json();

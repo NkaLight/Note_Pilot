@@ -11,7 +11,7 @@ import { prisma } from "@/lib/db";
 export async function POST(req: Request) {
   try {
     // Get the user ID from the authentication token
-    const user = await getSessionUser();
+    const {user} = await getSessionUser();
     const userId = user.user_id;
     if (!userId) {
       return new NextResponse("Unauthorized", { status: 401 });
@@ -31,8 +31,6 @@ export async function POST(req: Request) {
     if (!(uploadedFile instanceof File)) {
       return new NextResponse("Invalid file", { status: 400 });
     }
-
-    console.log("Received file:", uploadedFile.name, uploadedFile.size, uploadedFile.type);
 
     const fileBuffer = Buffer.from(await uploadedFile.arrayBuffer());
     const parser = new PDFParse({data:fileBuffer, verbosity: 0 });

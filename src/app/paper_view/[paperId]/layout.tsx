@@ -12,11 +12,11 @@ type PaperViewLayoutProps = {
 export default async function PaperViewLayout({ children, params }: PaperViewLayoutProps) {
     const resolvedParams = await params;
     const user = await getSessionUser();
-      if(!user){
+      if(user.status === "invalid"){
         redirect("/");
       }
     const paper_id = Number(resolvedParams.paperId);
-    const initialLectures = await getLecturesForPaper(paper_id, user.user_id); //I validate when calling the API for the lectures.
+    const initialLectures = user.status === "ok" ? await getLecturesForPaper(paper_id, user.user_id): []; 
 
     return (
         <ClientProviderWrapper initialLectures={initialLectures}>

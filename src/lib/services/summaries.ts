@@ -1,4 +1,3 @@
-import { text } from "stream/consumers";
 import { getSourceText } from "../db_access/upload";
 import { queryLLM } from "../utils/ai-gateway";
 import { ServiceError, AppError, ServiceType, DbError } from "../error";

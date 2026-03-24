@@ -9,7 +9,7 @@ import ThemeInit from "@/components/Account/themeInit";
 import { ThemeProviders } from "@/components/Account/themeProvider";
 import { getSessionUser } from '@/lib/auth';
 import { AuthContextProvider } from "@/context/AuthContext";
-
+import { redirect } from "next/dist/server/api-utils";
 
 export const metadata: Metadata = {
   title: "Note Pilot",
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({children,}: Readonly<{children: React.ReactNode;}>) {
-    const user = await getSessionUser();
+    const {user } = await getSessionUser();
 
   return (
     <html lang="en" suppressHydrationWarning>

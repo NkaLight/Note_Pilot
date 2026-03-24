@@ -11,7 +11,7 @@ export async function DELETE(
 ) {
     try {
         // Get authenticated user
-        const user = await getSessionUser();
+        const {user} = await getSessionUser();
         const userId = user.user_id;
         if (!userId) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -48,7 +48,10 @@ export async function DELETE(
         // Delete the upload (this will cascade delete related records due to DB constraints)
         await prisma.upload.delete({
             where: {
-                upload_id: uploadId
+                upload_id: uploadId,
+                paper:{
+                    user_id:userId
+                }
             }
         });
 

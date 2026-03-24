@@ -16,7 +16,7 @@ import { ServiceError, DbError } from "@/lib/error";
  */
 export async function GET(request: Request) {
     try {
-        const user = await getSessionUser();
+        const {user} = await getSessionUser();
         if(!user || !user.user_id) return NextResponse.json({ error:"Unauthorized" }, {status : 401});
         const userId  = user.user_id;
         const { searchParams } = new URL(request.url);
@@ -49,7 +49,7 @@ export async function GET(request: Request) {
  */
 export async function POST(req: Request){
     try{
-        const user = await getSessionUser();
+        const {user} = await getSessionUser();
         if(!user || !user.user_id) return NextResponse.json({ error:"Unauthorized" }, {status : 401});
         const userId  = user.user_id;
         const {mode, uploadId, lectureId, userAnswer, questions, problemId, userAnswerId} = await req.json();

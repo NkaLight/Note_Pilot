@@ -14,9 +14,7 @@
  * - Regenerates when selected lectures change or when user clicks regenerate
  */
 
-import ChatUI from "@/components/DashBoard/ChatUI";
 import { usePaperViewContext } from "@/context/PaperViewContext";
-import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import StudyLayout from "@/components/DashBoard/StudyLayout";
 
@@ -26,7 +24,7 @@ type SummaryItem = {
 }
 export default function DashboardPage() {
   // Chat width starts at 50% of viewport
-  const {chosenLectureId, lectures, selectedLectureIds} = usePaperViewContext();
+  const {chosenLectureId, selectedLectureIds} = usePaperViewContext();
   const [summaries, setSummaries] = useState<SummaryItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

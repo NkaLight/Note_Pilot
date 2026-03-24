@@ -22,10 +22,26 @@ const TermArray = z.array(
     })
 );
 
+export async function GET(req:Request){
+    const {user} = await getSessionUser();
+    if(!user) return NextResponse.json({error:"Unauthenticated"}, {status:401});
+    //Validated request
+    const { searchParams } = new URL(req.url);
+    const uploadId = searchParams.get("uploadId");
+    if (!uploadId) return NextResponse.json({ error: "Missing or invalid input." }, { status: 400 });
+    try{
+        const terms = await getGlossaryList(Number(uploadId), user.user_id);
+        return NextResponse.json({glossary: terms});
+    }catch(error){
+        console.error(error);
+        return NextResponse.json({error:"Internal server erorr"}, {status:500});
+    }
+}
+
 export async function POST(req: Request) {
     try {
         // Auth check
-        const user = await getSessionUser();
+        const {user} = await getSessionUser();
         if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
         // Validate request
@@ -42,7 +58,7 @@ export async function POST(req: Request) {
             terms = TermArray.parse(JSON.parse(jsonText));
         } catch {
             return NextResponse.json(
-                { error: "LLM did not return valid glossary JSON", detail: terms.slice(0, 800) },
+                { error: "LLM did not return valid glossary JSON", detail: terms?.slice(0, 800) },
                 { status: 502 }
             );
         }
@@ -60,21 +76,5 @@ export async function POST(req: Request) {
     } catch (err: any) {
         console.error("Glossary route error:", err);
         return NextResponse.json({ error: "Internal Server error" }, { status: 500 });
-    }
-}
-
-export async function GET(req:Request){
-    const user = await getSessionUser();
-    if(!user) return NextResponse.json({error:"Unauthenticated"}, {status:401});
-    //Validated request
-    const body = await req.json();
-    const parsed = GlossaryReq.safeParse(body);
-    if (!parsed.success) return NextResponse.json({ error: parsed.error.message }, { status: 400 });
-    try{
-        const terms = await getGlossaryList(parsed.data.uploadId, user.user_id);
-        return NextResponse.json({glossary: terms});
-    }catch(error){
-        console.error(error);
-        return NextResponse.json({error:"Internal server erorr"}, {status:500});
     }
 }
