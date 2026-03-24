@@ -15,7 +15,6 @@ import z from "zod";
  */
 export async function GET(){
     const {user} = await getSessionUser();
-    console.error(user);
     if(!user) return NextResponse.json({ error:"Unauthorized" }, {status : 401});
     try{
         const papers = await prisma.paper.findMany({
@@ -120,6 +119,7 @@ export async function PUT(req: Request){
         return NextResponse.json({status:200});
 
     }catch(error:any){
+        console.error(error);
         return NextResponse.json({ error:"Internal Server error" }, {status: 500});
     }
 }
@@ -138,7 +138,6 @@ const deletePaperSchema = z.object({
  */
 export async function DELETE(req: Request){
     const {user} = await getSessionUser();
-    console.error(user);
     if(!user) return NextResponse.json({error: "Unauthorized"}, {status: 401});
 
     //Validate input 
@@ -158,6 +157,7 @@ export async function DELETE(req: Request){
         });
         return NextResponse.json({status:200});
     }catch(error){
+        console.error(error);
         return NextResponse.json({error: "Error deleting your paper"}, {status: 500});
     }
 }

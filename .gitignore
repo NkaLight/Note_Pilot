@@ -10,6 +10,7 @@
 !.yarn/releases
 !.yarn/versions
 /diagrams
+.cache/
 
 # testing
 /coverage

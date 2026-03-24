@@ -37,6 +37,8 @@ export async function POST(req: Request) {
       return new NextResponse("Invalid file", { status: 400 });
     }
 
+
+    /*PDFPARSER documentation within serveless environment https://mehmet-kozan.github.io/pdf-parse/typedoc/documents/troubleshooting.html */
     const fileBuffer = Buffer.from(await uploadedFile.arrayBuffer());
     const parser = new PDFParse({data:fileBuffer, verbosity: 0, CanvasFactory });
     const parsed = await parser.getText();

@@ -6,9 +6,7 @@ export async function POST(req:NextRequest){
     if(!token) return NextResponse.json({error:"Unauthenticated"}, {status:401});
     
     try{
-        console.error("Retrieved ", token);
         const result = await verifyResetToken(token);
-        console.error("Token already used or invalid");
         if(!result) return NextResponse.json({error:"Unauthenticated"}, {status:401});
         return NextResponse.json({message:"tokenVerified"});
 

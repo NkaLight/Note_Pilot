@@ -9,7 +9,7 @@ const API_URL = "https://openrouter.ai/api/v1/chat/completions";
 export async function getQuestionsWithAnswers(uploadId:number, userId:number){
     const problemsets = await getProblemSet(uploadId, userId);
     if(problemsets){
-                                                //Ignore the problem warning
+        //Ignore the problem warning
         const questionsWithAnswers = problemsets.problem.map((problem, index) => ({
                 id: problem.problem_id,
                 question: problem.question_text,

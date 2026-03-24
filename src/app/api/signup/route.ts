@@ -80,7 +80,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: `A user with this ${target} already exists.`}, { status: 400 });
       }
     }
-    
+    console.error(error);
     return NextResponse.json({ error:"Registration failed" }, { status: 500 });
   }
 }

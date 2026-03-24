@@ -45,8 +45,7 @@ export async function GET(req: Request) {
   const uploadId = url.searchParams.get("uploadId");
 
   if(!uploadId){
-    console.error(`UploadId can not be falsy, current value: ${uploadId}`);
-    return NextResponse.json({error: "Invalid request"}, {status:400});
+    return NextResponse.json({error: "Invalid input."}, {status:400});
   }
   try {
     const flashcards = await getFlashCards(Number(uploadId), user.user_id);

@@ -11,7 +11,7 @@ export async function storeResetTokenHash(tokenHash:string, user){
 }
 
 export async function getResetToken(tokenHash:string){
-    await prisma.reset_token.findUnique({
+    return await prisma.reset_token.findUnique({
         where:{
             token_hash:tokenHash
         },

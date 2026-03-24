@@ -1,6 +1,5 @@
 import { getSessionUser } from "@/lib/auth";
 import {getChatMessages, clearChatMessages } from "@/lib/db_access/chat_message";
-import { prisma } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getSourceText } from "@/lib/db_access/upload";
@@ -82,12 +81,10 @@ export async function POST(request: NextRequest) {
     const parsed = postChatSchema.safeParse(body);
     
     if (!parsed.success) {
-      console.error('Invalid request body:', parsed.error);
       return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
 
     const { uploadId, content } = parsed.data;
-    console.error(uploadId);
     const upload = (await getSourceText(uploadId, user_id));
     if (!upload) {
       return NextResponse.json({ error: "Upload not found or unauthorized" }, { status: 404 });
@@ -130,14 +127,8 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Invalid uploadId" }, { status: 400 });
     }
 
-    console.log(`Clearing chat history for uploadId: ${parsed.data.uploadId}, user: ${user_id}`);
-
-
     // Delete all chat messages for this upload and user
     const result = await clearChatMessages(Number(uploadId), user_id);
-
-    console.log(`Deleted ${result.count} chat messages for upload ${parsed.data.uploadId}`);
-
     return NextResponse.json({
       success: true,
       deletedCount: result.count

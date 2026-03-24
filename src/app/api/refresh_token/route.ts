@@ -17,7 +17,7 @@ export async function POST(req:NextRequest){
         validate_session_schema.parse({refresh_token});
         const user = await refreshLogic(refresh_token);
         if(!user) return NextResponse.json({user:null, status:401});
-        return NextResponse.json({ user: { id: user.user_id, email: user.email} });
+        return NextResponse.json({ user: { email: user.email} });
     }catch(error){
         console.log(error);
         return NextResponse.json({error:"Internal server error"}, {status:500});
@@ -40,7 +40,6 @@ export async function PUT(req:NextRequest){
 
         return NextResponse.json({message: "Logout successful"}, {status:200});
     }catch(error){
-        console.log(error);
         return NextResponse.json({error: "Internal server error"}, {status:500});
     }
 }

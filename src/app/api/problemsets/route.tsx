@@ -33,7 +33,6 @@ export async function GET(request: Request) {
                 cached: true
             });
         }
-        console.error(questionsWithAnswers);
         return NextResponse.json({ success: true, questions: null });
 
     } catch (error) {
@@ -53,7 +52,6 @@ export async function POST(req: Request){
         if(!user || !user.user_id) return NextResponse.json({ error:"Unauthorized" }, {status : 401});
         const userId  = user.user_id;
         const {mode, uploadId, lectureId, userAnswer, questions, problemId, userAnswerId} = await req.json();
-        console.log(mode, uploadId, lectureId, userAnswer, questions);
 
         if(!mode) {
             return NextResponse.json({error:"No mode selected"}, {status: 400});
