@@ -1,4 +1,3 @@
-import { DbError } from "../error";
 import { prisma } from "../db";
 
 export async function getUser(refresh_token:string){

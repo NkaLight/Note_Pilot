@@ -14,7 +14,6 @@ export async function getSummaries(uploadId:number, user_id:number){
             }
         });
     }catch(error){
-        console.error("Database Error in getSummaries:", error);
-        throw new DbError("Error fetching summaries");
+        throw new DbError(`Error getSummaries DbError \n\n${error}\n\n`);
     }
 }

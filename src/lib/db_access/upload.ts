@@ -64,7 +64,6 @@ export async function getLecturesForPaper(paperId:number, userId:number):Promise
         return result.map(({upload_id, filename, uploaded_at}) => ({id:upload_id,title:filename, createdAt:uploaded_at})); 
 
     }catch(error){
-        console.error(error);
-        throw new DbError("Failed to get the lecture list");
+        throw new DbError(`Error getLecturesForPaper DbError \n\n${error}\n\n`);
     }
 }

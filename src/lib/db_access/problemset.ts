@@ -18,8 +18,7 @@ export async function getProblemSet(uploadId:number, userId:number){
             }
         });
     }catch(error){
-        console.error(error);
-        throw new DbError("Error retrieving problemset DbError");
+        throw new DbError(`Error retrieving getProblemSet DbError \n\n${error}\n\n`);
     }
 }
 
@@ -55,7 +54,6 @@ export async function addProblemSet(uploadId: number, userId: number, questions:
             return {pSet,  questions};// Here we return both the pSet and the q & A
         }, { timeout: 10000 }); // Bonus: give it 10s just in case
     } catch (error) {
-        console.error(error);
-        throw error;
+        throw new DbError(`Error retrieving addProblemSet DbError \n\n${error}\n\n`);
     }
 }
