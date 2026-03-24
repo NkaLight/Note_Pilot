@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { CanvasFactory } from 'pdf-parse/worker';
 import { PDFParse } from 'pdf-parse';
+import { getPath, getData } from 'pdf-parse/worker';
 import { prisma } from "@/lib/db";
 
 /**
@@ -10,7 +11,10 @@ import { prisma } from "@/lib/db";
  * Currently text extraction is done within the function, but should be moved to lib.
  */
 export async function POST(req: Request) {
+  PDFParse.setWorker(getData());
   try {
+    
+
     // Get the user ID from the authentication token
     const {user} = await getSessionUser();
     const userId = user.user_id;
@@ -34,7 +38,7 @@ export async function POST(req: Request) {
     }
 
     const fileBuffer = Buffer.from(await uploadedFile.arrayBuffer());
-    const parser = new PDFParse({data:fileBuffer, verbosity: 0 });
+    const parser = new PDFParse({data:fileBuffer, verbosity: 0, CanvasFactory });
     const parsed = await parser.getText();
     const parsedText = parsed.text;
     parser.destroy();
