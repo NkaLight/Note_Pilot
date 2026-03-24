@@ -22,16 +22,15 @@ export default function ResetPasswordForm({closeForm}:ResetPasswordFormProps){
         setError(null);
         setOutput(null);
         try{
-            const result = await fetch("/api/sendMagicLink", {
+            const result = await fetch("/api/account/generate_reset_link", {
                 method:"POST", 
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    email
+                    email:email
                 }),
             });
-            console.log(result);
             setIsLoading(false);
             setOutput("You should get an email if you are signed up with us.");
             setError(null);

@@ -18,7 +18,6 @@ import ChatUI from "@/components/DashBoard/ChatUI";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import StudyLayout from "@/components/DashBoard/StudyLayout";
 
 type GlossaryItem = {
   term: string;
@@ -88,7 +87,7 @@ export default function DashboardPage() {
   }, [chosenLectureId]); // chosenLectureId changes
 
   return (
-    <StudyLayout>
+    <>
       {/* Middle: Glossary */}
       <div className="rounded-3xl mb-5 mt-19 p-6 bg-white/50 mr-10 overflow-y-auto mt-5 flex-grow text-black">
         <div className="flex justify-between items-center mb-4">
@@ -157,6 +156,6 @@ export default function DashboardPage() {
           ) : null}
         </div>
       </div>
-    </StudyLayout>
+    </>
   );
 }

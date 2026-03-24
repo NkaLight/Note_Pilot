@@ -16,7 +16,6 @@
 
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { useEffect, useRef, useState } from "react";
-import StudyLayout from "@/components/DashBoard/StudyLayout";
 
 type SummaryItem = {
   header: string,
@@ -25,7 +24,7 @@ type SummaryItem = {
 export default function DashboardPage() {
   // Chat width starts at 50% of viewport
   const {chosenLectureId, selectedLectureIds} = usePaperViewContext();
-  const [summaries, setSummaries] = useState<SummaryItem[]>([]);
+  const [summaries, setSummaries] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,13 +34,11 @@ export default function DashboardPage() {
       setError("Please select at least one lecture from the PDFs page to generate summaries.");
       return;
     }
-    
     setIsLoading(true);
     setError(null);
-    
     try {
       // Generate summaries using combined context via existing generateContent API
-      const res = await fetch("/api/generateContent", {
+      const res = await fetch("/api/summary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -52,16 +49,16 @@ export default function DashboardPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Failed to generate summaries");
 
-      if (Array.isArray(data.content)) {
+      if (data.content) {
         setSummaries(data.content);
       } else {
         console.error("Expected array format not returned");
-        setSummaries([]);
+        setSummaries("");
         setError("Invalid response format from summary generation");
       }
     } catch (e: any) {
       setError("Error generating summaries");
-      setSummaries([]);
+      setSummaries("");
     } finally {
       setIsLoading(false);
     }
@@ -74,19 +71,14 @@ export default function DashboardPage() {
       setIsLoading(true);
       setError(null);
       try{
-        const res = await fetch(`/api/generateContent?uploadId=${chosenLectureId}`);
+        const res = await fetch(`/api/summary?uploadId=${chosenLectureId}`);
         const data = await res.json();
-        if(res.ok && data.content && data.content.length > 0){
-          const mappedSummaries  = (data.content as SummaryItem[]).map((fc)=>({
-            header:fc.header,
-            text:fc.text
-          }));
-          setSummaries(mappedSummaries);
+        if(data.content){
+          setSummaries(data.content);
         }else{
           await generateSummaries();
         }
       }catch(err){
-        console.error("Sync error", error);
         setError("Failed to get summaries");
       }finally{
         setIsLoading(false);
@@ -96,7 +88,7 @@ export default function DashboardPage() {
   }, [chosenLectureId]); // Re-run when selection changes
 
   return (
-    <StudyLayout>
+    <>
       {/* Middle: Summaries */}
       <div className=" rounded-3xl mb-5 mt-19 p-6 bg-white/50 mr-10 overflow-y-auto mt-5 flex-grow">
         <div className="flex justify-between items-center mb-4">
@@ -127,25 +119,17 @@ export default function DashboardPage() {
         )}
 
         {/* Render summary results */}
-        {summaries.length > 0 && !isLoading ? (
+        {summaries && !isLoading ? (
           <>
             <div className="space-y-6">
-              {summaries.map((item, idx) => (
-                <div key={idx} className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                  <h3 className="text-lg font-semibold mb-2 text-black">{item.header}</h3>
-                  <p
-                    className="text-gray-800 leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: item.text }}
-                  />
-                </div>
-              ))}
+              {summaries}
             </div>
           </>
         ) : !isLoading && selectedLectureIds.length > 0 && (
           <p className="text-gray-500 text-center py-8">No summaries generated yet.</p>
         )}
       </div>
-    </StudyLayout>
+    </>
   );
 }
 

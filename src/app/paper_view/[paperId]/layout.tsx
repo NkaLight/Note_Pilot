@@ -8,7 +8,6 @@ type PaperViewLayoutProps = {
   params: Promise<{ paperId: string }>;
 };
 
-
 export default async function PaperViewLayout({ children, params }: PaperViewLayoutProps) {
     const resolvedParams = await params;
     const user = await getSessionUser();
@@ -20,7 +19,7 @@ export default async function PaperViewLayout({ children, params }: PaperViewLay
 
     return (
         <ClientProviderWrapper initialLectures={initialLectures}>
-            <main>{children}</main>
+            {children}
         </ClientProviderWrapper>
     );
 }

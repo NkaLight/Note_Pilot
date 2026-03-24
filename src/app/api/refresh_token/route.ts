@@ -5,16 +5,12 @@ import { refreshLogic,} from "@/lib/services/refresh_token";
 import { markAsUsed } from "@/lib/db_access/refresh_token";
 
 
-/** Use ZOD to validate structure */
-const validate_session_schema = z.object({
-    refresh_token: z.string()
-});
 
 /*Using the refresh token, get the access token.*/
 export async function POST(req:NextRequest){
     try{
         const refresh_token = (await cookies()).get("refresh_token")?.value;
-        validate_session_schema.parse({refresh_token});
+        if(!refresh_token) return NextResponse.json({user:null, status:401});
         const user = await refreshLogic(refresh_token);
         if(!user) return NextResponse.json({user:null, status:401});
         return NextResponse.json({ user: { email: user.email} });

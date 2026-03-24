@@ -83,8 +83,8 @@ export async function createTestPasswordResetToken(email: string) {
 }
 
 export async function createExpiredPasswordResetToken(email: string): Promise<string> {
-    const rawToken = crypto.randomUUID();
-    const hashedToken = await bcrypt.hash(rawToken, 10);
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
     
     await prisma.reset_token.create({
         data: {

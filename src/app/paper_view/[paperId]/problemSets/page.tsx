@@ -17,7 +17,6 @@
 
 import ProblemSet from "@/components/DashBoard/ProblemSet";
 import { usePaperViewContext } from "@/context/PaperViewContext";
-import StudyLayout from "@/components/DashBoard/StudyLayout"; 
 import { useEffect, useRef, useState } from "react";
 
 export default function DashboardPage() {
@@ -141,7 +140,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <StudyLayout>
+    <>
           {/* Middle: Problem Sets */}
           <div className=" rounded-3xl mb-5 mt-19 p-6 mr-10 bg-white/50 overflow-y-auto mt-5 flex-grow">
             <div className="flex justify-between items-center mb-4">
@@ -192,6 +191,6 @@ export default function DashboardPage() {
                 <p className="text-gray-500 text-center py-8">No problem sets generated yet.</p>)}
             </div>
           </div>
-        </StudyLayout>
+        </>
   );
 }

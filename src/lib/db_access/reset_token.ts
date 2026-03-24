@@ -9,7 +9,7 @@ export async function storeResetTokenHash(tokenHash:string, user){
     });
 }
 
-export async function getResetToken(tokenHash:string){
+export async function getUserFromTokenHash(tokenHash:string){
     return await prisma.reset_token.findUnique({
         where:{
             token_hash:tokenHash

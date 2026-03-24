@@ -2,6 +2,7 @@
 
 import { ReactNode } from "react";
 import { PaperViewProvider, Lecture } from "@/context/PaperViewContext";
+import StudyLayout from "@/components/DashBoard/StudyLayout";
 
 interface Props {
   children: ReactNode;
@@ -11,7 +12,9 @@ interface Props {
 export default function ClientProviderWrapper({ children, initialLectures }: Props) {
   return (
     <PaperViewProvider initialLectures={initialLectures}>
-      <div>{children}</div>
+      <StudyLayout>
+        {children}
+      </StudyLayout>
     </PaperViewProvider>
   );
 }

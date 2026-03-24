@@ -32,11 +32,11 @@ test.describe("API endpoints unauthenticated", ()=>{
         expect((await request.get("/api/papers", {data: {uploadId:9}})).status()).toBe(401);
     });
 
-    test("GET /api/generateContent", async ({request}) =>{
-        expect((await request.get("/api/generateContent?uploadId=9")).status()).toBe(401);
+    test("GET /api/summary", async ({request}) =>{
+        expect((await request.get("/api/summary?uploadId=9")).status()).toBe(401);
     });
-    test("POST /api/generateContent", async ({request}) =>{
-        expect((await request.get("/api/generateContent", {data: {uploadId:9}})).status()).toBe(401);
+    test("POST /api/summary", async ({request}) =>{
+        expect((await request.get("/api/summary", {data: {uploadId:9}})).status()).toBe(401);
     });
 
     test("GET /api/problemsets", async ({request}) =>{

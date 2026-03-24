@@ -11,7 +11,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import StudyLayout from "@/components/DashBoard/StudyLayout";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 
 type Flashcard = { question: string; answer: string };
@@ -80,7 +79,6 @@ export default function FlashcardsPage() {
   }, [chosenLectureId]);
 
   return (
-    <StudyLayout>
        <div className="flex flex-col snap-y snap-mandatory gap-4 p-4 w-full items-center">
            {loading && err === null && <p className="text-white/80">Generating flashcards…</p>}
            {err && <p className="text-red-300">{err}</p>}
@@ -101,6 +99,5 @@ export default function FlashcardsPage() {
              </div>
            ))}
          </div>
-    </StudyLayout>
   );
 }

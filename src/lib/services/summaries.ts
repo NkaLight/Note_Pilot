@@ -4,38 +4,44 @@ import { ServiceError, AppError, ServiceType, DbError } from "../error";
 import { SummaryItemArray } from "../zod_schemas/summary";
 import { ZodError } from "zod";
 
-const API_URL = "https://openrouter.ai/api/v1/chat/completions";
-
 export async function generateSummaries(uploadId:number,userId:number){
     try{
         const textContent = await getSourceText(uploadId, userId);
         if(!textContent) throw new AppError("Could not generateSummaries, getSourceText() is falsy");
 
-        const aiQuery = `You are an AI that summarizes lecture content into a structured JSON array. 
-        Generate **at least 5 objects**, each with:
-        1. "header": a concise title.
-        2. "text": summarized text with <strong>...</strong> tags highlighting key concepts.
+        const aiQuery = `You are a really smart student post-grad student making notes for the lecture. Make notes based on this current lecture.
 
-        Return the data as a valid JSON array ONLY, with no extra text outside the array.
+                Lecture text:
+                """
+                ${textContent.text_content}
+                """`;
+                const SYSTEM_PROMPT = `
+                        You are a lecture summarizer. Output ONLY valid markdown, no JSON, no code fences.
 
-        Lecture text:
-        """
-        ${textContent}
-        """
+                        Use this exact structure:
+                        # [Main Topic Title]
 
-        Example output:
-        [
-        {
-            "header": "Introduction to Algorithms",
-            "text": "Algorithms are <strong>step-by-step procedures</strong> for solving problems efficiently..."
-        },
-        {
-            "header": "Time Complexity",
-            "text": "We measure <strong>algorithm performance</strong> by..."
-        }
-        ]`;
-        const systemPrompt = "You are an AI that outputs JSON only, no explanations.";
-        const data = await queryLLM(systemPrompt, aiQuery, {
+                        ## Overview
+                        A 2-3 sentence overview of the lecture.
+
+                        ## Key Concepts
+                        ### [Concept Name]
+                        Explanation of the concept with **bold** for key terms.
+
+                        ### [Concept Name]
+                        Explanation...
+
+                        ## Summary
+                        A concise paragraph tying everything together.
+
+                        ## Key Takeaways
+                        - Bullet point 1
+                        - Bullet point 2
+                        - Bullet point 3
+
+                        Where helpful, include a mermaid diagram to visualise relationships or processes.
+                        `.trim();
+        const data = await queryLLM(SYSTEM_PROMPT, aiQuery, {
             type: ServiceType.AI_GENERATION
         });
         return SummaryItemArray.parse(JSON.parse(data));
@@ -49,4 +55,8 @@ export async function generateSummaries(uploadId:number,userId:number){
         }
         throw new ServiceError(`Failed to generateSummaries ${err}`, ServiceType.AI_GENERATION);
     }
+}
+
+export async function generateAndSaveSummaries(uploadId:number,userId:number){
+    const summaries = await generateSummaries(uploadId, userId);
 }

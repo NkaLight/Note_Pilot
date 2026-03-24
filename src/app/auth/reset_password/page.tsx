@@ -27,8 +27,8 @@ export default function Verify(){
         setShowForm(null);
         e.preventDefault();
         try{
-            const result = await fetch("/api/reset_password", {
-                method:"POST", 
+            const result = await fetch("/api/account/reset_password", {
+                method:"PUT", 
                 headers: {
                     "Content-Type": "application/json",
                 },
