@@ -18,6 +18,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import ReactMarkdown from 'react-markdown';
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { StreamChunk } from "@/lib/utils/ai-gateway";
 
@@ -33,6 +34,7 @@ export default function ChatUI() {
   const [busy, setBusy] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const {chosenLectureId } = usePaperViewContext();
+  const [loadLLMResp, setLoadLLMResp] = useState<boolean>(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Load chat history when activeUploadIds changes
@@ -97,9 +99,7 @@ export default function ChatUI() {
      // eslint-disable-next-line no-constant-condition
      while(true){
       const {done, value} = await reader.read();
-      if(done){
-        break;
-      }
+      if(done) break;
 
       const chunk = textCoder.decode(value, {stream:true});
       const lines = chunk.split("\n").filter((l) => l.startsWith("data: "));
@@ -108,6 +108,7 @@ export default function ChatUI() {
         if (payload === "[DONE]") break;
         try{
           const json: StreamChunk = JSON.parse(payload);
+
           if(json.type === "error"){
             setMessages((prev) => {
               const updated = [...prev];
@@ -118,7 +119,10 @@ export default function ChatUI() {
               return updated;
             });
           };
-          if(json.type === "done") break;
+          if(json.type === "done"){
+            //POST the latest updates
+
+          }
 
           if (json.type === "delta") {
             // Only ever touches the last message
@@ -130,6 +134,7 @@ export default function ChatUI() {
               };
               return updated;
             });
+            bottomRef.current?.scrollIntoView({ behavior: "smooth" });
           }
         }catch{
           console.log("Chunk error");
@@ -202,13 +207,15 @@ export default function ChatUI() {
           return (
             <div key={i} className={`space-y-2`}>
               <div
-                className={`p-3 rounded-xl max-w-[80%] text-black ${
+                className={`p-3 rounded-xl max-w-[80%] dark:text-white text-black  ${
                   isAssistant
-                    ? "bg-gray-100 mr-auto text-left"
-                    : "bg-blue-100 ml-auto text-right"
+                    ? "mx-auto text"
+                    : "dark:bg-neutral-900 bg-cyan-400 ml-auto text-right"
                 }`}
+                style={isAssistant? 
+                    {color: "var(--card-text)"}: {}}
               >
-                {m.content}
+              {isAssistant ? (<ReactMarkdown>{m.content}</ReactMarkdown>):(<p>{m.content}</p>)}
               </div>
             </div>
           );

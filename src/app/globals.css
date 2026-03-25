@@ -15,8 +15,9 @@
   --bg-mid:   #1c1c1c;   /* dark middle */
   --bg-end:   #626262;   /* dark bottom */
   --text:     #ffffff;   /* dark text */
-  --card-bg: linear-gradient(to bottom, #2A2A2A, #767676);
-  --card-text: #ffffff;
+  --card-bg: linear-gradient(to bottom, #4b4b4b, #474747);
+  --chat-bg: linear-gradient(to bottom, #454545, #363636);
+  --card-text: #e5e5e5;
 }
 
 body {
