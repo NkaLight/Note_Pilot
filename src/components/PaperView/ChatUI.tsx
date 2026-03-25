@@ -90,10 +90,6 @@ export default function ChatUI() {
       body: JSON.stringify({ uploadId: chosenLectureId, content: input }),
      });
      if (!res.ok || !res.body) throw new Error("Stream failed");
-     console.log("res.ok:", res.ok);
-      console.log("res.status:", res.status);
-      console.log("Content-Type:", res.headers.get("content-type"));
-      console.log("res.body:", res.body);
 
      const reader = res.body.getReader();
      const textCoder = new TextDecoder();
@@ -105,7 +101,6 @@ export default function ChatUI() {
       }
 
       const chunk = textCoder.decode(value, {stream:true});
-      console.log("RAW CHUNK repr:", JSON.stringify(chunk));
       const lines = chunk.split("\n").filter((l) => l.startsWith("data: "));
       for(const line of lines){
         const payload = line.slice(6);
