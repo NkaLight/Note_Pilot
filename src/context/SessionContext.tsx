@@ -1,13 +1,10 @@
 "use client";
 
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
-import { useRouter } from "next/navigation";
 import { createContext, ReactNode, useContext, useState, useRef, useMemo, useEffect } from "react";
 
 type User = {
-    user_id: number;
     email: string;
-    username: string;
     aiLevel?: string;
 }
 

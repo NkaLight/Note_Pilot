@@ -3,7 +3,9 @@ import {getChatMessages, clearChatMessages } from "@/lib/db_access/chat_message"
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getSourceText } from "@/lib/db_access/upload";
-import { generateChat } from "@/lib/services/chat";
+import { generateChat, streamChat} from "@/lib/services/chat";
+import { parse } from "path";
+import Stream from "stream";
 
 /**
  * Chat API endpoints for persistent chat message management
@@ -69,42 +71,66 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const {user} = await getSessionUser();
-    const user_id = user.user_id;
-    if (!user_id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const body = await request.json();
-    const parsed = postChatSchema.safeParse(body);
+// export async function POST(request: NextRequest) {
+//   try {
+//     const {status, user} = await getSessionUser();
+//     const user_id = user.user_id;
+//     if (status !== "ok") {
+//       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+//     }
     
-    if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
-    }
-
-    const { uploadId, content } = parsed.data;
-    const upload = (await getSourceText(uploadId, user_id));
-    if (!upload) {
-      return NextResponse.json({ error: "Upload not found or unauthorized" }, { status: 404 });
-    }
-    const textContent = upload.text_content;
-    const message = await generateChat(textContent, uploadId, user_id,content);
+//     const body = await request.json();
+//     const parsed = postChatSchema.safeParse(body);
     
-    return NextResponse.json({
-      success: true,
-      message: {
-        role: message.role,
-        content: message.content,
-        created_at: message.created_at.toISOString()
-      }
-    });
+//     if (!parsed.success) {
+//       return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+//     }
 
-  } catch (error) {
-    console.error('Error saving chat message:', error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+//     const { uploadId, content } = parsed.data;
+//     const upload = (await getSourceText(uploadId, user_id));
+//     if (!upload) {
+//       return NextResponse.json({ error: "Upload not found or unauthorized" }, { status: 404 });
+//     }
+//     const textContent = upload.text_content;
+//     const message = await generateChat(textContent, uploadId, user_id,content);
+    
+//     return NextResponse.json({
+//       success: true,
+//       message: {
+//         role: message.role,
+//         content: message.content,
+//         created_at: message.created_at.toISOString()
+//       }
+//      });
+
+//    } catch (error) {
+//      console.error('Error saving chat message:', error);
+//      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+//    }
+//  }
+
+
+/*This with this file we are implementing Streaming  */
+export async function POST(req:NextRequest){
+  const {user, status} = await getSessionUser();
+  if(status !== "ok"){
+    return NextResponse.json({error:"Unauthenticated"}, {status:401});
   }
+  const body = await req.json();
+  const parsed = postChatSchema.safeParse(body);
+
+  if(!parsed.success){
+    return NextResponse.json({error: parsed.error.flatten()}, {status:400});
+  }
+
+  const chatResp = await streamChat(parsed.data.uploadId, user.user_id, parsed.data.content);
+
+  return new Response(chatResp,{
+    headers:{
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+    }
+  });
 }
 
 export async function DELETE(request: NextRequest) {
