@@ -12,19 +12,17 @@
 
 import React, { useState, useEffect } from "react";
 import { usePaperViewContext } from "@/context/PaperViewContext";
+import { FlashcardBlock } from "@/components/UI_Blocks/FlashCardBlock";
 
 type Flashcard = { question: string; answer: string };
 type ApiFlashcard = { question_front: string; answer_back: string };
 
 export default function FlashcardsPage() {
   // Flashcards state
-  const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
-  const [flippedIndex, setFlippedIndex] = useState<number | null>(null);
+   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const {chosenLectureId} = usePaperViewContext();
-
-  const toggleFlip = (i: number) => setFlippedIndex(flippedIndex === i ? null : i);
+  const { chosenLectureId } = usePaperViewContext();
 
   //Given chosenId(uploadId), generate + persist
   async function makeFlashcardsFromUpload(uploadId: number) {
@@ -79,25 +77,10 @@ export default function FlashcardsPage() {
   }, [chosenLectureId]);
 
   return (
-       <div className="flex flex-col snap-y snap-mandatory gap-4 p-4 w-full items-center">
-           {loading && err === null && <p className="text-white/80">Generating flashcards…</p>}
-           {err && <p className="text-red-300">{err}</p>}
-           {!loading && err === null && flashcards.length  === 0 && (
-             <p className="text-white/70">No flashcards yet click a lecture to load flashcards.</p>
-           )}
-           {flashcards.map((card, index) => (
-             <div
-               key={index}
-               onClick={() => toggleFlip(index)}
-               className="snap-center cursor-pointer border rounded-lg shadow hover:shadow-lg transition-all text-black flex items-center justify-center text-center w-full max-w-lg aspect-square p-6"
-               style={{
-                 flexShrink: 0,
-                 background: "radial-gradient(circle at center, #ffffff, rgb(167, 200, 255))",
-               }}
-             >
-               {flippedIndex === index ? card.answer : card.question}
-             </div>
-           ))}
-         </div>
+       <FlashcardBlock 
+            flashcards={flashcards}
+            loading={loading}
+            error={err}
+        />
   );
 }

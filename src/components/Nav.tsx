@@ -157,7 +157,7 @@ const DotMenu = ({ onHover }: { onHover: () => void }) => (
     exit="exit"
   >
     {[...Array(3)].map((_, i) => (
-      <span key={i} className="w-5 h-5 rounded-full bg-white inline-block m-1" />
+      <span key={i} className="w-3 h-3 rounded-full bg-white inline-block m-1" />
     ))}
   </motion.div>
 );

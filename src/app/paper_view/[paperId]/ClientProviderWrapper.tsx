@@ -2,7 +2,7 @@
 
 import { ReactNode } from "react";
 import { PaperViewProvider, Lecture } from "@/context/PaperViewContext";
-import StudyLayout from "@/components/DashBoard/StudyLayout";
+import StudyLayout from "@/components/PaperView/StudyLayout";
 
 interface Props {
   children: ReactNode;

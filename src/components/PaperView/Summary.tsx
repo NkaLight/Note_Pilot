@@ -1,9 +1,6 @@
 // src/app/components/Dashboard/Summary.tsx
 type SummaryType = {
-  id: string;
-  title: string | null;
   summaryText: string;
-  createdAt: string;
 };
 
 type SummaryProps = {
@@ -14,7 +11,7 @@ export default function Summary({ summary }: SummaryProps) {
   if (!summary) {
     return (
       <div className="p-4 text-gray-500">
-        No summary selected yet.
+        No summary yet.
       </div>
     );
   }

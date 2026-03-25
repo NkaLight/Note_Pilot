@@ -14,7 +14,7 @@
  * - Regenerates when selected lectures change or when user clicks regenerate
  */
 
-import ChatUI from "@/components/DashBoard/ChatUI";
+import ChatUI from "@/components/PaperView/ChatUI";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";

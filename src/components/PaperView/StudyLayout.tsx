@@ -1,11 +1,10 @@
-// src/components/DashBoard/StudyLayout.tsx
 "use client";
-import React, { useState, useRef, useCallback } from "react";
-import ChatUI from "@/components/DashBoard/ChatUI";
-import Upload from "@/components/DashBoard/Upload";
+import React, { useState, useRef } from "react";
+import ChatUI from "@/components/PaperView/ChatUI";
+import Upload from "@/components/PaperView/Upload";
 
 interface StudyLayoutProps {
-  children: React.ReactNode; // This is your Flashcards, Glossary, or Summary content
+  children: React.ReactNode; // Generated content such as flashcards etc.
   onMakeAction?: (text: string) => void; // e.g., makeFlashcardsFrom
   uploadIds?: number[];
   paperId?: number | null;
@@ -39,7 +38,7 @@ export default function StudyLayout({ children }: StudyLayoutProps) {
     };
 
   return (
-    <div ref={containerRef} className="h-screen w-full flex pl-10 gap-10 pr-0 overflow-hidden bg-black">
+    <div ref={containerRef} className="h-screen w-full flex pl-10 gap-10 pr-0 overflow-hidden">
       {/* (1) Chat Panel */}
       <div style={{ width: `${chatWidth}px` }} className="flex-shrink-0 h-full pb-10 pt-14">
         <ChatUI />

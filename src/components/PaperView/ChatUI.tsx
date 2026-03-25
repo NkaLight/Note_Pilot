@@ -17,7 +17,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 
 type Message = { 
@@ -31,12 +31,13 @@ export default function ChatUI() {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
-  const {chosenLectureId, chatMessages, setChatMessages} = usePaperViewContext();
+  const {chosenLectureId } = usePaperViewContext();
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   // Load chat history when activeUploadIds changes
   useEffect(() => {
      if (!chosenLectureId) return;
-     if(chatMessages.length > 0) return;
+     if(messages.length > 0) return;
 
      loadChatHistory(chosenLectureId);
   }, [chosenLectureId]); // Watch for changes in the array
@@ -79,7 +80,10 @@ export default function ChatUI() {
     const userMessage: Message = { role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
-    setBusy(true);
+    setBusy(true); 
+    if(bottomRef.current){
+      bottomRef.current.scrollIntoView({ behavior: "smooth" });
+    }
 
     try {
       const res = await fetch("/api/chat", {
@@ -132,7 +136,7 @@ export default function ChatUI() {
   return (
     <div className="w-full h-full flex flex-col">
       {/* Header with context info and actions */}
-      {chosenLectureId && (
+      {/* {chosenLectureId && (
         <div className="mb-2 p-2 bg-blue-50 rounded-2xl border border-blue-200">
           <div className="flex justify-between items-center">
             <button
@@ -144,10 +148,10 @@ export default function ChatUI() {
             </button>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Messages */}
-      <div className="flex-1 rounded-3xl p-3 bg-white/50 overflow-y-auto space-y-3">
+      <div className="flex-1 rounded-3xl p-3 overflow-y-auto space-y-3" style={{background: "var(--card-bg)"}}>
         {loadingHistory && (
           <div className="text-center py-4">
             <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
@@ -171,12 +175,15 @@ export default function ChatUI() {
           );
         })}
         {busy && <p className="text-sm text-black">Thinking…</p>}
+        <div ref={bottomRef} />
       </div>
 
       {/* Composer */}
-      <div className="mt-3 p-0 rounded-full bg-black/5 flex gap-2">
+      <div className="mt-3 p-1 rounded-full flex gap-2" style={{background:"var(--card-bg)"}}>
         <input
-          className={`flex-1 rounded-xl px-3 py-2 bg-gray-100 text-black`}
+          className={`flex-1 rounded-xl 
+            px-3 py-2 outline-none border-none bg-transparent dark:text-amber-50
+          text-black placeholder:text-gray-500 dark:placeholder:text-zinc-400` }
           placeholder={"Ask about the lecture"}
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -186,7 +193,7 @@ export default function ChatUI() {
         <button
           onClick={handleSend}
           disabled={busy || !input.trim()}
-          className={`rounded-full px-4 py-2 transition-colors bg-gray-100 hover:bg-gray-50 text-black cursor-pointer`}
+          className={`rounded-full px-4 py-2 transition-colors bg-transparent text-transparent cursor-pointer`}
         >
           {busy ? 'Thinking...' : 'Send'}
         </button>

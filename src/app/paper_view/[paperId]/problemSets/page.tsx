@@ -15,7 +15,7 @@
  * - Feedback & Scores: Temporary (generated fresh each time)
  */
 
-import ProblemSet from "@/components/DashBoard/ProblemSet";
+import ProblemSet from "@/components/PaperView/ProblemSet";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { useEffect, useRef, useState } from "react";
 
