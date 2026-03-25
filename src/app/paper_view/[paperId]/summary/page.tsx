@@ -2,6 +2,7 @@
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { StreamChunk } from "@/lib/utils/ai-gateway";
 import { useEffect, useRef, useState } from "react";
+import LoadingCircles from "@/components/LoadingCircles";
 import ReactMarkdown from 'react-markdown';
 
 export default function DashboardPage() {
@@ -132,6 +133,7 @@ export default function DashboardPage() {
               {summaries}
             </ReactMarkdown>
         )}
+        {isLoading && (<LoadingCircles className={'w-5'} />)}
       </div>
     </>
   );

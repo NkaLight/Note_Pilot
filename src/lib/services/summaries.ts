@@ -49,17 +49,20 @@ export async function generateSummaries(uploadId:number,userId:number){
                 // eslint-disable-next-line no-constant-condition
                 while(true){
                     const {done, value} = await reader.read();
-                    const raw  = textDecode.decode(value);
-                    if(done)break;
-                    try{
-                        const parsed:StreamChunk = JSON.parse(raw);
-                        if(parsed.type === "delta") llmText+=parsed.text;
-                        if(parsed.type === "done") await saveSummary(uploadId, userId,llmText);
-                        
-                    }catch{
-                        //ignore
-                    }
+                    if(done) break;
+                    const raw  = textDecode.decode(value, {stream:true});
+                    const lines = raw.split("\n").filter(l => l.startsWith("data: "));
+                    for(const line of lines){
+                        try{
+                            const parsed:StreamChunk = JSON.parse(line.slice(6));
+                            if(parsed.type === "delta") llmText+=parsed.text;
+                            if(parsed.type === "done") await saveSummary(uploadId, userId,llmText);
+                            
+                        }catch{
+                            //ignore
+                        }
                     controller.enqueue(value);
+                    }
                 };
             }catch(e){
                 if(e instanceof ServiceError){
