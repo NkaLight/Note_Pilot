@@ -49,59 +49,37 @@ export async function queryLLM(systemPrompt: string, userPrompt: string, options
 
   } catch (err: any) {
     if (err instanceof ServiceError) throw err;
-    // Wrap generic fetch/network errors into your ServiceError
-    console.error(err);
     throw new ServiceError(err.message || "AI Network Failure", type, 503);
   }
 }
 
-export async function queryLLMChat( 
-  systemPrompt: string,
-  history: ChatMessage[],
-  options: LLMOptions
-){
-    const { model = DEFAULT_MODEL, temperature = 0.7, type } = options;
-    try{
-      const resp = await fetch(API_URL, {
-        method:"POST", 
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.NVIDIA_AI_API}`,
-          "HTTP-Referer": process.env.APP_URL || "http://localhost:3000",
-          "X-Title": "Note Pilot",
-        },
-        body: JSON.stringify({
-          model,
-          temperature,
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...history,
-          ],
-        }),
-      });
-      if(!resp.ok){
-        throw new ServiceError(`AI Provider Error: ${resp.status}`, type, 502);
-      }
-      const data = await resp.json();
-      return (data?.choices?.[0]?.message?.content ?? "").trim();
-    }catch(err){
-      if (err instanceof ServiceError) throw err;
-      console.error(err);
-      throw new ServiceError(err.message || "AI Network Failure", type, 503);
-    }
-};
+// export async function queryLLMStream(systemPrompt:string, userPrompt:string, options:LLMOptions){
+//   const { model = DEFAULT_MODEL, temperature, type } = options;
+//   try{
+//     const resp = await fetch(API_URL, {
+//       method:"POST", 
+//       headers:{
+//         "Content-Type": "application/json",
+//         "Authorization":`Bearer ${process.env.NVIDIA_AI_API}`,
+//         "HTTP-Referer": process.env.APP_URL || "http://localhost:3000",
+//         "X-Title": "Note Pilot",
+//       }
+//     })
+//   }
+
+// }
 
 export type StreamChunk =
   | { type: "delta"; text: string }
   | { type: "done" }
   | { type: "error"; message: string };
 
-export async function queryLLMChatStream(
+export async function queryLLMStream(
   systemPrompt: string,
-  history: ChatMessage[],
+  userPrompt:string,
   options: LLMOptions
 ){
-  const {model = DEFAULT_MODEL, temperature = 0.7, type} = options;
+  const {model = DEFAULT_MODEL, temperature = 0.7, type,} = options;
   const resp = await fetch(API_URL, {
     method:"POST", 
     headers:{
@@ -113,14 +91,13 @@ export async function queryLLMChatStream(
     body:JSON.stringify({
       model, temperature, messages:[
         {role: "system", content:systemPrompt},
-        ...history
+        {role:"user", content:userPrompt}
       ],
       stream: true
     })
 
   });
   if(!resp.ok) throw new ServiceError(`queryLLMChatStream Error: ${resp.status}`,type, 502);
-
   return new ReadableStream({
     async start(controller) {
         const reader = resp.body.getReader();

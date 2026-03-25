@@ -22,9 +22,13 @@ export async function POST(req:Request){
         const {user} = await getSessionUser();
         if(!user) return NextResponse.json({error:"Unauthenticated"}, {status:401});
         const {uploadId} = await req.json();
-        const summaries = await generateSummaries(Number(uploadId), user.user_id);
-        
-        return NextResponse.json({summaries});
+        const stream = await generateSummaries(Number(uploadId), user.user_id);
+            return new Response(stream,{
+                headers:{
+                "Content-Type": "text/event-stream",
+                "Cache-Control": "no-cache",
+                }
+            });
     }catch(error){
         console.error(error);
         return NextResponse.json({error:"Failed to generate summaries, try again later"}, {status:500});

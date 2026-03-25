@@ -4,6 +4,7 @@ import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { createContext, ReactNode, useContext, useState, useRef, useMemo, useEffect } from "react";
 
 type User = {
+    name:string;
     email: string;
     aiLevel?: string;
 }

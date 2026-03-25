@@ -15,7 +15,6 @@ const AddPaperForm = ({ closeForm, onRefresh }: { closeForm: () => void;onRefres
   const [descr, setDescr] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,7 +100,6 @@ const EditPaper = ({
   const [descr, setDescr] = useState(paperItem.description ?? "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter();
 
   const handleUpdate = async () => {
     setIsSubmitting(true);

@@ -21,12 +21,14 @@ export async function getUserByEmail(email:string){
 }
 
 export async function setNewPassword(passwordHash:string, user_id:number){
+    
     return await prisma.application_user.update({
         where:{
             user_id:user_id,
         },
         data:{
             password:passwordHash,
+
         }
     });
 }

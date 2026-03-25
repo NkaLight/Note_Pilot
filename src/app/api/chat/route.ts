@@ -1,11 +1,8 @@
 import { getSessionUser } from "@/lib/auth";
 import {getChatMessages, clearChatMessages } from "@/lib/db_access/chat_message";
 import { NextRequest, NextResponse } from "next/server";
+import { streamChat } from "@/lib/services/chat";
 import { z } from "zod";
-import { getSourceText } from "@/lib/db_access/upload";
-import { generateChat, streamChat} from "@/lib/services/chat";
-import { parse } from "path";
-import Stream from "stream";
 
 /**
  * Chat API endpoints for persistent chat message management

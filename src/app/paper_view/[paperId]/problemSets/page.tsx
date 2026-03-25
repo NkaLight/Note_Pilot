@@ -38,9 +38,7 @@ export default function DashboardPage() {
     try {
       const response = await fetch(`/api/problemsets?uploadId=${chosenLectureId}`);
       const data = await response.json();
-      
-      console.log("DATA returned from endpoint: api/problemsets?uploadId", data);
-      console.log(data.questions);
+
       if (data.success && data.questions && data.questions.length > 0) {
         const questionsWithUserAnswers = data.questions.map((q: any) => {
           return {

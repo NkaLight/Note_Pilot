@@ -11,6 +11,8 @@ export async function refreshLogic(curr_refresh_token:string){
             application_user:true
         }
     });
+    if(!session) return null;
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -18,8 +20,6 @@ export async function refreshLogic(curr_refresh_token:string){
     expiryDate.setHours(0, 0, 0, 0);
 
     const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-    //If none exist
-    if(!session) return null;
 
     //if refresh_token expired
     if (expiryDate < today) return null;

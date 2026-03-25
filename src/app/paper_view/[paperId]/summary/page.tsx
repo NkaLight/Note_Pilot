@@ -1,26 +1,9 @@
 "use client";
-/**
- * Summaries Page (client-side)
- *
- * WHAT IT DOES:
- * - Renders a layout (Chat | Summaries)
- * - Automatically generates summaries from selected PDF uploads and AI chat context
- * - Provides a regenerate button for creating new iterations
- * - Uses context from lecture PDF uploads and AI chat history
- *
- * AUTOMATIC GENERATION:
- * - Uses selected lecture uploads as context for summary generation
- * - Combines PDF text content and chat history for comprehensive summaries
- * - Regenerates when selected lectures change or when user clicks regenerate
- */
-
 import { usePaperViewContext } from "@/context/PaperViewContext";
+import { StreamChunk } from "@/lib/utils/ai-gateway";
 import { useEffect, useRef, useState } from "react";
+import ReactMarkdown from 'react-markdown';
 
-type SummaryItem = {
-  header: string,
-  text: string
-}
 export default function DashboardPage() {
   // Chat width starts at 50% of viewport
   const {chosenLectureId, selectedLectureIds} = usePaperViewContext();
@@ -31,7 +14,6 @@ export default function DashboardPage() {
   // Generate summaries automatically using selected uploads and chat context
   async function generateSummaries() {
     if (chosenLectureId === null) {
-      setError("Please select at least one lecture from the PDFs page to generate summaries.");
       return;
     }
     setIsLoading(true);
@@ -45,47 +27,73 @@ export default function DashboardPage() {
           uploadId: chosenLectureId 
         }),
       });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Failed to generate summaries");
-
-      if (data.content) {
-        setSummaries(data.content);
-      } else {
-        console.error("Expected array format not returned");
-        setSummaries("");
-        setError("Invalid response format from summary generation");
+      if (!res.ok || !res.body) throw new Error("Stream failed");
+      console.log(res.body);
+      const reader = res.body.getReader();
+      const textDec = new TextDecoder();
+      // eslint-disable-next-line no-constant-condition
+      while(true){
+        const {done, value} = await reader.read();
+        if(done) break;
+        try{
+          const chunk = textDec.decode(value, {stream: true});
+          console.log("RAW: ", chunk);
+          const lines = chunk.split("\n").filter((l)=>l.startsWith("data: "));
+          for(const line of lines){
+            const payload = line.slice(6);
+            if(payload === "[DONE]")break;
+            try{
+              const parse:StreamChunk = JSON.parse(payload);
+              if(parse.type === "error"){
+                setSummaries("Something went wrong.");
+                setError(parse.message);
+              }else if(parse.type === "delta"){
+                console.log(parse.text);
+                setSummaries(prevState => prevState + parse.text);
+              }
+            }catch{
+              //Do nothing
+            }finally{
+              setIsLoading(false);
+            }
+          }
+        }catch{
+          setError("Something wrong happened");
+          setSummaries("");
+        }finally{
+          setIsLoading(false);
+        }
       }
-    } catch (e: any) {
-      setError("Error generating summaries");
-      setSummaries("");
-    } finally {
+    }catch{
+       setError("Something wrong happened");
+        setSummaries("");
+    }finally{
       setIsLoading(false);
     }
   }
-
   // Auto-generate when selected lectures change
-  useEffect(() => {
-    const syncSummaries = async()=>{
-      if(!chosenLectureId)return;
-      setIsLoading(true);
-      setError(null);
-      try{
-        const res = await fetch(`/api/summary?uploadId=${chosenLectureId}`);
-        const data = await res.json();
-        if(data.content){
-          setSummaries(data.content);
-        }else{
-          await generateSummaries();
-        }
-      }catch(err){
-        setError("Failed to get summaries");
-      }finally{
-        setIsLoading(false);
-      }
-    };
-    syncSummaries();
-  }, [chosenLectureId]); // Re-run when selection changes
+  // useEffect(() => {
+  //   const syncSummaries = async()=>{
+  //     if(!chosenLectureId)return;
+  //     setIsLoading(true);
+  //     setError(null);
+  //     try{
+  //       const res = await fetch(`/api/summary?uploadId=${chosenLectureId}`);
+  //       const data = await res.json();
+  //       if(data.content){
+  //         setSummaries(data.content);
+  //         setIsLoading(false);
+  //       }else{
+  //         await generateSummaries();
+  //       }
+  //     }catch(err){
+  //       setError("Failed to get summaries");
+  //     }finally{
+  //       setIsLoading(false);
+  //     }
+  //   };
+  //   syncSummaries().catch(() => setError("Failed to sync summaries"));
+  // }, [chosenLectureId]); // Re-run when selection changes
 
   return (
     <>
@@ -93,7 +101,7 @@ export default function DashboardPage() {
       <div className=" rounded-3xl mb-5 mt-19 p-6 bg-white/50 mr-10 overflow-y-auto mt-5 flex-grow">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-black">Summaries</h2>
-          {selectedLectureIds.length > 0 && (
+          {chosenLectureId  && (
             <button
               onClick={generateSummaries}
               disabled={isLoading}
@@ -119,18 +127,12 @@ export default function DashboardPage() {
         )}
 
         {/* Render summary results */}
-        {summaries && !isLoading ? (
-          <>
-            <div className="space-y-6">
+        {summaries && (
+            <ReactMarkdown>
               {summaries}
-            </div>
-          </>
-        ) : !isLoading && selectedLectureIds.length > 0 && (
-          <p className="text-gray-500 text-center py-8">No summaries generated yet.</p>
+            </ReactMarkdown>
         )}
       </div>
     </>
   );
 }
-
-
