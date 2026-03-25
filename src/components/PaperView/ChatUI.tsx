@@ -19,6 +19,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { usePaperViewContext } from "@/context/PaperViewContext";
+import { StreamChunk } from "@/lib/utils/ai-gateway";
 
 type Message = { 
   role: "user" | "assistant"; 
@@ -106,15 +107,26 @@ export default function ChatUI() {
         const payload = line.slice(6);
         if (payload === "[DONE]") break;
         try{
-          const { choices } = JSON.parse(payload);
-          const text = choices?.[0]?.delta?.content;
-          if (text) {
+          const json: StreamChunk = JSON.parse(payload);
+          if(json.type === "error"){
+            setMessages((prev) => {
+              const updated = [...prev];
+              updated[updated.length - 1] = {
+                role: "assistant",
+                content: "⚠️ Something went wrong.",
+              };
+              return updated;
+            });
+          };
+          if(json.type === "done") break;
+
+          if (json.type === "delta") {
             // Only ever touches the last message
             setMessages((prev) => {
               const updated = [...prev];
               updated[updated.length - 1] = {
                 ...updated[updated.length - 1],
-                content: updated[updated.length - 1].content + text,
+                content: updated[updated.length - 1].content + json.text,
               };
               return updated;
             });
