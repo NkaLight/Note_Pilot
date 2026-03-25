@@ -1,24 +1,24 @@
 "use client";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { StreamChunk } from "@/lib/utils/ai-gateway";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import LoadingCircles from "@/components/LoadingCircles";
 import ReactMarkdown from 'react-markdown';
+import { Mermaid } from "@/components/Mermaid";
 
 export default function DashboardPage() {
-  // Chat width starts at 50% of viewport
   const {chosenLectureId, selectedLectureIds} = usePaperViewContext();
   const [summaries, setSummaries] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Generate summaries automatically using selected uploads and chat context
   async function generateSummaries() {
     if (chosenLectureId === null) {
       return;
     }
     setIsLoading(true);
     setError(null);
+    setSummaries("");
     try {
       // Generate summaries using combined context via existing generateContent API
       const res = await fetch("/api/summary", {
@@ -73,35 +73,35 @@ export default function DashboardPage() {
     }
   }
   // Auto-generate when selected lectures change
-  // useEffect(() => {
-  //   const syncSummaries = async()=>{
-  //     if(!chosenLectureId)return;
-  //     setIsLoading(true);
-  //     setError(null);
-  //     try{
-  //       const res = await fetch(`/api/summary?uploadId=${chosenLectureId}`);
-  //       const data = await res.json();
-  //       if(data.content){
-  //         setSummaries(data.content);
-  //         setIsLoading(false);
-  //       }else{
-  //         await generateSummaries();
-  //       }
-  //     }catch(err){
-  //       setError("Failed to get summaries");
-  //     }finally{
-  //       setIsLoading(false);
-  //     }
-  //   };
-  //   syncSummaries().catch(() => setError("Failed to sync summaries"));
-  // }, [chosenLectureId]); // Re-run when selection changes
+  useEffect(() => {
+    const syncSummaries = async()=>{
+      if(!chosenLectureId)return;
+      setIsLoading(true);
+      setError(null);
+      try{
+        const res = await fetch(`/api/summary?uploadId=${chosenLectureId}`);
+        const data = await res.json();
+        console.log(data);
+        if(data.content){
+          setSummaries(data.content);
+          setIsLoading(false);
+        }else{
+          await generateSummaries();
+        }
+      }catch(err){
+        setError("Failed to get summaries");
+      }finally{
+        setIsLoading(false);
+      }
+    };
+    syncSummaries().catch(() => setError("Failed to sync summaries"));
+  }, [chosenLectureId]); // Re-run when selection changes
 
   return (
     <>
       {/* Middle: Summaries */}
-      <div className=" rounded-3xl mb-5 mt-19 p-6 bg-white/50 mr-10 overflow-y-auto mt-5 flex-grow">
+      <div className=" rounded-3xl mb-5 mt-19 p-6 bg-white/50 mr-10 overflow-y-auto mt-5 flex-grow" style={{background: "var(--card-bg)"}}>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-black">Summaries</h2>
           {chosenLectureId  && (
             <button
               onClick={generateSummaries}
@@ -129,7 +129,17 @@ export default function DashboardPage() {
 
         {/* Render summary results */}
         {summaries && (
-            <ReactMarkdown>
+            <ReactMarkdown
+              components={{
+                code({className, children}){
+                  if(className === "language-mermaid"){
+                    return<Mermaid chart={String(children).trim()} />;
+                  }else{
+                    return <code className="className">{children}</code>;
+                  }
+                }
+              }}
+            >
               {summaries}
             </ReactMarkdown>
         )}

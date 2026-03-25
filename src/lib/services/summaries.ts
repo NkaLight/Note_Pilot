@@ -36,8 +36,6 @@ export async function generateSummaries(uploadId:number,userId:number){
                     - Bullet point 1
                     - Bullet point 2
                     - Bullet point 3
-
-                    Where helpful, include a mermaid diagram to visualise relationships or processes.
                     `.trim();
     let llmText = "";
     const stream  = await queryLLMStream(SYSTEM_PROMPT, aiQuery, {  type: ServiceType.AI_GENERATION });
@@ -53,6 +51,7 @@ export async function generateSummaries(uploadId:number,userId:number){
                     const raw  = textDecode.decode(value, {stream:true});
                     const lines = raw.split("\n").filter(l => l.startsWith("data: "));
                     for(const line of lines){
+                        controller.enqueue(value);
                         try{
                             const parsed:StreamChunk = JSON.parse(line.slice(6));
                             if(parsed.type === "delta") llmText+=parsed.text;
@@ -61,9 +60,9 @@ export async function generateSummaries(uploadId:number,userId:number){
                         }catch{
                             //ignore
                         }
-                    controller.enqueue(value);
                     }
                 };
+                controller.close();
             }catch(e){
                 if(e instanceof ServiceError){
                     controller.enqueue(e);

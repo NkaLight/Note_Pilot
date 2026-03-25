@@ -3,7 +3,7 @@ import { DbError } from "../error";
 
 export async function getSummary(uploadId:number, user_id:number){
     try{
-        return await prisma.summary.findMany({
+        return await prisma.summary.findUnique({
             select:{
                 text_content:true
             },

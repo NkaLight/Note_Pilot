@@ -18,8 +18,8 @@ export const metadata: Metadata = {
  * @returns {JSX.Element} The rendered component
  */
 export default async function AIPageLayout({ children }: { children: ReactNode }) {
-  const user = await getSessionUser();
-  if(user.status === "invalid"){ // Only redirect when token is not valid
+  const {status} = await getSessionUser();
+  if(status === "invalid"){ // Only redirect when token is not valid
     redirect("/");
   }
   return (
