@@ -89,7 +89,7 @@ export default function DashboardPage() {
   return (
     <>
       {/* Middle: Glossary */}
-      <div className="rounded-3xl mb-5 mt-19 p-6 bg-white/50 mr-10 overflow-y-auto mt-5 flex-grow text-black" style={{background: "var(--card-bg)"}}>
+      <div className="rounded-4xl   p-3 bg-white/50 mr-10 overflow-y-auto  flex-grow text-black" style={{background: "var(--card-bg)"}}>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-black">Glossary</h2>
           {chosenLectureId && (
@@ -134,11 +134,8 @@ export default function DashboardPage() {
 
         {/* Render glossary results */}
         <div className="space-y-4">
-          {glossary.length > 0 && !loading ? (
+          {glossary.length > 0 && !loading && (
             <>
-              <div className="text-sm text-gray-600 mb-4">
-                Found {glossary.length} term{glossary.length !== 1 ? 's' : ''} in your selected content
-              </div>
               {glossary.map((item, idx) => (
                 <div
                   key={idx}
@@ -149,13 +146,10 @@ export default function DashboardPage() {
                 </div>
               ))}
             </>
-          ) : !loading && chosenLectureId ? (
-            <p className="text-gray-500 text-center py-8">No glossary terms generated yet.</p>
-          ) : !loading ? (
-            <p className="text-gray-500 text-center py-8">Select lectures from the PDFs page to start generating your glossary.</p>
-          ) : null}
+          )}
         </div>
       </div>
     </>
   );
 }
+

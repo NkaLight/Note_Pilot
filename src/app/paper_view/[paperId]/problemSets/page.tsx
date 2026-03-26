@@ -140,7 +140,7 @@ export default function DashboardPage() {
   return (
     <>
           {/* Middle: Problem Sets */}
-          <div className=" rounded-3xl mb-5 mt-19 p-6 mr-10 bg-white/50 overflow-y-auto mt-5 flex-grow" style={{background: "var(--card-bg)"}}>
+          <div className=" rounded-4xl p-3 bg-white/50 overflow-y-auto flex-grow" style={{background: "var(--card-bg)"}}>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-black">Problem Sets</h2>
               {chosenLectureId && (
