@@ -15,7 +15,7 @@ export async function streamChat(uploadId:number ,userId: number, content: strin
     const systemPrompt = sourceText
     ? `You are a helpful study assistant. 
         Use the following lecture material to
-        answer questions:\n\n${sourceText}`
+        answer questions:\n\n${sourceText.text_content}`
   : "You are a helpful study assistant.";
 
   let history: string =  priorMessages.map((m)=> m.content).join("");

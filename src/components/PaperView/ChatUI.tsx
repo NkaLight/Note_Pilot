@@ -179,23 +179,9 @@ export default function ChatUI() {
 
   return (
     <div className="w-full h-full flex flex-col">
-      {/* Header with context info and actions */}
-      {/* {chosenLectureId && (
-        <div className="mb-2 p-2 bg-blue-50 rounded-2xl border border-blue-200">
-          <div className="flex justify-between items-center">
-            <button
-              onClick={clearChatHistory}
-              className="text-xs px-2 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200"
-              title="Clear chat history"
-            >
-              Clear History
-            </button>
-          </div>
-        </div>
-      )} */}
-
       {/* Messages */}
       <div className="flex-1 rounded-3xl p-3 overflow-y-auto space-y-3" style={{background: "var(--card-bg)"}}>
+        <div onClick={()=>clearChatHistory()} className="max-w-min ml-auto  cursor-pointer">CLEAR</div>
         {loadingHistory && (
           <div className="text-center py-4">
             <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
@@ -215,7 +201,13 @@ export default function ChatUI() {
                 style={isAssistant? 
                     {color: "var(--card-text)"}: {}}
               >
-              {isAssistant ? (<ReactMarkdown>{m.content}</ReactMarkdown>):(<p>{m.content}</p>)}
+
+                  {isAssistant ? (
+                    <div className="prose prose-theme max-w-none dark:prose-invert">  
+                      <ReactMarkdown>{m.content}</ReactMarkdown>
+                    </div>
+                    ):(<p>{m.content}</p>)
+                  }
               </div>
             </div>
           );

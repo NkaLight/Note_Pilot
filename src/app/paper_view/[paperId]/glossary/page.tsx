@@ -89,7 +89,7 @@ export default function DashboardPage() {
   return (
     <>
       {/* Middle: Glossary */}
-      <div className="rounded-3xl mb-5 mt-19 p-6 bg-white/50 mr-10 overflow-y-auto mt-5 flex-grow text-black">
+      <div className="rounded-3xl mb-5 mt-19 p-6 bg-white/50 mr-10 overflow-y-auto mt-5 flex-grow text-black" style={{background: "var(--card-bg)"}}>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-black">Glossary</h2>
           {chosenLectureId && (

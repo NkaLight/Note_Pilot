@@ -14,7 +14,13 @@ export async function generateSummaries(uploadId:number,userId:number){
             ${textContent.text_content}
             """`;
             const SYSTEM_PROMPT = `
-                    You are a lecture summarizer. Output ONLY valid markdown, no JSON, no code fences.
+                    You are a lecture summarizer. Formatting rules (STRICT):
+- Do NOT indent list items unless they are nested
+- Use top-level bullet points with "-"
+- Always insert a blank line after headings
+- Do NOT use double spaces for spacing
+- Use proper markdown paragraphs (blank lines).
+Output ONLY valid markdown, no JSON, no code fences.
 
                     Use this exact structure:
                     # [Main Topic Title]

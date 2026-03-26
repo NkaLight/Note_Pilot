@@ -1,16 +1,16 @@
 "use client";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { StreamChunk } from "@/lib/utils/ai-gateway";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef} from "react";
 import LoadingCircles from "@/components/LoadingCircles";
 import ReactMarkdown from 'react-markdown';
-import { Mermaid } from "@/components/Mermaid";
 
-export default function DashboardPage() {
+export default function SummaryPage() {
   const {chosenLectureId, selectedLectureIds} = usePaperViewContext();
   const [summaries, setSummaries] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const bottomRef = useRef<HTMLDivElement|null>(null);
 
   async function generateSummaries() {
     if (chosenLectureId === null) {
@@ -51,6 +51,7 @@ export default function DashboardPage() {
               }else if(parse.type === "delta"){
                 console.log(parse.text);
                 setSummaries(prevState => prevState + parse.text);
+                bottomRef.current.scrollIntoView();
               }
             }catch{
               //Do nothing
@@ -81,10 +82,10 @@ export default function DashboardPage() {
       try{
         const res = await fetch(`/api/summary?uploadId=${chosenLectureId}`);
         const data = await res.json();
-        console.log(data);
-        if(data.content){
-          setSummaries(data.content);
+        if(data.summary){
+          setSummaries(data.summary.text_content);
           setIsLoading(false);
+          bottomRef.current.scrollIntoView();
         }else{
           await generateSummaries();
         }
@@ -98,53 +99,18 @@ export default function DashboardPage() {
   }, [chosenLectureId]); // Re-run when selection changes
 
   return (
-    <>
-      {/* Middle: Summaries */}
-      <div className=" rounded-3xl mb-5 mt-19 p-6 bg-white/50 mr-10 overflow-y-auto mt-5 flex-grow" style={{background: "var(--card-bg)"}}>
-        <div className="flex justify-between items-center mb-4">
-          {chosenLectureId  && (
-            <button
-              onClick={generateSummaries}
-              disabled={isLoading}
-              className="px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 transition-colors"
-            >
-              {isLoading ? "Regenerating..." : "Regenerate Summaries"}
-            </button>
-          )}
-        </div>
-        {/* Error display */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-            <p className="text-red-700">{error}</p>
-          </div>
-        )}
-
-        {/* Loading state */}
-        {isLoading && (
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-3 text-gray-600">Generating summaries from your lectures.</span>
-          </div>
-        )}
-
-        {/* Render summary results */}
-        {summaries && (
-            <ReactMarkdown
-              components={{
-                code({className, children}){
-                  if(className === "language-mermaid"){
-                    return<Mermaid chart={String(children).trim()} />;
-                  }else{
-                    return <code className="className">{children}</code>;
-                  }
-                }
-              }}
-            >
-              {summaries}
+    <div style={{background: "var(--card-bg)", color:"var(--card-txt)"}} className="rounded-4xl p-3">
+        <div onClick={()=>generateSummaries()} className="max-w-min ml-auto  cursor-pointer">REGENERATE</div>
+        {summaries &&
+          (<div className="prose prose-theme max-w-none dark:prose-invert">
+            <ReactMarkdown>
+                {summaries}
             </ReactMarkdown>
-        )}
-        {isLoading && (<LoadingCircles className={'w-5'} />)}
-      </div>
-    </>
+            <div ref={bottomRef} />
+            </div>
+          )
+        }
+        {isLoading && (<div ref={bottomRef} className="text-sm text-black">Thinking…</div>)}
+    </div>
   );
 }

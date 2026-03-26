@@ -109,16 +109,19 @@ export async function queryLLMStream(
           );
         };
         try{
+          let buffer = "";
           // eslint-disable-next-line no-constant-condition
           while(true){
             const {done, value} = await reader.read();
             if(done){
               break;
             }
-            const raw  = textCode.decode(value, {stream:true});
-            const lines = raw.split("\n").filter((l) => l.startsWith("data: "));
-            
+            buffer += textCode.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
+
             for(const line of lines){
+              if (!line.startsWith("data: ")) continue;
               const payload = line.slice(6);
               if(payload === "[DONE]"){
                 emit({type:"done"});

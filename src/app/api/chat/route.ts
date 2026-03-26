@@ -119,7 +119,6 @@ export async function POST(req:NextRequest){
   if(!parsed.success){
     return NextResponse.json({error: parsed.error.flatten()}, {status:400});
   }
-
   const chatResp = await streamChat(parsed.data.uploadId, user.user_id, parsed.data.content);
 
   return new Response(chatResp,{

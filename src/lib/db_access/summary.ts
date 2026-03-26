@@ -33,11 +33,17 @@ export async function saveSummary(uploadId:number, userId:number, textContent:st
                 throw new Error("Unauthorized");
             }
 
-            return await prisma.summary.create({
-                data:{
-                    upload_id:uploadId,
+            return await prisma.summary.upsert({
+                where:{
+                    upload_id:uploadId
+                },
+                update:{
                     text_content:textContent
                 },
+                create:{
+                    upload_id:uploadId,
+                    text_content:textContent,
+                }
             });
         }catch(error){
             throw new DbError(`Error saveSummaries DbError \n\n${error}\n\n`);
