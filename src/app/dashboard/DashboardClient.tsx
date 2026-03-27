@@ -1,12 +1,11 @@
 "use client";
 
-import EditIcon from "@/components/EditIcon";
+import EditIcon from "@/components/Icons/EditIcon";
 import Modal from "@/components/Modal";
 import type { paper } from "@prisma/client";
 import { AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 /* ---------- AddPaperForm Component ---------- */
 const AddPaperForm = ({ closeForm, onRefresh }: { closeForm: () => void;onRefresh: ()=> void},) => {
@@ -281,7 +280,7 @@ export default function DashboardPage(props: { onloadPapers: paper[] | null }) {
       <div className="flex p-0 overflow-x-auto">
         {papers &&
           papers.map((paper) => (
-            <Link href={`/paper_view/${paper.paper_id}/flashcards`} key={paper.paper_id}>
+            <Link href={`/paper_view/${paper.paper_id}/flashcards?paper_code=${paper.code}`} key={paper.paper_id}>
                 <div className="relative m-4 bg-white text-black p-4 rounded-full w-36 flex-shrink-0 cursor-pointer hover:bg-blue-700 hover:text-white transition-colors duration-300"><div
                   className="absolute top-1 right-3 cursor-pointer"
                   onClick={(e) => {

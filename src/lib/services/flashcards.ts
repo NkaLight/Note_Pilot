@@ -27,7 +27,7 @@ export async function generateFlashCardsSet(uploadId:number, user_id:number){
     const sourceText = await getSourceText(uploadId, user_id);
     if(!sourceText){
         throw new ServiceError(
-            "Source text is null", 
+            `Source text is null params = uploadId:${uploadId} user_id:${user_id}`, 
             ServiceType.AI_GENERATION
         );
     }

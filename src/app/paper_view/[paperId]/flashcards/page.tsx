@@ -13,6 +13,7 @@
 import React, { useState, useEffect } from "react";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { FlashcardBlock } from "@/components/UI_Blocks/FlashCardBlock";
+import { useSearchParams } from "next/navigation";
 
 type Flashcard = { question: string; answer: string };
 type ApiFlashcard = { question_front: string; answer_back: string };
@@ -22,8 +23,9 @@ export default function FlashcardsPage() {
    const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const { chosenLectureId } = usePaperViewContext();
-
+  const { chosenLectureId, setCode } = usePaperViewContext();
+  const paperCode = useSearchParams().get("paper_code");
+  setCode(paperCode);
   //Given chosenId(uploadId), generate + persist
   async function makeFlashcardsFromUpload(uploadId: number) {
     setLoading(true);

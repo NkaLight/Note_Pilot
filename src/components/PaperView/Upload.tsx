@@ -2,7 +2,10 @@
 
 import { useState, useRef } from "react";
 import { usePaperViewContext } from "@/context/PaperViewContext";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
+import { UploadIcon } from "../Icons/FIleIcon";
+import LoadingCircles from "../LoadingCircles";
+import { DeleteIcon, Edit, EditIcon, TrashIcon } from "lucide-react";
 
 type Lecture = {
   id: number;
@@ -11,39 +14,23 @@ type Lecture = {
 };
 
 export default function Upload({ onSaved }: { onSaved: () => void }) {
-  // State for the new lecture title
-  const [lectureTitle, setLectureTitle] = useState("");
-  // State for managing the upload process
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
-  const {lectures, setChosenLectureId, setLectures, chosenLectureId} = usePaperViewContext();
+  const {lectures, setChosenLectureId, setLectures, chosenLectureId, code} = usePaperViewContext();
   const fileInputRef = useRef(null);
   const paperId = useParams().paperId?.toString();
-
   // Handler for when a file is selected
   async function handleFileUpload(file: File) {
-    if (!lectureTitle.trim()) {
-      setError("Please enter a title for the new lecture first.");
-      return;
-    }
-
     setIsUploading(true);
     setError("");
 
     try {
       const form = new FormData();
-      // Pass the user-provided title and the file
-      form.append("lectureTitle", lectureTitle.trim()); 
+      // Pass the paperId and file_content 
       form.append("file", file);
-      form.append("paperId", paperId?paperId:"");
+      form.append("paperId", chosenLectureId?paperId:"");
 
       // 1. API Call
-      console.log("Uploading file:", file.text);
-      console.log("File name:", file.name);
-      console.log("File size:", file.size);
-      console.log("File type:", file.type);
-      console.log("PaperId:", paperId);
-      console.log("LectureTitle:", lectureTitle);
       const res = await fetch("/api/upload_v2", { method: "POST", body: form });
       const data = await res.json();
 
@@ -51,13 +38,9 @@ export default function Upload({ onSaved }: { onSaved: () => void }) {
         setError(data.error || "Upload failed. Please try again.");
       } else {
         // 2. Success - Reset form and notify parent
-
-        // Trigger the parent component (WorkspaceClient) to refresh its lecture list
+        const lectureTitle = await data.lectureTitle;
         const newLecture : Lecture = {id: lectures.length, title: lectureTitle, createdAt: new Date()};
         setLectures(prevState => [...prevState, newLecture]);
-        setLectureTitle("");
-
-        //Trigger all the other data points being stored.
       }
     } catch {
       setError("Network or server error during upload.");
@@ -69,52 +52,34 @@ export default function Upload({ onSaved }: { onSaved: () => void }) {
   return (
     <div>
       <ul className="space-y-2">
+        <p className="--var(card-text) pb-0 mb-0 ml-0.5"> {code}</p>
+        <hr className="pt-0 mt-0 w-20"/>
         {lectures.map((lecture) => (
             <li 
                 key={lecture.id} 
-                onClick={() => setChosenLectureId(lecture.id)} // Pass the ID on click
-                className={`p-2 rounded-lg cursor-pointer transition-colors text-sm text-black ${
+                className={`pl-2 rounded-lg transition-colors text-sm text-black dark:text-white ${
                     lecture.id === chosenLectureId 
-                        ? 'bg-blue-100 border-blue-500 font-semibold' 
-                        : 'bg-gray-50 hover:bg-gray-100 border-gray-200'
+                        ? 'bg-transparent font-semibold underline' 
+                        : 'bg-transparent'
                 }`}
             >
-                <div className="font-medium truncate block">{lecture.title}</div>
-                <div className="text-xs text-gray-500">
+                <div className="font-medium truncate cursor-pointer block hover:underline" onClick={()=>setChosenLectureId(lecture.id)}>{lecture.title}</div>
+                <div className="text-xs text-gray-500 flex gap-1">
                     {lecture.createdAt.toLocaleDateString()}
+                    <span><EditIcon className="w-3 cursor-pointer hover:text-black hover:dark:text-white" /></span>
+                    <span><TrashIcon className="w-3 cursor-pointer hover:text-black hover:dark:text-white" /></span>
                 </div>
             </li>
         ))}
+
       </ul>
+      <div 
+        className="flex mt-1 ml-4 size-3 cursor-pointer dark:text-white text-black"
+        onClick={() => {if(!isUploading) fileInputRef.current?.click();}}
+
+          >Upload <span>{isUploading ? <LoadingCircles className={"w-5 m-0.5 p-0 ml-1 dark:text-white "}/> :<UploadIcon className="h-4 p-0 m-0 mt-1 ml-1 dark:text-white text-black" />}</span></div>
       <div className="text-black p-0 my-4">
         {/* Input for Lecture Title */}
-        <input
-          id="lecture-title"
-          type="text"
-          placeholder="Lecture Title (e.g., Intro to Algorithms)"
-          value={lectureTitle}
-          onChange={(e) => setLectureTitle(e.target.value)}
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-black mb-3 focus:ring-blue-500 focus:border-blue-500"
-          disabled={isUploading}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !isUploading && lectureTitle.trim()) {
-              fileInputRef.current?.click();
-            }
-          }}
-        />
-        
-        {/* File Upload Button (linked to hidden input) */}
-        <label
-          htmlFor="file-upload-input"
-          className={`w-full inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-            isUploading || !lectureTitle.trim()
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
-          }`}
-        >
-          {isUploading ? 'Uploading...' : 'Upload Lecture File (.txt, .pdf, etc.)'}
-        </label>
-        
         {/* Hidden File Input */}
         <input
           id="file-upload-input"
@@ -123,7 +88,7 @@ export default function Upload({ onSaved }: { onSaved: () => void }) {
           // Update accepted file types as needed
           accept=".pdf" 
           className="hidden"
-          disabled={isUploading || !lectureTitle.trim()}
+          disabled={isUploading}
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) {
@@ -139,8 +104,6 @@ export default function Upload({ onSaved }: { onSaved: () => void }) {
             Error: {error}
           </div>
         )}
-        
-        <hr className="my-4 border-t border-gray-300" />
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 import React, { useState, useRef } from "react";
 import ChatUI from "@/components/PaperView/ChatUI";
 import Upload from "@/components/PaperView/Upload";
+import {FileIconPlus} from "@/components/Icons/FIleIcon";
 
 interface StudyLayoutProps {
   children: React.ReactNode; // Generated content such as flashcards etc.
@@ -49,8 +50,8 @@ export default function StudyLayout({ children }: StudyLayoutProps) {
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        className={`w-1 h-full cursor-col-resize touch-none transition-colors ${
-          isResizing ? "bg-blue-500" : "hover:bg-blue-500/40 bg-white/10"
+        className={`w-1 p-0 m-0 h-full cursor-col-resize bg-transparent touch-none transition-colors ${
+          isResizing ? "bg-blue-500" : "hover:bg-blue-500/40 bg-transparent"
         }`}
       />
 
@@ -61,9 +62,10 @@ export default function StudyLayout({ children }: StudyLayoutProps) {
 
       {/* (4) Upload Panel */}
       <aside className="group relative">
-        <div className="absolute right-0 top-0 h-full w-3 z-20 cursor-ew-resize" />
-        <div className="border border-white/30 p-2 bg-white/30 backdrop-blur-md rounded-md w-0 opacity-0 group-hover:w-[12vw] group-hover:opacity-100 transition-all duration-300 h-full overflow-y-auto">
-          <h4 className="mt-10 mb-5 text-white">Lectures:</h4>
+        <div className="absolute bg-gray-400 right-0 top-0 h-full w-3 z-20 cursor-ew-resize" />
+        <div  className="border p-2 bg-transparent backdrop-blur-sm rounded-md w-0 opacity-0 group-hover:w-[13vw] group-hover:opacity-100 transition-all duration-800 h-full overflow-y-auto">
+          <div className="flex mt-4 text-white">FILES: <span><FileIconPlus className="h-4 p-0 m-0 mt-1 ml-1 text-white"/></span></div>
+          <hr className="mb-8 mt-5"/>
           <Upload onSaved={() => {}} />
         </div>
       </aside>

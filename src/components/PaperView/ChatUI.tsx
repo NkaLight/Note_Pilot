@@ -1,5 +1,4 @@
-// src/components/DashBoard/ChatUI.tsx
-/**
+/* 
  * ChatUI component
  *
  * WHAT IT DOES
@@ -193,20 +192,19 @@ export default function ChatUI() {
           return (
             <div key={i} className={`space-y-2`}>
               <div
-                className={`p-3 rounded-xl max-w-[80%] dark:text-white text-black  ${
+                className={`p-3 rounded-xl max-w-[80%] ${
                   isAssistant
                     ? "mx-auto text"
                     : "dark:bg-neutral-900 bg-cyan-400 ml-auto text-right"
                 }`}
-                style={isAssistant? 
-                    {color: "var(--card-text)"}: {}}
+                
               >
 
                   {isAssistant ? (
                     <div className="prose prose-theme max-w-none dark:prose-invert">  
                       <ReactMarkdown>{m.content}</ReactMarkdown>
                     </div>
-                    ):(<p>{m.content}</p>)
+                    ):(<p className="dark:text-white" text-black>{m.content}</p>)
                   }
               </div>
             </div>

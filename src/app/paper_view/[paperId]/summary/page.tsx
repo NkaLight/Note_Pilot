@@ -2,11 +2,10 @@
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { StreamChunk } from "@/lib/utils/ai-gateway";
 import { useEffect, useState, useRef} from "react";
-import LoadingCircles from "@/components/LoadingCircles";
 import ReactMarkdown from 'react-markdown';
 
 export default function SummaryPage() {
-  const {chosenLectureId, selectedLectureIds} = usePaperViewContext();
+  const {chosenLectureId} = usePaperViewContext();
   const [summaries, setSummaries] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +37,6 @@ export default function SummaryPage() {
         if(done) break;
         try{
           const chunk = textDec.decode(value, {stream: true});
-          console.log("RAW: ", chunk);
           const lines = chunk.split("\n").filter((l)=>l.startsWith("data: "));
           for(const line of lines){
             const payload = line.slice(6);
@@ -49,7 +47,6 @@ export default function SummaryPage() {
                 setSummaries("Something went wrong.");
                 setError(parse.message);
               }else if(parse.type === "delta"){
-                console.log(parse.text);
                 setSummaries(prevState => prevState + parse.text);
                 bottomRef.current.scrollIntoView();
               }

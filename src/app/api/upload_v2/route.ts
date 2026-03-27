@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
+import { getLectureTitle } from "@/lib/services/upload";
 import { CanvasFactory } from 'pdf-parse/worker';
 import { PDFParse } from 'pdf-parse';
 import { getPath, getData } from 'pdf-parse/worker';
@@ -26,9 +27,8 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     const uploadedFiles = formData.getAll("file"); 
     const paperId = formData.get("paperId") as string | null;
-    const lectureTitle = formData.get("lectureTitle") as string | null;
 
-    if (!uploadedFiles.length || !paperId || !lectureTitle) {
+    if (!uploadedFiles.length || !paperId) {
       return new NextResponse("Missing required fields", { status: 400 });
     }
 
@@ -44,6 +44,9 @@ export async function POST(req: Request) {
     const parsed = await parser.getText();
     const parsedText = parsed.text;
     parser.destroy();
+
+    //Dynamically generate the lecture for the user.
+    const lectureTitle:string = await getLectureTitle(parsed.text.slice(0, 100));
 
     //Send to DB
     const papId = parseInt(paperId, 10); // convert to int
