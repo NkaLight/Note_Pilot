@@ -1,5 +1,5 @@
 import DashboardClient from "./DashboardClient";
-import { getPapersByUserId } from "@/lib/paper";
+import { getPapersByUserId } from "@/lib/db_access/paper";
 
 /** DashboardPage Component
  * @description 

@@ -12,27 +12,10 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { getFlashCards } from "@/lib/db_access/flashcards";
-import { FlashcardsReq, FlashcardArray } from "@/lib/zod_schemas/flashcards";
+import { FlashcardsReq,} from "@/lib/zod_schemas/flashcards";
 import {generateFlashCardsSet} from "@/lib/services/flashcards";
 import { DbError, ServiceError } from "@/lib/error";
 
-// OpenRouter endpoint
-const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-
-const SYSTEM_PROMPT = `
-You are a flashcard generator that ONLY returns valid JSON arrays.
-
-Respond ONLY with a JSON array where each element has:
-- "question_front": the front of the flashcard (1 short question)
-- "answer_back": the answer (1–2 concise sentences)
-
-Never include extra text, markdown, explanations, or code fences.
-Example output:
-[
-  {"question_front": "What is refactoring?", "answer_back": "Improving code without changing behavior."},
-  {"question_front": "What is re-engineering?", "answer_back": "A major system redesign to modernize software."}
-]
-`.trim();
 
 /**
  * GET — Fetch all flashcard sets belonging to the logged-in user.

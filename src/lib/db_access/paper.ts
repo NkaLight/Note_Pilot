@@ -1,4 +1,4 @@
-import { getSessionUser } from "./auth";
+import { getSessionUser } from "../auth";
 import { prisma } from "@/lib/db";
 
 
