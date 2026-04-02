@@ -26,6 +26,7 @@ export default function AccountPage() {
     console.log(user);
 
     // Local state for profile fields
+    const [username, setUsername] = useState(user?.username ?? "");
     const [email, setEmail] = useState(user?.email ?? "");
     const [password, setPassword] = useState("");
     const [aiLevel, setAiLevel] = useState<AILevel>("child");
@@ -39,6 +40,7 @@ export default function AccountPage() {
 
     useEffect(() => {
         if (!user) return;
+        setUsername(user.username ?? "");
         setEmail(user.email ?? "");
         setAiLevel((user.aiLevel as AILevel) ?? "student"); // Use actual aiLevel from user, default to "student"
         // set avatarPreview from user.avatarUrl when you add it later
@@ -53,6 +55,7 @@ export default function AccountPage() {
 
             if (avatarFile) {
                 const form = new FormData();
+                form.append("username", username);
                 form.append("email", email);
                 if (password) form.append("password", password);
                 form.append("aiLevel", aiLevel);
@@ -62,6 +65,7 @@ export default function AccountPage() {
             } else {
                 headers = { "Content-Type": "application/json" };
                 body = JSON.stringify({
+                    username,
                     email,
                     password: password || undefined,
                     aiLevel,
@@ -121,8 +125,10 @@ export default function AccountPage() {
                 <div className="grid gap-10 grid-cols-1 lg:grid-cols-[1fr_320px]">
                     <section>
                         <ProfileFields
+                            username={username}
                             email={email}
                             password={password}
+                            setUsername={setUsername}
                             setEmail={setEmail}
                             setPassword={setPassword}
                         />
@@ -138,6 +144,7 @@ export default function AccountPage() {
                     </section>
 
                     <Avatar
+                        displayName={username}
                         avatarPreview={avatarPreview}
                         setAvatarPreview={setAvatarPreview}
                         setAvatarFile={setAvatarFile}

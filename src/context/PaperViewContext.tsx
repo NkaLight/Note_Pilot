@@ -23,7 +23,7 @@ type PaperViewContextType = {
   setSelectedLectureIds: React.Dispatch<React.SetStateAction<number[]>>;
   chatMessages: Message[];
   setChatMessages: (messages: Message[]) => void;
-  setCoed:(code:string)=>void;
+  setCode:(code:string)=>void;
   code:string, 
 }
 

@@ -4,12 +4,12 @@ import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { createContext, ReactNode, useContext, useState, useRef, useMemo, useEffect } from "react";
 
 type User = {
-    name:string;
+    username:string;
     email: string;
     aiLevel?: string;
 }
 
-//user: { id: user.user_id, email: user.email, username : user.username }
+//user: { id: user.user_id, email: user.email, name : user.username }
 type SessionContextType = {
     user: User | null
     setUser: (user: User | null) => void;
