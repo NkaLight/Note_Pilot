@@ -2,10 +2,10 @@
 
 import { useState, useRef } from "react";
 import { usePaperViewContext } from "@/context/PaperViewContext";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { UploadIcon } from "../Icons/FIleIcon";
 import LoadingCircles from "../LoadingCircles";
-import { DeleteIcon, Edit, EditIcon, TrashIcon } from "lucide-react";
+import {EditIcon, TrashIcon } from "lucide-react";
 
 type Lecture = {
   id: number;

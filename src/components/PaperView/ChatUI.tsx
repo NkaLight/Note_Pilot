@@ -20,6 +20,7 @@ import { useEffect, useState, useRef } from "react";
 import ReactMarkdown from 'react-markdown';
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { StreamChunk } from "@/lib/utils/ai-gateway";
+import TrashBin from "@/components/Icons/TrashBin";
 
 type Message = { 
   role: "user" | "assistant"; 
@@ -180,7 +181,7 @@ export default function ChatUI() {
     <div className="w-full h-full flex flex-col">
       {/* Messages */}
       <div className="flex-1 rounded-3xl p-3 overflow-y-auto space-y-3" style={{background: "var(--card-bg)"}}>
-        <div onClick={()=>clearChatHistory()} className="max-w-min ml-auto  cursor-pointer">CLEAR</div>
+        <div onClick={()=>clearChatHistory()} className="sticky top-0 flex justify-end z-10 mr-auto cursor-pointer"><TrashBin size={25}/></div>
         {loadingHistory && (
           <div className="text-center py-4">
             <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>

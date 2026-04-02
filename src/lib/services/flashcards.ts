@@ -44,7 +44,10 @@ export async function generateFlashCardsSet(uploadId:number, user_id:number){
         `.trim();
     
     // Calls OpenRouter LLM
-    const jsonText = await queryLLM("Generate flashcards from the following content. Output JSON ONLY as:", userPrompt, {type:ServiceType.AI_GENERATION});
+    const jsonText = await queryLLM(`Generate flashcards from the following content. Output JSON ONLY as: [
+        {"question_front": "...", "answer_back": "..."},
+        ...
+        ]`,userPrompt,  {type:ServiceType.AI_GENERATION});
     let flashcards;
     try{
         flashcards = FlashcardArray.parse(JSON.parse(jsonText));

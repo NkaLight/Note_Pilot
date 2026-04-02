@@ -2,6 +2,7 @@
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { StreamChunk } from "@/lib/utils/ai-gateway";
 import { useEffect, useState, useRef} from "react";
+import { RefreshCcw } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 
 export default function SummaryPage() {
@@ -97,7 +98,7 @@ export default function SummaryPage() {
 
   return (
     <div style={{background: "var(--card-bg)", color:"var(--card-txt)"}} className="rounded-4xl p-3">
-        <div onClick={()=>generateSummaries()} className="max-w-min ml-auto  cursor-pointer">REGENERATE</div>
+        <div onClick={()=>generateSummaries()} className=" font-serif flex max-w-min ml-auto gap-1  cursor-pointer mr-5 opacity-10 hover:opacity-100 duration-300 ease-in-out transition-opacity">Regenerate <RefreshCcw size={"1.5em"}/></div>
         {summaries &&
           (<div className="prose prose-theme max-w-none dark:prose-invert">
             <ReactMarkdown>

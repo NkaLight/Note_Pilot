@@ -50,7 +50,7 @@ export default function StudyLayout({ children }: StudyLayoutProps) {
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        className={`w-1 p-0 m-0 h-full cursor-col-resize bg-transparent touch-none transition-colors ${
+        className={`w-5 p-0 m-0 h-full cursor-col-resize bg-transparent touch-none transition-colors ${
           isResizing ? "bg-blue-500" : "hover:bg-blue-500/40 bg-transparent"
         }`}
       />

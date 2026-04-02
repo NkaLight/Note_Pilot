@@ -41,7 +41,7 @@ export const setAuthCookies = async (accessToken: string,refreshToken:string) =>
     httpOnly:true,
     secure:process.env.NODE_ENV === "production",
     path:"/",
-    maxAge:60 * 20, // 15min + 5min buffer = 20min.
+    maxAge:60 * 60 * 24 * 8, // 15min + 5min buffer = 20min.
   });
 };
 
@@ -53,6 +53,6 @@ export const setAccessToken = async (accessToken:string) =>{
     httpOnly:true,
     secure:process.env.NODE_ENV === "production",
     path:"/",
-    maxAge:60 * 20,
+    maxAge:60 * 60 * 24 * 8,
   });
 };

@@ -14,6 +14,7 @@ import React, { useState, useEffect } from "react";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { FlashcardBlock } from "@/components/UI_Blocks/FlashCardBlock";
 import { useSearchParams } from "next/navigation";
+import { RefreshCcw } from "lucide-react";
 
 type Flashcard = { question: string; answer: string };
 type ApiFlashcard = { question_front: string; answer_back: string };
@@ -26,9 +27,9 @@ export default function FlashcardsPage() {
   const { chosenLectureId, setCode } = usePaperViewContext();
   const paperCode = useSearchParams().get("paper_code");
   setCode(paperCode);
-  //Given chosenId(uploadId), generate + persist
+
+  
   async function makeFlashcardsFromUpload(uploadId: number) {
-    setLoading(true);
     setErr(null);
     try {
       const res = await fetch("/api/flashcards", {
@@ -47,6 +48,8 @@ export default function FlashcardsPage() {
     } catch (e: any) {
       console.log(`makeFlashcards error ${e.message}`);
       setErr("Error Generating flashcards");
+    }finally{
+      setLoading(false);
     }
   }
 
@@ -79,10 +82,13 @@ export default function FlashcardsPage() {
   }, [chosenLectureId]);
 
   return (
-       <FlashcardBlock 
+    <>
+      <div className=" font-serif flex max-w-min ml-auto gap-1  cursor-pointer mr-5 opacity-10 hover:opacity-100 duration-300 ease-in-out transition-opacity "  onClick={()=>makeFlashcardsFromUpload(chosenLectureId)}>Regenerate <RefreshCcw size={"1.5em"}/></div>
+      <FlashcardBlock 
             flashcards={flashcards}
             loading={loading}
             error={err}
         />
+    </>
   );
 }
