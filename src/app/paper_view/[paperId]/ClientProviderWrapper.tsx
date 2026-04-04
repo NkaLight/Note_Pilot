@@ -11,7 +11,7 @@ interface Props {
 
 export default function ClientProviderWrapper({ children, initialLectures }: Props) {
   return (
-    <PaperViewProvider initialLectures={initialLectures}>
+    <PaperViewProvider initialLectures={initialLectures} paperCode={null}>
       <StudyLayout>
         {children}
       </StudyLayout>

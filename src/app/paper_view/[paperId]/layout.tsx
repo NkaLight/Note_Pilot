@@ -5,11 +5,11 @@ import { redirect } from "next/navigation";
 
 type PaperViewLayoutProps = {
   children: React.ReactNode;
-  params: { paperId: string};
+  params: Promise<{ paperId: string }>;
 };
 
 export default async function PaperViewLayout({ children, params, }: PaperViewLayoutProps) {
-    const { paperId } = params;
+    const { paperId } = await params;
     const {user, status} = await getSessionUser();
       if(status === "invalid"){
         //redirect("/");
