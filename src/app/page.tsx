@@ -1,6 +1,7 @@
 import {getSessionUser} from  "@/lib/auth";
 import { redirect } from "next/navigation";
 import Button from "@/components/TryForFreeButton";
+import Footer from "@/components/Footer";
 
 export default async function LandingPage() {
   const {user, status} = await getSessionUser();
@@ -67,6 +68,7 @@ export default async function LandingPage() {
           </div>
         ))}
       </div>
+      <Footer/>
     </div>
   );
 }

@@ -18,6 +18,7 @@
 import ProblemSet from "@/components/PaperView/ProblemSet";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { useEffect, useRef, useState } from "react";
+import { RefreshCcw } from "lucide-react";
 
 export default function DashboardPage() {
   // Chat width starts at 50% of viewport
@@ -142,15 +143,9 @@ export default function DashboardPage() {
           {/* Middle: Problem Sets */}
           <div className=" rounded-4xl p-3 bg-white/50 overflow-y-auto flex-grow" style={{background: "var(--card-bg)"}}>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-black">Problem Sets</h2>
+              <h2 className="text-xl font-semibold dark:text-white text-black">Exam style questions</h2>
               {chosenLectureId && (
-                <button
-                  onClick={handleRegenerate}
-                  disabled={isLoading}
-                  className="px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 transition-colors"
-                >
-                  {isLoading ? "Regenerating..." : "Regenerate Problems"}
-                </button>
+                <div className=" font-serif flex max-w-min ml-auto gap-1  cursor-pointer mr-5 opacity-10 hover:opacity-100 duration-300 ease-in-out transition-opacity "  onClick={()=>generateNewProblemSets()}>Regenerate <RefreshCcw size={"1.5em"}/></div>
               )}
             </div>
 

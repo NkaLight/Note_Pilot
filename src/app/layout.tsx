@@ -1,22 +1,19 @@
 
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import Nav from "@/components/Nav";
-import "./globals.css";
-import Footer from "@/components/Footer";
 import { SessionProvider } from "@/context/SessionContext";
 import ThemeInit from "@/components/Account/themeInit";
 import { ThemeProviders } from "@/components/Account/themeProvider";
 import { getSessionUser } from '@/lib/auth';
 import { AuthContextProvider } from "@/context/AuthContext";
-import { redirect } from "next/dist/server/api-utils";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Note Pilot",
   description: "",
 };
 
-export default async function RootLayout({children,}: Readonly<{children: React.ReactNode;}>) {
+export default async function RootLayout({children, showFooter = true}: Readonly<{children: React.ReactNode;}>) {
     const {user } = await getSessionUser();
 
   return (
@@ -28,7 +25,6 @@ export default async function RootLayout({children,}: Readonly<{children: React.
               <AuthContextProvider initialAuth="">
                 <Nav />
                 <main>{children}</main>
-                <Footer />
               </AuthContextProvider>
           </SessionProvider>
         </ThemeProviders>

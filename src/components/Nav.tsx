@@ -60,7 +60,21 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
   };
 
   if (!showAuth) return null;
-  if (loading) return <div className="h-16 w-full bg-transparent" />; // Barebones placeholder
+  if (loading) 
+    return(// Barebones Nav placeholder
+      <header className="fixed top-0 w-full z-50 px-4 py-2">
+        <AnimatePresence mode="wait">
+            <motion.nav key="guest" {...navFadeIn} className="nav-container hidden md:flex justify-between">
+              <Logo href="/" />
+              <div className="nav-account-section flex gap-1">
+                <Link href="/about">About</Link>
+                <button onClick={() => setActiveForm("signIn")}>Login</button>
+                <button onClick={() => setActiveForm("signUp")} className="btn-primary">Sign Up</button>
+              </div>
+            </motion.nav>
+          </AnimatePresence>
+      </header>
+    );
 
   return (
     <>

@@ -18,6 +18,7 @@ import ChatUI from "@/components/PaperView/ChatUI";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { RefreshCcw } from "lucide-react";
 
 type GlossaryItem = {
   term: string;
@@ -39,7 +40,7 @@ export default function DashboardPage() {
 
 
   // Generate glossary automatically using selected uploads and chat context
-  async function generateGlossary(regenerate) {
+  async function generateGlossary(regenerate:boolean) {
     if (chosenLectureId === null) {
       setErr("Please select at least one lecture from the PDFs page to generate a glossary.");
       return;
@@ -89,17 +90,11 @@ export default function DashboardPage() {
   return (
     <>
       {/* Middle: Glossary */}
-      <div className="rounded-4xl   p-3 bg-white/50 mr-10 overflow-y-auto  flex-grow text-black" style={{background: "var(--card-bg)"}}>
+      <div className="rounded-4xl   p-3 bg-white/50 mr-10 overflow-y-auto  flex-grow dark:text-white text-black" style={{background: "var(--card-bg)"}}>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-black">Glossary</h2>
+          <h2 className="text-xl font-semibold dark:text-white text-black">Glossary</h2>
           {chosenLectureId && (
-            <button
-              onClick={()=> generateGlossary(true)}
-              disabled={loading}
-              className="px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 transition-colors"
-            >
-              {loading ? "Regenerating..." : "Regenerate Glossary"}
-            </button>
+            <div className=" font-serif flex max-w-min ml-auto gap-1  cursor-pointer mr-5 opacity-10 hover:opacity-100 duration-300 ease-in-out transition-opacity "  onClick={()=>generateGlossary(true)}>Regenerate <RefreshCcw size={"1.5em"}/></div>
           )}
         </div>
 
