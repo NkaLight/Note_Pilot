@@ -78,7 +78,7 @@ const handleSubmit = async (e: React.FormEvent) =>  {
     if (!res.ok) {
       // Server returned an error
       setIsLoading(false);
-      setError("Failed to create a user");
+      setError(data.error || "Failed to create a user");
       return;
     }
 

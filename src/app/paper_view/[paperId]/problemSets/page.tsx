@@ -147,6 +147,7 @@ export default function DashboardPage() {
               {chosenLectureId && (
                 <div className=" font-serif flex max-w-min ml-auto gap-1  cursor-pointer mr-5 opacity-10 hover:opacity-100 duration-300 ease-in-out transition-opacity "  onClick={()=>generateNewProblemSets()}>Regenerate <RefreshCcw size={"1.5em"}/></div>
               )}
+               {!chosenLectureId && <div className=" font-serif flex cursor-pointer mr-5 opacity-50  duration-300 ease-in-out transition-opacity">Please select a lecture or upload a lecture</div>}
             </div>
 
             {/* Error display */}

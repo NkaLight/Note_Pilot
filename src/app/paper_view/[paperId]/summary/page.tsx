@@ -98,7 +98,8 @@ export default function SummaryPage() {
 
   return (
     <div style={{background: "var(--card-bg)", color:"var(--card-txt)"}} className="rounded-4xl p-3">
-        <div onClick={()=>generateSummaries()} className=" font-serif flex max-w-min ml-auto gap-1  cursor-pointer mr-5 opacity-10 hover:opacity-100 duration-300 ease-in-out transition-opacity">Regenerate <RefreshCcw size={"1.5em"}/></div>
+        {chosenLectureId && <div onClick={()=>generateSummaries()} className=" font-serif flex max-w-min ml-auto gap-1  cursor-pointer mr-5 opacity-10 hover:opacity-100 duration-300 ease-in-out transition-opacity">Regenerate <RefreshCcw size={"1.5em"}/></div>}
+        {!chosenLectureId && <div className=" font-serif flex cursor-pointer mr-5 opacity-50  duration-300 ease-in-out transition-opacity">Please select a lecture or upload a lecture</div>}
         {summaries &&
           (<div className="prose prose-theme max-w-none dark:prose-invert">
             <ReactMarkdown>

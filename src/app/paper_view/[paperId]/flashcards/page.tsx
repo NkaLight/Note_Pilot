@@ -83,7 +83,7 @@ export default function FlashcardsPage() {
 
   return (
     <>
-      <div className=" font-serif flex max-w-min ml-auto gap-1  cursor-pointer mr-5 opacity-10 hover:opacity-100 duration-300 ease-in-out transition-opacity "  onClick={()=>makeFlashcardsFromUpload(chosenLectureId)}>Regenerate <RefreshCcw size={"1.5em"}/></div>
+      {chosenLectureId && <div className=" font-serif flex max-w-min ml-auto gap-1  cursor-pointer mr-5 opacity-10 hover:opacity-100 duration-300 ease-in-out transition-opacity "  onClick={()=>makeFlashcardsFromUpload(chosenLectureId)}>Regenerate <RefreshCcw size={"1.5em"}/></div>}
       <FlashcardBlock 
             flashcards={flashcards}
             loading={loading}
