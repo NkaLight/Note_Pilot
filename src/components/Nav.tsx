@@ -39,6 +39,7 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
   // 1. Logic: Determine Current View
   const isPaperView = !!paperId;
   const isAccountPage = pathname.startsWith("/account");
+  const isHomePage = pathname.toString() == "/";
 
   // 2. Logic: Inactivity Timer
   useEffect(() => {
@@ -94,7 +95,7 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
 
           {/* CASE 2: LOGGED IN & COLLAPSED */}
           {user && collapsed && (
-            <DotMenu key="dots" onHover={() => setCollapsed(false)} />
+            <DotMenu key="dots" onHover={() => setCollapsed(false)} homePage={isHomePage} />
           )}
 
           {/* CASE 3: LOGGED IN & EXPANDED */}
@@ -161,7 +162,7 @@ const Logo = ({ href }: { href: string }) => (
   </Link>
 );
 
-const DotMenu = ({ onHover }: { onHover: () => void }) => (
+const DotMenu = ({ onHover, homePage}: { onHover: () => void; homePage:boolean}) => (
   <motion.div
     className="nav-dot-menu"
     onMouseEnter={onHover}
@@ -171,7 +172,7 @@ const DotMenu = ({ onHover }: { onHover: () => void }) => (
     exit="exit"
   >
     {[...Array(3)].map((_, i) => (
-      <span key={i} className="w-3 h-3 rounded-full dark:bg-white bg-black inline-block m-1" />
+      <span key={i} className={`w-3 h-3 rounded-full ${homePage ? "bg-black" : "dark:bg-white bg-black"} inline-block m-1`} />
     ))}
   </motion.div>
 );
