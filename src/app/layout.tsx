@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description: "",
 };
 
-export default async function RootLayout({children, showFooter = true}: Readonly<{children: React.ReactNode;}>) {
+export default async function RootLayout({children}: Readonly<{children: React.ReactNode;}>) {
     const {user } = await getSessionUser();
 
   return (

@@ -30,12 +30,12 @@ export async function POST(request: Request) {
 
     if(!result.success){
       return NextResponse.json(
-        { errors: result.error.flatten().fieldErrors },
+        { error: result.error.flatten().fieldErrors },
         { status: 400 }
       ); 
     }
     const validated = result.data;
-    if(!validated) return NextResponse.json({errors: "Internal Sever error"}, {status: 404});// This should never happen I was shutting up Next.js, since validated could be undefined but I know that could never happen
+    if(!validated) return NextResponse.json({error: "Internal Sever error"}, {status: 404});// This should never happen I was shutting up Next.js, since validated could be undefined but I know that could never happen
 
     // Hash password before storing
     const hashedPassword = await bcrypt.hash(validated.password, 10);
