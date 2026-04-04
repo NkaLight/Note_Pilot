@@ -4,7 +4,7 @@ import Nav from "@/components/Nav";
 import { SessionProvider } from "@/context/SessionContext";
 import ThemeInit from "@/components/Account/themeInit";
 import { ThemeProviders } from "@/components/Account/themeProvider";
-import { getSessionUser } from '@/lib/auth';
+import { getSessionUser } from "@/lib/auth";
 import { AuthContextProvider } from "@/context/AuthContext";
 import "./globals.css";
 
@@ -32,5 +32,4 @@ export default async function RootLayout({children}: Readonly<{children: React.R
     </html>
   );
 }
-
 

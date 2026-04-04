@@ -7,11 +7,7 @@
  * - Update/Delete buttons delegate to parent handlers.
  * - Pure UI; persistence handled by parent (AccountPage).
  */
-
-import { useEffect, useRef, useState } from "react";
-
 import { useTheme } from "next-themes";
-
 type AILevel = "child" | "student" | "advanced";
 
 interface PreferencesProps {

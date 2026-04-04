@@ -1,6 +1,6 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState} from "react";
 import { usePathname, useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -49,7 +49,7 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
 
     const timer = setTimeout(() => setCollapsed(true), 500);
     return () => clearTimeout(timer);
-  }, [user, activeForm, isHovered, pathname]);
+  }, [user, activeForm, isHovered, pathname]);// eslint-disable-line react-hooks/exhaustive-deps
 
   const handleLogout = async () => {
     const res = await fetch("/api/refresh_token", {method:"PUT"});
@@ -144,7 +144,7 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
         )}
         {activeForm === "forgotPassword" && (
           <Modal isOpen onClose={() => setActiveForm(null)}>
-            <ResetPasswordForm closeForm={() => setActiveForm(null)} />
+            <ResetPasswordForm/>
           </Modal>
         )}
       </AnimatePresence>

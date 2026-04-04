@@ -131,7 +131,7 @@ export async function GET(req: NextRequest) {
         // Add cache headers for better performance
         return NextResponse.json({ studyGuides }, {
             headers: {
-                'Cache-Control': 'public, max-age=300, stale-while-revalidate=600',
+                "Cache-Control": "public, max-age=300, stale-while-revalidate=600",
             }
         });
     } catch (err: any) {
@@ -233,6 +233,7 @@ Generate at least 3-5 key topics, 5-8 study tips, 3-5 practice questions, and 3-
             const parsed = JSON.parse(jsonText);
             studyGuideContent = StudyGuideContent.parse(parsed);
         } catch (err) {
+            console.error(err);
             return NextResponse.json(
                 { error: "LLM did not return valid study guide JSON", detail: raw.slice(0, 800) },
                 { status: 502 }

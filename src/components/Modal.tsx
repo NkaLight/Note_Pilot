@@ -22,7 +22,6 @@ export default function Modal({ isOpen, onClose, children, account = false }: Mo
   }, [isOpen]);
 
   if (!show) return null;
-
   
     return account ? 
       (

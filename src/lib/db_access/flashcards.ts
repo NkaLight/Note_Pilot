@@ -15,11 +15,11 @@ export async function getFlashCards(uploadId:number, user_id:number){
         },
         orderBy: { flashcard_id: "asc" },
       });
-    }catch(error){
+    }catch{
         throw new DbError("Failed to fetch flashCards from DB");
     }
 }
-export async function createOrUpdateFlashCardSet(uploadId:number,flashcards:Flashcard [], sourceText:string){
+export async function createOrUpdateFlashCardSet(uploadId:number,flashcards:Flashcard []){
     try{
         return await prisma.flashcard_set.upsert({
             where:{upload_id:uploadId},

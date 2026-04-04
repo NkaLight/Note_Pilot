@@ -9,7 +9,6 @@ export const metadata: Metadata = {
   description: "",
 };
 
-
 /** Dashboard React Component
  * @description 
  * Server side component.

@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import LoadingCircles from "../LoadingCircles";
  
 type Flashcard = { question: string; answer: string };
  

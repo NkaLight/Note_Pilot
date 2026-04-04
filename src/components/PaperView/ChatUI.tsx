@@ -17,7 +17,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown from "react-markdown";
 import { usePaperViewContext } from "@/context/PaperViewContext";
 import { StreamChunk } from "@/lib/utils/ai-gateway";
 import TrashBin from "@/components/Icons/TrashBin";
@@ -34,23 +34,23 @@ export default function ChatUI() {
   const [busy, setBusy] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const {chosenLectureId } = usePaperViewContext();
-  const [loadLLMResp, setLoadLLMResp] = useState<boolean>(false);
   const bottomRef = useRef<HTMLDivElement>(null);
-
+  /*To Do loading icon as LLM message is streamed 
+  const [loadLLMResp, setLoadLLMResp] = useState<boolean>(false);*/
   // Load chat history when activeUploadIds changes
   useEffect(() => {
      if (!chosenLectureId) return;
      if(messages.length > 0) return;
 
      loadChatHistory(chosenLectureId);
-  }, [chosenLectureId]); // Watch for changes in the array
+  }, [chosenLectureId, messages.length]);
 
   // Load existing chat messages for the selected upload
   const loadChatHistory = async (uploadId: number) => {
     setLoadingHistory(true);
     try {
       const response = await fetch(`/api/chat?uploadId=${uploadId}`, {
-        credentials: 'include'
+        credentials: "include"
       });
       
       if (response.ok) {
@@ -69,6 +69,7 @@ export default function ChatUI() {
         setMessages([]);
       }
     } catch (error) {
+      console.warn(error);
       setMessages(() => [
           { role: "assistant", content: "⚠️ Something went wrong. Please try again later" },
         ]);
@@ -79,7 +80,6 @@ export default function ChatUI() {
 
   const handleSend = async () => {
     if (!input.trim() || !chosenLectureId) return;
-    
     const userMessage: Message = { role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
@@ -96,7 +96,7 @@ export default function ChatUI() {
 
      const reader = res.body.getReader();
      const textCoder = new TextDecoder();
-     // eslint-disable-next-line no-constant-condition
+      
      while(true){
       const {done, value} = await reader.read();
       if(done) break;
@@ -137,11 +137,12 @@ export default function ChatUI() {
             bottomRef.current?.scrollIntoView({ behavior: "smooth" });
           }
         }catch{
-          console.log("Chunk error");
+          console.warn("Chunk error");
         }
       }
     }
   }catch(error){
+    console.error(error);
     setMessages((prev) => {
       const updated = [...prev];
       updated[updated.length - 1] = {
@@ -163,17 +164,17 @@ export default function ChatUI() {
     try {
       // Clear chat for the first upload (could be enhanced to clear all)
       const response = await fetch(`/api/chat?uploadId=${chosenLectureId}`, {
-        method: 'DELETE',
-        credentials: 'include'
+        method: "DELETE",
+        credentials: "include"
       });
       
       if (response.ok) {
         setMessages([]);
       } else {
-        console.error('Failed to clear chat history');
+        console.error("Failed to clear chat history");
       }
     } catch (error) {
-      console.error('Error clearing chat history:', error);
+      console.error("Error clearing chat history:", error);
     }
   };
 
@@ -191,7 +192,7 @@ export default function ChatUI() {
         {messages.map((m, i) => {
           const isAssistant = m.role === "assistant";
           return (
-            <div key={i} className={`space-y-2`}>
+            <div key={i} className={"space-y-2"}>
               <div
                 className={`p-3 rounded-xl max-w-[80%] ${
                   isAssistant
@@ -230,9 +231,9 @@ export default function ChatUI() {
         <button
           onClick={handleSend}
           disabled={busy || !input.trim()}
-          className={`rounded-full px-4 py-2 transition-colors bg-transparent text-transparent cursor-pointer`}
+          className={"rounded-full px-4 py-2 transition-colors bg-transparent text-transparent cursor-pointer"}
         >
-          {busy ? 'Thinking...' : 'Send'}
+          {busy ? "Thinking..." : "Send"}
         </button>
       </div>
     </div>

@@ -4,7 +4,7 @@ import Button from "@/components/TryForFreeButton";
 import Footer from "@/components/Footer";
 
 export default async function LandingPage() {
-  const {user, status} = await getSessionUser();
+  const {status} = await getSessionUser();
   if (status === "ok") {
     redirect("/dashboard"); // Redirect if signed in
   }

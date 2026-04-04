@@ -208,27 +208,29 @@ const EditPaper = ({
 /* ---------- DashboardPage Component ---------- */
 export default function DashboardPage(props: { onloadPapers: paper[] | null }) {
   const [papers, setPapers] = useState<paper[] | null>(props.onloadPapers);
-  const [loading, setLoading] = useState(false);
   const [activeForm, setActiveForm] = useState<
     "addPaper" | "confirmRemovePaper" | "editPaper" | null
   >(null);
   const [selectedPaper, setSelectedPaper] = useState<paper | null>();
-  const fetchSummaries = async () => {
-      setLoading(true);
+  const [error, setError] = useState<"Failed to fetch papers"|null>(null); 
+  const fetchPapers = async () => {
       try {
+        if(error) setError(null);
         const res = await fetch("/api/papers", {
           cache: "no-store",
           method: "GET",
         });
         const data = await res.json();
         setPapers(data?.papers ?? []);
-      } finally {
-        setLoading(false);
+        setError(null);
+      }catch{
+        setError("Failed to fetch papers");
       }
     };
 
   useEffect(() => {
-    fetchSummaries();
+    fetchPapers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleCloseModal = () => {
@@ -326,7 +328,7 @@ export default function DashboardPage(props: { onloadPapers: paper[] | null }) {
             onClose={() => setActiveForm(null)}
             key={"addPaper"}
           >
-            <AddPaperForm closeForm={handleCloseModal} onRefresh={fetchSummaries}/>
+            <AddPaperForm closeForm={handleCloseModal} onRefresh={fetchPapers}/>
           </Modal>
         )}
         {activeForm === "editPaper" && selectedPaper && (
@@ -335,7 +337,7 @@ export default function DashboardPage(props: { onloadPapers: paper[] | null }) {
             onClose={() => setActiveForm(null)}
             key={"editPaper"}
           >
-            <EditPaper closeForm={handleCloseModal} paperItem={selectedPaper} onRefresh={fetchSummaries} />
+            <EditPaper closeForm={handleCloseModal} paperItem={selectedPaper} onRefresh={fetchPapers} />
           </Modal>
         )}
       </AnimatePresence>

@@ -28,7 +28,6 @@ const deleteChatSchema = z.object({
   uploadId: z.coerce.number(),
 });
 
-
 export async function GET(request: NextRequest) {
   try {
     const {user} = await getSessionUser();
@@ -38,7 +37,7 @@ export async function GET(request: NextRequest) {
     }
 
     const url = new URL(request.url);
-    const uploadId = url.searchParams.get('uploadId');
+    const uploadId = url.searchParams.get("uploadId");
     
     if (!uploadId) {
       return NextResponse.json({ error: "uploadId is required" }, { status: 400 });
@@ -63,7 +62,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error fetching chat history:', error);
+    console.error("Error fetching chat history:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -106,7 +105,6 @@ export async function GET(request: NextRequest) {
 //    }
 //  }
 
-
 /*This with this file we are implementing Streaming  */
 export async function POST(req:NextRequest){
   const {user, status} = await getSessionUser();
@@ -138,7 +136,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     const url = new URL(request.url);
-    const uploadId = url.searchParams.get('uploadId');
+    const uploadId = url.searchParams.get("uploadId");
     
     if (!uploadId) {
       return NextResponse.json({ error: "uploadId is required" }, { status: 400 });
@@ -157,7 +155,7 @@ export async function DELETE(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error clearing chat history:', error);
+    console.error("Error clearing chat history:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

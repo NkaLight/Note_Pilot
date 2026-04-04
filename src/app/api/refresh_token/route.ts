@@ -1,13 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { z, } from "zod"; 
 import { refreshLogic,} from "@/lib/services/refresh_token";
 import { markAsUsed } from "@/lib/db_access/refresh_token";
 
-
-
 /*Using the refresh token, get the access token.*/
-export async function POST(req:NextRequest){
+export async function POST(){
     try{
         const refresh_token = (await cookies()).get("refresh_token")?.value;
         if(!refresh_token) return NextResponse.json({user:null, status:401});
@@ -15,7 +12,7 @@ export async function POST(req:NextRequest){
         if(!user) return NextResponse.json({user:null, status:401});
         return NextResponse.json({ user: { email: user.email} });
     }catch(error){
-        console.log(error);
+        console.error(error);
         return NextResponse.json({error:"Internal server error"}, {status:500});
     }
 }
@@ -24,7 +21,7 @@ export async function POST(req:NextRequest){
  * @description Retrieve access token from header, clear from cache, mark refresh token as used in DB.
  * @returns {status:200} on success.
  */
-export async function PUT(req:NextRequest){
+export async function PUT(){
     try{
         const refresh_token =  (await cookies()).get("refresh_token");
         if(refresh_token?.value){
@@ -36,6 +33,7 @@ export async function PUT(req:NextRequest){
 
         return NextResponse.json({message: "Logout successful"}, {status:200});
     }catch(error){
+        console.error(error);
         return NextResponse.json({error: "Internal server error"}, {status:500});
     }
 }

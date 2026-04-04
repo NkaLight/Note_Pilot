@@ -57,7 +57,7 @@ export const SessionProvider = ({
                 }
             };
             loadSession();
-        }, []);
+        }, [initialUser]);
 
         const intervalRef = useRef<number | null>(null);
         useEffect(()=>{
@@ -85,7 +85,6 @@ export const SessionProvider = ({
                 if(intervalRef.current) window.clearInterval(intervalRef.current);
             };
         }, [user]);
-
 
         const contextValue = useMemo(() => ({ 
         user, 

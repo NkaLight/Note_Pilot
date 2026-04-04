@@ -1,20 +1,13 @@
 "use client";
 
-import { request } from "http";
 import { useState } from "react";
 import LoadingCircles from "./LoadingCircles";
 
-interface ResetPasswordFormProps {
-  closeForm: () => void;
-}
-
-export default function ResetPasswordForm({closeForm}:ResetPasswordFormProps){
+export default function ResetPasswordForm(){
     const [email, setEmail] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [output, setOutput] = useState<"You should get an email if you are signed up with us." | null>(null);
     const [error, setError] = useState<string|null>(null);
-    console.log(error);
-    console.log(output);
 
     const handleSubmit = async (e:React.FormEvent) =>{
         e.preventDefault();
@@ -22,7 +15,7 @@ export default function ResetPasswordForm({closeForm}:ResetPasswordFormProps){
         setError(null);
         setOutput(null);
         try{
-            const result = await fetch("/api/account/generate_reset_link", {
+            await fetch("/api/account/generate_reset_link", {
                 method:"POST", 
                 headers: {
                     "Content-Type": "application/json",
@@ -34,7 +27,7 @@ export default function ResetPasswordForm({closeForm}:ResetPasswordFormProps){
             setIsLoading(false);
             setOutput("You should get an email if you are signed up with us.");
             setError(null);
-        }catch(error){
+        }catch{
             setError("Failed to send the email try again");
             setIsLoading(false);
             setOutput(null);

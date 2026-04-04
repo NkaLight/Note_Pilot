@@ -9,14 +9,13 @@
 interface Props {
   username: string;
   email: string;
-  password: string;
   setUsername: (v: string) => void;
   setEmail: (v: string) => void;
   setPassword: (v: string) => void;
 }
 
 export default function ProfileFields({
-  username, email, password,
+  username, email,
   setUsername, setEmail, setPassword,
 }: Props) {
   const inputClass =

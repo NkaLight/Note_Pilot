@@ -1,5 +1,3 @@
-import {useEffect} from "react"
-
 export default function LoadingCircles({className}){
     return(
         <div className={className}>
@@ -14,5 +12,5 @@ export default function LoadingCircles({className}){
                 <circle cx="20" cy="60" r="4" fill="currentColor" />
             </svg>
         </div>
-    )
+    );
 }

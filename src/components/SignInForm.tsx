@@ -16,7 +16,7 @@ export default function SignInForm({closeForm}: SignInFormProps){
     const [isLoading, setIsLoading] = useState(false);
     const {setUser} = useSession();
     const router = useRouter();
-    const { activeForm, setActiveForm } = useAuthContext();
+    const {setActiveForm } = useAuthContext();
     
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

@@ -1,7 +1,6 @@
 import {test as base, expect} from "@playwright/test";
 import { createIsolatedUser, cleanupUser, createTestPasswordResetToken } from "../../helpers/create-test-user";
 
-
 const test = base.extend<{
   testUser: { userId: number; email: string; password: string };
 }>({
@@ -22,7 +21,7 @@ test("Email exists - Click forgot passwowrd", async ({browser, testUser })=>{
     const freshContext = await browser.newContext();
     const page = await freshContext.newPage();
 
-    await page.goto('/');
+    await page.goto("/");
     await page.getByText("Login").click();
     await page.getByText("Forgot Password").click();
     await page.getByPlaceholder("yourEmail@example.com").fill(testUser.email);
@@ -36,7 +35,7 @@ test("Email does not exist - Clicks forgot passwowrd", async ({browser})=>{
     const freshContext = await browser.newContext();
     const page = await freshContext.newPage();
 
-    await page.goto('/');
+    await page.goto("/");
     await page.getByText("Login").click();
     await page.getByText("Forgot Password").click();
     await page.getByPlaceholder("yourEmail@example.com").fill("nonExistentEmail@email.com");

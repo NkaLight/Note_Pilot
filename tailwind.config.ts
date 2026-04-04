@@ -5,7 +5,6 @@
  */
 
 import type { Config } from "tailwindcss";
-import typography from "@tailwindcss/typography";
 
 export default {
   darkMode: "class", // 👈 makes `dark:` respond to .dark on <html>

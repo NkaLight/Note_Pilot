@@ -21,5 +21,5 @@ export default function Footer(){
             <p>Newton Sythong</p>
             </div>
         </div>
-    )
+    );
 }

@@ -51,7 +51,7 @@ export async function POST(req: Request){
         const {user} = await getSessionUser();
         if(!user || !user.user_id) return NextResponse.json({ error:"Unauthorized" }, {status : 401});
         const userId  = user.user_id;
-        const {mode, uploadId, lectureId, userAnswer, questions, problemId, userAnswerId} = await req.json();
+        const {mode, uploadId, userAnswer, questions} = await req.json();
 
         if(!mode) {
             return NextResponse.json({error:"No mode selected"}, {status: 400});

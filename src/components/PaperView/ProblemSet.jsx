@@ -1,18 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 export default function ProblemSet({ question, index, onAnswerChange }) {
-  const [answer, setAnswer] = useState(question.userAnswer || '');
+  const [answer, setAnswer] = useState(question.userAnswer || "");
   const [loading, setIsLoading] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [score, setScore] = useState(null);
 
-  console.log(feedback);
-  console.log(score);
-  console.log(loading);
-
   // Update answer when question changes (for persistence)
   useEffect(() => {
-    setAnswer(question.userAnswer || '');
+    setAnswer(question.userAnswer || "");
   }, [question.userAnswer]);
 
   // Handle answer changes
@@ -25,7 +21,7 @@ export default function ProblemSet({ question, index, onAnswerChange }) {
 
   const getFeedback = async () => {
     if (!answer.trim()) {
-      setFeedback('Please provide an answer before requesting feedback.');
+      setFeedback("Please provide an answer before requesting feedback.");
       return;
     }
 
@@ -34,11 +30,11 @@ export default function ProblemSet({ question, index, onAnswerChange }) {
     setScore(null);
 
     try {
-      const res = await fetch('/api/problemsets', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/problemsets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          mode: 'evaluate',
+          mode: "evaluate",
           userAnswer: answer,
           questions: {
             question: question.question,
@@ -48,17 +44,16 @@ export default function ProblemSet({ question, index, onAnswerChange }) {
       });
 
       const data = await res.json();
-      console.log(data);
 
       if (data.feedback) {
         setFeedback(data.feedback);
         setScore(data.score);
       } else {
-        setFeedback('Failed to get feedback. Please try again.');
+        setFeedback("Failed to get feedback. Please try again.");
       }
     } catch (error) {
-      console.error('Error getting feedback:', error);
-      setFeedback('Failed to get feedback. Please try again.');
+      console.error("Error getting feedback:", error);
+      setFeedback("Failed to get feedback. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -85,7 +80,7 @@ export default function ProblemSet({ question, index, onAnswerChange }) {
           disabled={loading || !answer.trim()}
           className="text-white bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed border rounded-xl px-4 py-2 transition-colors"
         >
-          {loading ? 'Generating...' : 'Get Feedback'}
+          {loading ? "Generating..." : "Get Feedback"}
         </button>
         {answer.trim() && (
           <span className="text-xs text-gray-500">
@@ -117,10 +112,10 @@ export default function ProblemSet({ question, index, onAnswerChange }) {
                 <span className="ml-2 text-sm">
                   (
                   {score >= 0.8
-                    ? 'Excellent!'
+                    ? "Excellent!"
                     : score >= 0.6
-                    ? 'Good work!'
-                    : 'Keep practicing!'}
+                    ? "Good work!"
+                    : "Keep practicing!"}
                   )
                 </span>
               </p>

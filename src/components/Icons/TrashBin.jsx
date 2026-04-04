@@ -11,5 +11,5 @@ export default function TrashBin({size=50, className=""}){
                 </div>
             </div>
         </div>
-    )
+    );
 }

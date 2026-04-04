@@ -3,12 +3,11 @@ import { getSourceText } from "../db_access/upload";
 import { ServiceType, DbError, ServiceError } from "../error";
 import { queryLLM } from "../utils/ai-gateway";
 
-
 export async function getQuestionsWithAnswers(uploadId:number, userId:number){
     const problemsets = await getProblemSet(uploadId, userId);
     if(problemsets){
         //Ignore the problem warning
-        const questionsWithAnswers = problemsets.problem.map((problem, index) => ({
+        const questionsWithAnswers = problemsets.problem.map((problem) => ({
                 id: problem.problem_id,
                 question: problem.question_text,
                 answer: problem.answer_text || "",
@@ -74,7 +73,7 @@ export async function generateAndSaveProblems(uploadId:number, userId:number){
             });
   try {
     const parsed = JSON.parse(jsonText);
-    const {pSet, questions} = await addProblemSet(uploadId,userId, parsed);
+    const {questions} = await addProblemSet(uploadId,userId, parsed);
 
     // Transform to Frontend Format
     return {

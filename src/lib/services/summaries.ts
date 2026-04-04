@@ -1,6 +1,6 @@
 import { getSourceText } from "../db_access/upload";
 import { queryLLMStream, StreamChunk } from "../utils/ai-gateway";
-import { ServiceError, ServiceType, DbError } from "../error";
+import { ServiceError, ServiceType } from "../error";
 import { saveSummary } from "../db_access/summary";
 
 export async function generateSummaries(uploadId:number,userId:number){
@@ -50,7 +50,7 @@ Output ONLY valid markdown, no JSON, no code fences.
             const reader = stream.getReader();
             const textDecode = new TextDecoder();
             try{
-                // eslint-disable-next-line no-constant-condition
+                 
                 while(true){
                     const {done, value} = await reader.read();
                     if(done) break;

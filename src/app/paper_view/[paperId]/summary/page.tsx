@@ -3,7 +3,7 @@ import { usePaperViewContext } from "@/context/PaperViewContext";
 import { StreamChunk } from "@/lib/utils/ai-gateway";
 import { useEffect, useState, useRef} from "react";
 import { RefreshCcw } from "lucide-react";
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown from "react-markdown";
 
 export default function SummaryPage() {
   const {chosenLectureId} = usePaperViewContext();
@@ -29,10 +29,9 @@ export default function SummaryPage() {
         }),
       });
       if (!res.ok || !res.body) throw new Error("Stream failed");
-      console.log(res.body);
       const reader = res.body.getReader();
       const textDec = new TextDecoder();
-      // eslint-disable-next-line no-constant-condition
+       
       while(true){
         const {done, value} = await reader.read();
         if(done) break;
@@ -88,12 +87,14 @@ export default function SummaryPage() {
           await generateSummaries();
         }
       }catch(err){
+        console.warn(err);
         setError("Failed to get summaries");
       }finally{
         setIsLoading(false);
       }
     };
     syncSummaries().catch(() => setError("Failed to sync summaries"));
+      // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chosenLectureId]); // Re-run when selection changes
 
   return (
@@ -110,6 +111,7 @@ export default function SummaryPage() {
           )
         }
         {isLoading && (<div ref={bottomRef} className="text-sm text-black">Thinking…</div>)}
+        {error && <div className="text-red-600">Error: {error}</div>}
     </div>
   );
 }

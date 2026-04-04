@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, useRef } from "react";
 import { usePaperViewContext } from "@/context/PaperViewContext";
@@ -13,7 +13,7 @@ type Lecture = {
   createdAt: Date;
 };
 
-export default function Upload({ onSaved }: { onSaved: () => void }) {
+export default function Upload() {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
   const {lectures, setChosenLectureId, setLectures, chosenLectureId, code} = usePaperViewContext();
@@ -59,8 +59,8 @@ export default function Upload({ onSaved }: { onSaved: () => void }) {
                 key={lecture.id} 
                 className={`pl-2 rounded-lg transition-colors text-sm text-black dark:text-white ${
                     lecture.id === chosenLectureId 
-                        ? 'bg-transparent font-semibold underline' 
-                        : 'bg-transparent'
+                        ? "bg-transparent font-semibold underline" 
+                        : "bg-transparent"
                 }`}
             >
                 <div className="font-medium truncate cursor-pointer block hover:underline" onClick={()=>setChosenLectureId(lecture.id)}>{lecture.title}</div>
@@ -93,7 +93,7 @@ export default function Upload({ onSaved }: { onSaved: () => void }) {
             const file = e.target.files?.[0];
             if (file) {
               handleFileUpload(file);
-              e.target.value = ''; // Clear input for next selection
+              e.target.value = ""; // Clear input for next selection
             }
           }}
         />

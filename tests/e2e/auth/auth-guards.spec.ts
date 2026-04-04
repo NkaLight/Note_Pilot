@@ -3,18 +3,17 @@ import {test, expect} from "@playwright/test";
 test.describe("API endpoints unauthenticated", ()=>{
     test("GET /api/papers", async ({request}) =>{
         const res = await request.get("/api/papers");
-        const data = await res.json();
         expect(res.status()).toBe(401);
     });
     test("POST /api/papers", async ({request})=>{
         const res = await request.post("/api/papers", {
-            data: { name: 'test', code: 'TEST101', descr: 'test' }
+            data: { name: "test", code: "TEST101", descr: "test" }
         });
         expect(res.status()).toBe(401);
     });
     test("PUT /api/papers", async ({request})=>{
         const res = await request.post("/api/papers", {
-            data: { name: 'testEdit', code: 'TEST101', descr: 'test', paper_id: 1 }
+            data: { name: "testEdit", code: "TEST101", descr: "test", paper_id: 1 }
         });
         expect(res.status()).toBe(401);
     });

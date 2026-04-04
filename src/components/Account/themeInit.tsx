@@ -27,7 +27,6 @@ export default function ThemeInit() {
 		setTheme(pref.dark_mode ? "dark" : "light");
     }
 
-
     }, [user, setTheme]);
 
     return null;

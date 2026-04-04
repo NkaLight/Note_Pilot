@@ -14,7 +14,7 @@ export async function getSourceText(uploadId:number, userId:number){
                 }
             }
         });
-    }catch(error){
+    }catch{
         throw new DbError("Failed to get the textContent from upload attribute");
     }
 }
@@ -32,7 +32,7 @@ export async function verifyUploadId(uploadId:number, userId:number){
                 }
             }
         });
-    }catch(error){
+    }catch{
         throw new DbError("Failed to get the uploadContent");
     }
 }

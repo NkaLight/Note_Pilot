@@ -7,7 +7,7 @@ import { ServiceError, ServiceType } from "../error";
 
 export async function createPasswordResetToken(email:string){
     const rawToken = crypto.randomBytes(32).toString("hex");
-    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
     const user = await getUserByEmail(email);
     if(!user) throw new ServiceError("User does not exist",ServiceType.USER_ACC, 404);
     await storeResetTokenHash(tokenHash, user);
@@ -15,7 +15,7 @@ export async function createPasswordResetToken(email:string){
 }
 
 export async function verifyResetToken(rawToken:string){
-    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
     const result = await prisma.reset_token.findUnique({
         where:{
             token_hash:tokenHash, 
@@ -28,7 +28,7 @@ export async function verifyResetToken(rawToken:string){
     return result ? true : false;
 }
 export async function resetPassword(newPassword:string, rawToken:string){
-    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
     //Make reset_token invalid
     const result = await prisma.reset_token.findUnique({
         where:{

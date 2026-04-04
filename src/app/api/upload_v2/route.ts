@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { getLectureTitle } from "@/lib/services/upload";
-import { CanvasFactory } from 'pdf-parse/worker';
-import { PDFParse } from 'pdf-parse';
-import { getPath, getData } from 'pdf-parse/worker';
+import { CanvasFactory } from "pdf-parse/worker";
+import { PDFParse } from "pdf-parse";
+import { getData } from "pdf-parse/worker";
 import { prisma } from "@/lib/db";
 
 /**
@@ -14,7 +14,6 @@ import { prisma } from "@/lib/db";
 export async function POST(req: Request) {
   PDFParse.setWorker(getData());
   try {
-    
 
     // Get the user ID from the authentication token
     const {user} = await getSessionUser();
@@ -36,7 +35,6 @@ export async function POST(req: Request) {
     if (!(uploadedFile instanceof File)) {
       return new NextResponse("Invalid file", { status: 400 });
     }
-
 
     /*PDFPARSER documentation within serveless environment https://mehmet-kozan.github.io/pdf-parse/typedoc/documents/troubleshooting.html */
     const fileBuffer = Buffer.from(await uploadedFile.arrayBuffer());

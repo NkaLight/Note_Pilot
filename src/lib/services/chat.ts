@@ -1,6 +1,5 @@
 import { queryLLMStream, StreamChunk } from "../utils/ai-gateway";
 import { getChatMessages, saveNewMessages } from "../db_access/chat_message";
-import { ChatMessage } from "../utils/ai-gateway";
 import { ServiceError, ServiceType } from "../error";
 import { getSourceText } from "../db_access/upload";
 
@@ -28,7 +27,7 @@ export async function streamChat(uploadId:number ,userId: number, content: strin
             const reader = stream.getReader();
             const textCode = new TextDecoder();
             try{
-                // eslint-disable-next-line no-constant-condition
+                 
                 while(true){
                     const {done, value} = await reader.read();
                     if(done){

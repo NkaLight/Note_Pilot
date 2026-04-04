@@ -19,33 +19,32 @@ export default function SignUpForm({closeForm}: SignUpFormProps){
     const [isLoading, setIsLoading] = useState(false);
     const {setUser} = useSession();
     const router = useRouter();
-    const { activeForm, setActiveForm } = useAuthContext();
-
+    const { setActiveForm } = useAuthContext();
 
       const validatePassword = (pwd: string): string[] => {
     const validationErrors: string[] = [];
     
     if (pwd.length < 8) {
-      validationErrors.push('At least 8 characters');
+      validationErrors.push("At least 8 characters");
     }
     if (!/[A-Z]/.test(pwd)) {
-      validationErrors.push('One uppercase letter');
+      validationErrors.push("One uppercase letter");
     }
     if (!/[a-z]/.test(pwd)) {
-      validationErrors.push('One lowercase letter');
+      validationErrors.push("One lowercase letter");
     }
     if (!/[0-9]/.test(pwd)) {
-      validationErrors.push('One number');
+      validationErrors.push("One number");
     }
     
     return validationErrors;
   };
 
   const passwordRequirements = [
-    { met: password.length >= 8, text: 'At least 8 characters' },
-    { met: /[A-Z]/.test(password), text: 'One uppercase letter' },
-    { met: /[a-z]/.test(password), text: 'One lowercase letter' },
-    { met: /[0-9]/.test(password), text: 'One number' },
+    { met: password.length >= 8, text: "At least 8 characters" },
+    { met: /[A-Z]/.test(password), text: "One uppercase letter" },
+    { met: /[a-z]/.test(password), text: "One lowercase letter" },
+    { met: /[0-9]/.test(password), text: "One number" },
   ];
 
 const handleSubmit = async (e: React.FormEvent) =>  {
@@ -98,8 +97,6 @@ const handleSubmit = async (e: React.FormEvent) =>  {
   }
 };
 
-
-
     return (
         <div className="sign-up-container">
           <h3>Sign Up</h3>
@@ -141,7 +138,7 @@ const handleSubmit = async (e: React.FormEvent) =>  {
                     ) : (
                       <div className="w-4 h-4 rounded-full border-2 border-gray-300" />
                     )}
-                    <span className={`text-sm ${req.met ? 'text-green-700' : 'text-gray-600'}`}>
+                    <span className={`text-sm ${req.met ? "text-green-700" : "text-gray-600"}`}>
                       {req.text}
                     </span>
                   </div>

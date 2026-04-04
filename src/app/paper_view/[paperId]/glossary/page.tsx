@@ -14,10 +14,8 @@
  * - Regenerates when selected lectures change or when user clicks regenerate
  */
 
-import ChatUI from "@/components/PaperView/ChatUI";
 import { usePaperViewContext } from "@/context/PaperViewContext";
-import { useParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useCallback} from "react";
 import { RefreshCcw } from "lucide-react";
 
 type GlossaryItem = {
@@ -27,20 +25,15 @@ type GlossaryItem = {
 
 export default function DashboardPage() {
   // Chat width starts at 50% of viewport
-  const {chosenLectureId, lectures, selectedLectureIds} = usePaperViewContext();
-  const params = useParams();
-  const paperId = params?.paperId ? Number(params.paperId) : null;
-
-  console.log(selectedLectureIds, chosenLectureId);
+  const {chosenLectureId} = usePaperViewContext();
 
   // Local UI state
   const [glossary, setGlossary] = useState<GlossaryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-
   // Generate glossary automatically using selected uploads and chat context
-  async function generateGlossary(regenerate:boolean) {
+const generateGlossary = useCallback(async (regenerate: boolean) => {
     if (chosenLectureId === null) {
       setErr("Please select at least one lecture from the PDFs page to generate a glossary.");
       return;
@@ -53,9 +46,7 @@ export default function DashboardPage() {
       const res = await fetch(`/api/glossary?uploadId=${chosenLectureId}`);
 
       let data = await res.json();
-      console.log("Returned data: ", data);
       if (!res.ok) throw new Error(data?.error || "Failed to generate glossary");
-      console.log("Response data: ", data);
       if(!data.glossary.length || regenerate){
         const resp = await fetch(`/api/glossary?uploadId=${chosenLectureId}`, {
           method:"POST", 
@@ -74,8 +65,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }
-  console.log("Glossary:" ,glossary);
+  }, [chosenLectureId]);
 
   // Auto-generate when selected lectures change
   useEffect(() => {
@@ -85,7 +75,7 @@ export default function DashboardPage() {
       setGlossary([]);
       setErr(null);
     }
-  }, [chosenLectureId]); // chosenLectureId changes
+  }, [chosenLectureId, generateGlossary]); // chosenLectureId changes
 
   return (
     <>

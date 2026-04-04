@@ -16,7 +16,7 @@ const test = base.extend<{
 });
 
 test.describe('Dashboard auth guards', () => {
-  test('should allow authenticated users to stay on dashboard', async ({ page,testUser }) => {
+  test('should allow authenticated users to stay on dashboard', async ({ page, testUser: _ }) => {
     await page.goto('/dashboard');
     await expect(page).toHaveURL(/\/dashboard/);
     await expect(page).toHaveTitle(/Dashboard/);
@@ -26,7 +26,7 @@ test.describe('Dashboard auth guards', () => {
   // since they don't need the beforeEach auth setup
 });
 
-test('CREATE: should add a new paper via UI', async ({ page, testUser }) => {
+test('CREATE: should add a new paper via UI', async ({ page, testUser: _ }) => {
   const uniqueId = Math.random().toString(36).substring(7);
   const paper_code = `COSC100-${uniqueId}`;
 
@@ -39,7 +39,7 @@ test('CREATE: should add a new paper via UI', async ({ page, testUser }) => {
   await expect(page.getByText(paper_code)).toBeVisible();
 });
 
-test('READ: should display list of papers', async ({ page, testUser }) => {
+test('READ: should display list of papers', async ({ page, testUser: _ }) => {
   const uniqueId = Math.random().toString(36).substring(7);
   const paper_code = `COSC${uniqueId}`;
 
@@ -52,7 +52,7 @@ test('READ: should display list of papers', async ({ page, testUser }) => {
   await expect(page.getByText(paper_code)).toBeVisible();
 });
 
-test('UPDATE: should edit paper code via modal', async ({ page, testUser }) => {
+test('UPDATE: should edit paper code via modal', async ({ page, testUser: _ }) => {
   const uniqueId = Math.random().toString(36).substring(7);
   const paper_code = `COSC${uniqueId}`;
   const updatedCode = `NEW${uniqueId}`;
@@ -73,7 +73,7 @@ test('UPDATE: should edit paper code via modal', async ({ page, testUser }) => {
   await expect(page.getByText(updatedCode)).toBeVisible();
 });
 
-test('DELETE: should remove paper from dashboard', async ({ page, testUser }) => {
+test('DELETE: should remove paper from dashboard', async ({ page, testUser: _ }) => {
   const uniqueId = Math.random().toString(36).substring(7);
   const targetCode = `COSC104-${uniqueId}`;
 

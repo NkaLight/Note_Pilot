@@ -1,3 +1,5 @@
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
+import nextTypescript from "eslint-config-next/typescript";
 import { FlatCompat } from "@eslint/eslintrc";
 import js from "@eslint/js";
 import { dirname } from "path";
@@ -12,17 +14,15 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  ...compat.extends(
-    "next/core-web-vitals",
-    "next/typescript",
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended"
-  ),
+  ...nextCoreWebVitals,
+  ...nextTypescript,
+  ...compat.extends("eslint:recommended"),
+  ...compat.extends("plugin:@typescript-eslint/recommended"),
   {
     rules: {
       // Error Prevention
-      "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/explicit-function-return-type": "warn",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
       "no-console": ["warn", { allow: ["warn", "error"] }],
 
@@ -38,6 +38,7 @@ const eslintConfig = [
       // React Specific
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
+      "react-hooks/set-state-in-effect": "off",
 
       // Formatting
       "semi": ["error", "always"],
@@ -45,5 +46,8 @@ const eslintConfig = [
       "no-multiple-empty-lines": ["warn", { "max": 1 }],
     },
   },
+  {
+    ignores: ["node_modules/**", ".next/**", "out/**", "build/**", "next-env.d.ts"]
+  }
 ];
 export default eslintConfig;

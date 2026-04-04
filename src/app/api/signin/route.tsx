@@ -1,12 +1,10 @@
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { AUTH_POLICY, setAuthCookies} from "@/lib/utils/auth";
 import { SignJWT } from "jose";
-
 
 /**
  * API route for user sign-in.

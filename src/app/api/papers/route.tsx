@@ -8,7 +8,6 @@ import z from "zod";
  * Includes endpoints to get, add, update, and delete papers.
 */
 
-
 /**
  * Get all papers for the authenticated user.
  * @Returns a list of papers in JSON format.
@@ -22,11 +21,12 @@ export async function GET(){
             user_id: user.user_id
             },
         orderBy:{
-            paper_id: 'desc'
+            paper_id: "desc"
         }
         });
         return NextResponse.json({papers});
     }catch(error: any){
+        console.error(error);
         return NextResponse.json( { error:"Internal Server error" }, {status: 500});
     }
 }
@@ -59,7 +59,7 @@ export async function POST(req: Request){
     }
 
     try{
-        const papers = await prisma.paper.create({
+        await prisma.paper.create({
             data:{
                 user_id: user.user_id,
                 name: validatedInput.name,
@@ -70,6 +70,7 @@ export async function POST(req: Request){
         });
         return NextResponse.json({status:200});
     }catch(error: any){
+        console.error(error);
         return NextResponse.json( { error:"Internal Server error" }, {status: 500});
     }
 }
@@ -105,7 +106,7 @@ export async function PUT(req: Request){
 
     //Finally update the Paper
     try{
-        const paper = await prisma.paper.update({
+        await prisma.paper.update({
             data: {
                 name: data.name,
                 code: data.code,
@@ -129,8 +130,6 @@ const deletePaperSchema = z.object({
     paper_id: z.number()
 });
 
-
-
 /**
  * Delete a paper for the authenticated user.
  * @param req the request object containing paper details (to delete)
@@ -149,7 +148,7 @@ export async function DELETE(req: Request){
     if(!data) return NextResponse.json({error: "Internal server error"}, {status: 500});
 
     try{
-        const dbPaper = await prisma.paper.delete({
+        await prisma.paper.delete({
             where:{
                 paper_id: data.paper_id,
                 user_id: user.user_id

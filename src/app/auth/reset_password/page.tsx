@@ -46,7 +46,7 @@ export default function Verify(){
                 setError(data.error());
             }
         }catch(error){
-            console.log("failed");
+            console.error(error);
             setError("Internal server error please try again later.");
         }finally{
             setLoading(false);
@@ -63,7 +63,7 @@ export default function Verify(){
             setLoading(true);
             const res = await fetch("/api/verify", {
                 method:"POST", 
-                headers:{'Content-Type': 'application/json'},
+                headers:{"Content-Type": "application/json"},
                 body: JSON.stringify({ token: tokenFromUrl })
             });
             if(!res.ok){
@@ -143,7 +143,7 @@ export default function Verify(){
                                     <div className="relative">
                                         <input
                                             id="confirmPassword"
-                                            type={showConfirmPassword ? 'text' : 'password'}
+                                            type={showConfirmPassword ? "text" : "password"}
                                             value={confirmPassword}
                                             onChange={(e) => setConfirmPassword(e.target.value)}
                                             className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"

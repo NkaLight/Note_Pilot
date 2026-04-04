@@ -21,7 +21,6 @@ import { getSessionUser } from "@/lib/auth"; // returns user ID or null
  * Always respond with JSON to keep client robust (no Unexpected token '<').
  */
 
-
 const uiToDbLevel: Record<string, string> = {
     child: "early",
     student: "intermediate",
@@ -48,7 +47,6 @@ export async function PUT(req: NextRequest) {
     try {
         const isMultipart = (req.headers.get("content-type") || "").includes("multipart/form-data");
 
-        let username: string | undefined;
         let email: string | undefined;
         let password: string | undefined;
         let aiLevel: string | undefined;
@@ -58,7 +56,6 @@ export async function PUT(req: NextRequest) {
         if (isMultipart) {
             const form = await req.formData();
 
-            username = form.get("username")?.toString();
             email = form.get("email")?.toString();
             password = form.get("password")?.toString();
             aiLevel = form.get("aiLevel")?.toString();

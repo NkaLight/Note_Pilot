@@ -1,6 +1,5 @@
 import { prisma } from "../db";
 
-
 export async function getChatMessages(uploadId:number, userId:number){
     return await prisma.chat_message.findMany({
         where:{

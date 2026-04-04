@@ -17,7 +17,7 @@
 
 import ProblemSet from "@/components/PaperView/ProblemSet";
 import { usePaperViewContext } from "@/context/PaperViewContext";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { RefreshCcw } from "lucide-react";
 
 export default function DashboardPage() {
@@ -25,8 +25,7 @@ export default function DashboardPage() {
   const [questions, setQuestions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { lectures, selectedLectureIds, chosenLectureId} = usePaperViewContext(); 
-
+  const { selectedLectureIds, chosenLectureId} = usePaperViewContext(); 
 
   // Load existing problem sets when selected lectures change
   async function loadExistingProblemSets() {
@@ -121,12 +120,8 @@ export default function DashboardPage() {
       setQuestions([]);
       setError(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chosenLectureId]);
-
-  // Manual regenerate function
-  const handleRegenerate = () => {
-    generateNewProblemSets();
-  };
 
   // Save user answer (to localStorage for now)
   const saveUserAnswer = (questionId: string, answer: string) => {
@@ -170,7 +165,7 @@ export default function DashboardPage() {
               {questions.length > 0 && !isLoading ? (
                 <>
                   <div className="text-sm text-gray-600 mb-4">
-                    Generated {questions.length} question{questions.length !== 1 ? 's' : ''} from your selected content
+                    Generated {questions.length} question{questions.length !== 1 ? "s" : ""} from your selected content
                   </div>
                   {questions.map((q, idx) => (
                     <ProblemSet

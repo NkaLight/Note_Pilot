@@ -27,7 +27,6 @@ export default function FlashcardsPage() {
   const { chosenLectureId, setCode } = usePaperViewContext();
   const paperCode = useSearchParams().get("paper_code");
   setCode(paperCode);
-
   
   async function makeFlashcardsFromUpload(uploadId: number) {
     setErr(null);
@@ -46,7 +45,7 @@ export default function FlashcardsPage() {
       }));
       setFlashcards(cards);
     } catch (e: any) {
-      console.log(`makeFlashcards error ${e.message}`);
+      console.warn(e);
       setErr("Error Generating flashcards");
     }finally{
       setLoading(false);

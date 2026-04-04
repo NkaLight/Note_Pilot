@@ -1,6 +1,6 @@
 const VERIFIED_EMAIL = process.env.Verified_Email_Sender as string;
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL|| "http://localhost:3000";
-import { Client, SendEmailV3_1, LibraryResponse } from 'node-mailjet';
+import { Client, SendEmailV3_1 } from "node-mailjet";
 const mailjet = new Client({
   apiKey: process.env.MJ_API_KEY_PUBLIC,
   apiSecret: process.env.MJ_API_KEY_PRIVATE
@@ -20,14 +20,13 @@ async function sendMailService(recipientEmail:string, html:string, subject:strin
                 ],
                 Subject: subject,
                 HTMLPart: html,
-                TextPart: 'Hey please find the reset link here. Valid for 5 minutes'
+                TextPart: "Hey please find the reset link here. Valid for 5 minutes"
             }
         ]
     };
-    const result = await mailjet.post('send', { version: 'v3.1' }).request(data);
+    const result = await mailjet.post("send", { version: "v3.1" }).request(data);
     return result.body;
 } 
-
 
 export async function sendResetLink(recipientEmail:string, rawToken:string){
     const resetUrl = `${baseUrl}/auth/reset_password?token=${rawToken}`;
