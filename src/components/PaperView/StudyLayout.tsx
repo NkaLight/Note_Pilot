@@ -66,7 +66,7 @@ export default function StudyLayout({ children }: StudyLayoutProps) {
         <div  className="border p-2 bg-transparent backdrop-blur-sm rounded-md w-0 opacity-0 group-hover:w-[13vw] group-hover:opacity-100 transition-all duration-800 h-full overflow-y-auto">
           <div className="flex mt-4 text-white">FILES: <span><FileIconPlus className="h-4 p-0 m-0 mt-1 ml-1 text-white"/></span></div>
           <hr className="mb-8 mt-5"/>
-          <Upload onSaved={() => {}} />
+          <Upload/>
         </div>
       </aside>
     </div>
