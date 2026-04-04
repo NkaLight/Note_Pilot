@@ -39,7 +39,7 @@ export default function Nav({ showAuth = true }: { showAuth?: boolean }) {
   // 1. Logic: Determine Current View
   const isPaperView = !!paperId;
   const isAccountPage = pathname.startsWith("/account");
-  const isHomePage = pathname.toString() == "/";
+  const isHomePage = pathname.toString() === "/";
 
   // 2. Logic: Inactivity Timer
   useEffect(() => {
