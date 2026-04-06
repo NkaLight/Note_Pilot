@@ -15,6 +15,7 @@ export default function StudyLayout({ children }: StudyLayoutProps) {
     const [chatWidth, setChatWidth] = useState(450);
     const [isResizing, setIsResizing] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const uploadContainerRef = useRef<HTMLDivElement>(null);
 
     const onPointerMove = (e:React.PointerEvent<HTMLDivElement>) =>{
         if(!isResizing || !containerRef.current) return null;
@@ -37,6 +38,16 @@ export default function StudyLayout({ children }: StudyLayoutProps) {
         divider.setPointerCapture(e.pointerId);
         setIsResizing(true);
     };
+    const keepUploadUIVisible = ()=>{
+      console.log("Keep UI visible triggered");
+      uploadContainerRef.current.style.width = "13vw"
+      uploadContainerRef.current.style.opacity = "1";
+    }   
+    const releaseUploadUI = ()=>{
+      console.log("release UI triggered");
+      uploadContainerRef.current.style.width = ""
+      uploadContainerRef.current.style.opacity = "";
+    }
 
   return (
     <div ref={containerRef} className="h-screen w-full flex pl-10 gap-10 pr-0 overflow-hidden">
@@ -62,11 +73,13 @@ export default function StudyLayout({ children }: StudyLayoutProps) {
 
       {/* (4) Upload Panel */}
       <aside className="group relative">
-        <div className="absolute bg-gray-400 right-0 top-0 h-full w-3 z-20 cursor-ew-resize" />
-        <div  className="border p-2 bg-transparent backdrop-blur-sm rounded-md w-0 opacity-0 group-hover:w-[13vw] group-hover:opacity-100 transition-all duration-800 h-full overflow-y-auto">
+        <div ref={uploadContainerRef} 
+            className="border p-2 bg-transparent backdrop-blur-sm rounded-md w-0 opacity-5 
+            group-hover:w-[13vw] group-hover:opacity-100 transition-all duration-800 h-full overflow-y-auto
+            ">
           <div className="flex mt-4 text-white">FILES: <span><FileIconPlus className="h-4 p-0 m-0 mt-1 ml-1 text-white"/></span></div>
           <hr className="mb-8 mt-5"/>
-          <Upload/>
+          <Upload onClickEvent={()=> keepUploadUIVisible()} onDoneEvent={()=> releaseUploadUI()}/>
         </div>
       </aside>
     </div>

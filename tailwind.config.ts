@@ -13,6 +13,10 @@ export default {
     "./components/**/*.{ts,tsx,js,jsx}",
     "./src/**/*.{ts,tsx,js,jsx}",
   ],
+   plugins: [
+    ({ addVariant }: { addVariant: (name: string, selector: string) => void }) => 
+      addVariant('is-open', '&.is-open')
+  ],
   theme: {
     extend: {
       animation: {

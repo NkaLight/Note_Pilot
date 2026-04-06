@@ -13,7 +13,7 @@ type Lecture = {
   createdAt: Date;
 };
 
-export default function Upload() {
+export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>void; onDoneEvent:()=>void}) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
   const {lectures, setChosenLectureId, setLectures, chosenLectureId, code} = usePaperViewContext();
@@ -23,7 +23,6 @@ export default function Upload() {
   async function handleFileUpload(file: File) {
     setIsUploading(true);
     setError("");
-
     try {
       const form = new FormData();
       // Pass the paperId and file_content 
@@ -45,6 +44,7 @@ export default function Upload() {
     } catch {
       setError("Network or server error during upload.");
     } finally {
+      onDoneEvent();
       setIsUploading(false);
     }
   }
@@ -75,7 +75,17 @@ export default function Upload() {
       </ul>
       <div 
         className="flex mt-1 ml-4 size-3 cursor-pointer dark:text-white text-black"
-        onClick={() => {if(!isUploading) fileInputRef.current?.click();}}
+        onClick={() => {
+          if(!isUploading){
+            onClickEvent(); 
+            window.addEventListener("focus", ()=>{
+              if(!fileInputRef.current?.files?.length){
+                onDoneEvent()
+              }
+            }, {once:true});
+            fileInputRef.current?.click();
+          }
+        }}
 
           >Upload <span>{isUploading ? <LoadingCircles className={"w-5 m-0.5 p-0 ml-1 dark:text-white "}/> :<UploadIcon className="h-4 p-0 m-0 mt-1 ml-1 dark:text-white text-black" />}</span></div>
       <div className="text-black p-0 my-4">
