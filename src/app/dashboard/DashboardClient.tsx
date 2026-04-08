@@ -5,7 +5,7 @@ import Modal from "@/components/Modal";
 import type { paper } from "@prisma/client";
 import { AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 /* ---------- AddPaperForm Component ---------- */
 const AddPaperForm = ({ closeForm, onRefresh }: { closeForm: () => void;onRefresh: ()=> void},) => {

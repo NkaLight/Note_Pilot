@@ -35,6 +35,8 @@ export default function ChatUI() {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const {chosenLectureId } = usePaperViewContext();
   const bottomRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isAtBottom, setIsAtBottom] = useState(true);
   /*To Do loading icon as LLM message is streamed 
   const [loadLLMResp, setLoadLLMResp] = useState<boolean>(false);*/
   // Load chat history when activeUploadIds changes
@@ -76,6 +78,15 @@ export default function ChatUI() {
     } finally {
       setLoadingHistory(false);
     }
+  };
+
+  /*Function handles the scrolling logic for streaming  */
+  const handleScroll = () => {
+    if (!containerRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+    // If we are within 100px of the bottom, consider the user "at the bottom"
+    const atBottom = scrollHeight - scrollTop - clientHeight < 100;
+    setIsAtBottom(atBottom);
   };
 
   const handleSend = async () => {
@@ -134,7 +145,9 @@ export default function ChatUI() {
               };
               return updated;
             });
-            bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+            if(json.type === "delta" && isAtBottom){
+              bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+            }
           }
         }catch{
           console.warn("Chunk error");
