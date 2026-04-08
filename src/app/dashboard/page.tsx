@@ -7,7 +7,6 @@ import { getPapersByUserId } from "@/lib/db_access/paper";
 */
 export default async function DashboardPage() {
   const initialPapers = await getPapersByUserId();
-  
   return (
     <DashboardClient
       onloadPapers={initialPapers}

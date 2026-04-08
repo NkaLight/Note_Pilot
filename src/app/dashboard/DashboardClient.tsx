@@ -228,11 +228,6 @@ export default function DashboardPage(props: { onloadPapers: paper[] | null }) {
       }
     };
 
-  useEffect(() => {
-    fetchPapers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const handleCloseModal = () => {
     setActiveForm(null);
     setSelectedPaper(null);
