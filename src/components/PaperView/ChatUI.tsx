@@ -145,6 +145,7 @@ export default function ChatUI() {
               };
               return updated;
             });
+            handleScroll();
             if(json.type === "delta" && isAtBottom){
               bottomRef.current?.scrollIntoView({ behavior: "smooth" });
             }

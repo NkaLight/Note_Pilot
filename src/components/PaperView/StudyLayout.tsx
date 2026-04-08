@@ -26,7 +26,7 @@ export default function StudyLayout({ children }: StudyLayoutProps) {
         // 3. Simple boundaries
         if (newWidth > 400 && newWidth < window.innerWidth * 0.7) {
             setChatWidth(newWidth);
-        }
+        };
     };
     const onPointerUp = (e:React.PointerEvent<HTMLDivElement>)=>{
         e.currentTarget.releasePointerCapture(e.pointerId);
@@ -39,15 +39,13 @@ export default function StudyLayout({ children }: StudyLayoutProps) {
         setIsResizing(true);
     };
     const keepUploadUIVisible = ()=>{
-      console.log("Keep UI visible triggered");
-      uploadContainerRef.current.style.width = "13vw"
+      uploadContainerRef.current.style.width = "13vw";
       uploadContainerRef.current.style.opacity = "1";
-    }   
+    };
     const releaseUploadUI = ()=>{
-      console.log("release UI triggered");
-      uploadContainerRef.current.style.width = ""
+      uploadContainerRef.current.style.width = "";
       uploadContainerRef.current.style.opacity = "";
-    }
+    };
 
   return (
     <div ref={containerRef} className="h-screen w-full flex pl-10 gap-10 pr-0 overflow-hidden">

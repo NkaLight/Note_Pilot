@@ -80,7 +80,7 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
             onClickEvent(); 
             window.addEventListener("focus", ()=>{
               if(!fileInputRef.current?.files?.length){
-                onDoneEvent()
+                onDoneEvent();
               }
             }, {once:true});
             fileInputRef.current?.click();
