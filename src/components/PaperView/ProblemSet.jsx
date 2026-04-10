@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 export default function ProblemSet({ question, index, onAnswerChange }) {
   const [answer, setAnswer] = useState(question.userAnswer || "");
   const [loading, setIsLoading] = useState(false);
-  const [feedback, setFeedback] = useState(null);
+  const [feedback, setFeedback] = useState("");
   const [score, setScore] = useState(null);
 
   // Update answer when question changes (for persistence)
@@ -26,7 +26,7 @@ export default function ProblemSet({ question, index, onAnswerChange }) {
     }
 
     setIsLoading(true);
-    setFeedback(null);
+    setFeedback("");
     setScore(null);
 
     try {
@@ -42,14 +42,35 @@ export default function ProblemSet({ question, index, onAnswerChange }) {
           },
         }),
       });
+      if(!res.ok || !res.body) throw new Error("Stream failed please try again");
+      const reader = res.body.getReader();
+      const textCoder = new TextDecoder();
+      let accumulated = '';
 
-      const data = await res.json();
-
-      if (data.feedback) {
-        setFeedback(data.feedback);
-        setScore(data.score);
-      } else {
-        setFeedback("Failed to get feedback. Please try again.");
+      while(true){
+        const {done, value} = await reader.read();
+        if(done) break;
+        const chunk = textCoder.decode(value, {stream:true});
+        const lines = chunk.split("\n");
+        for(const line of lines){
+          if(!line.startsWith("data: ")) continue;
+          try{
+            const json = JSON.parse(line.slice(6));
+            if(json.type === "delta"){
+              accumulated += json.text;
+              setFeedback(accumulated);
+            }
+          }catch{
+            //do nothing incomplete chunk.
+          }
+        }
+      }
+      try{
+        const parsed = JSON.parse(accumulated);
+        setFeedback(parsed.feedback);
+        setScore(parsed.score);
+      }catch{
+        //response was not JSON so leave as is.
       }
     } catch (error) {
       console.error("Error getting feedback:", error);
@@ -90,7 +111,7 @@ export default function ProblemSet({ question, index, onAnswerChange }) {
       </div>
 
       {/* Feedback Section */}
-      {loading && (
+      {loading && !feedback && (
         <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-center">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
@@ -99,7 +120,7 @@ export default function ProblemSet({ question, index, onAnswerChange }) {
         </div>
       )}
 
-      {!loading && feedback && (
+      {feedback && (
         <div className="mt-4 space-y-3">
           <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
             <h4 className="font-semibold text-gray-800 mb-2">Feedback:</h4>

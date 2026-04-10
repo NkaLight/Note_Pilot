@@ -1,7 +1,7 @@
 import { addProblemSet, getProblemSet } from "../db_access/problemset";
 import { getSourceText } from "../db_access/upload";
 import { ServiceType, DbError, ServiceError } from "../error";
-import { queryLLM } from "../utils/ai-gateway";
+import { queryLLMStream, queryLLM, StreamChunk } from "../utils/ai-gateway";
 
 export async function getQuestionsWithAnswers(uploadId:number, userId:number){
     const problemsets = await getProblemSet(uploadId, userId);
@@ -49,6 +49,61 @@ export async function evaluateAnswer(question, answer, userAnswer){
         throw new ServiceError("Invalid AI response format", ServiceType.AI_GENERATION);
     }
 
+}
+
+export async function evaluateAnswerStream(question, answer, userAnswer):Promise<ReadableStream>{
+    const evaluationPrompt = `
+            You are an exam evaluator. Compare the student's answer with the correct answer and provide constructive feedback.
+            
+            Return your response as valid JSON in this exact format:
+            {
+                "feedback": "Detailed feedback explaining what was good and what could be improved...",
+                "score": 0.85
+            }
+            
+            The score should be between 0 and 1, where 1 is perfect.
+            
+            Question: ${question}
+            Correct Answer: ${answer}
+            Student Answer: ${userAnswer}
+            `;
+    const systemPrompt = "You are an AI that outputs JSON only.";
+    let LLMText = ""; 
+    const stream = await queryLLMStream(systemPrompt, evaluationPrompt, {type:ServiceType.AI_GENERATION});
+    return new ReadableStream({
+        async start(controller){
+            const reader = stream.getReader();
+            const textCode = new TextDecoder();
+            try{
+                while(true){
+                    const {done, value} = await reader.read();
+                    if(done){
+                        break;
+                    }
+                    const raw = textCode.decode(value, {stream:true});
+                    const lines = raw.split("\n").filter((l)=> l.startsWith("data: "));
+                    for(const line of lines){
+                        try{
+                            const parsed:StreamChunk = JSON.parse(line.slice(6));
+                            if(parsed.type === "delta") LLMText += parsed.text;
+                        }catch{
+                            //do nothing
+                        }
+                    }
+                    controller.enqueue(value);
+                }
+                controller.close();
+            }catch(e){
+                if(e instanceof ServiceError){
+                    controller.error(e);
+                }else{
+                    controller.error(new ServiceError("Stream interrupted", ServiceType.CHAT_AI, 500));
+                }
+            }
+        }, cancel(){
+            stream.cancel();
+        }
+    });
 }
 
 export async function generateAndSaveProblems(uploadId:number, userId:number){

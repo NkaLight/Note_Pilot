@@ -1,6 +1,6 @@
 import { getSessionUser } from "@/lib/auth";
 import { NextResponse } from "next/server";
-import {getQuestionsWithAnswers, generateAndSaveProblems, evaluateAnswer} from "@/lib/services/problemset";
+import {getQuestionsWithAnswers, generateAndSaveProblems, evaluateAnswerStream} from "@/lib/services/problemset";
 import { ServiceError, DbError } from "@/lib/error";
 
 /**
@@ -85,10 +85,12 @@ export async function POST(req: Request){
                 return NextResponse.json({error: "Question, answer, and user answer required"}, {status: 400});
             }
             try{
-                const feedback = await evaluateAnswer(question, answer, userAnswer);
-                return NextResponse.json({ 
-                    feedback: feedback.feedback, 
-                    score: feedback.score 
+                const feedback = await evaluateAnswerStream(question, answer, userAnswer);
+                return new Response(feedback,{
+                    headers:{
+                    "Content-Type": "text/event-stream",
+                    "Cache-Control": "no-cache",
+                    }
                 });
             }catch(err){
                 if(err instanceof DbError || err instanceof ServiceError){

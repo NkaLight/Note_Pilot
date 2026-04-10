@@ -67,45 +67,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// export async function POST(request: NextRequest) {
-//   try {
-//     const {status, user} = await getSessionUser();
-//     const user_id = user.user_id;
-//     if (status !== "ok") {
-//       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-//     }
-    
-//     const body = await request.json();
-//     const parsed = postChatSchema.safeParse(body);
-    
-//     if (!parsed.success) {
-//       return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
-//     }
-
-//     const { uploadId, content } = parsed.data;
-//     const upload = (await getSourceText(uploadId, user_id));
-//     if (!upload) {
-//       return NextResponse.json({ error: "Upload not found or unauthorized" }, { status: 404 });
-//     }
-//     const textContent = upload.text_content;
-//     const message = await generateChat(textContent, uploadId, user_id,content);
-    
-//     return NextResponse.json({
-//       success: true,
-//       message: {
-//         role: message.role,
-//         content: message.content,
-//         created_at: message.created_at.toISOString()
-//       }
-//      });
-
-//    } catch (error) {
-//      console.error('Error saving chat message:', error);
-//      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-//    }
-//  }
-
-/*This with this file we are implementing Streaming  */
 export async function POST(req:NextRequest){
   const {user, status} = await getSessionUser();
   if(status !== "ok"){
