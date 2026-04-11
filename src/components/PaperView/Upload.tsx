@@ -15,6 +15,9 @@ type Lecture = {
 
 export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>void; onDoneEvent:()=>void}) {
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(null);
+  const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState("");
   const {lectures, setChosenLectureId, setLectures, chosenLectureId, code} = usePaperViewContext();
   const fileInputRef = useRef(null);
@@ -49,6 +52,30 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
     }
   }
 
+  async function handleFileUpdate(newName:string, uploadId:number, paperId:string){
+    setIsLoading(true);
+    setError("");
+    try{
+      const form = new FormData();
+      form.append("paperId", paperId);
+      form.append("uploadId", String(uploadId));
+      form.append("newFileName", newName);
+
+      const res = await fetch("/api/upload_v2", {method:"PUT", body:form});
+      const data = await res.json();
+      if(res.ok){
+        const lectureTitle = await data.lectureTitle;
+        const newLecture : Lecture = {id: lectures.length, title: lectureTitle, createdAt: new Date()};
+        setLectures(prevState => [...prevState, newLecture]);
+      }
+    }catch{
+       setError("Error updating the lecture");
+    }finally{
+      setIsLoading(false);
+      onDoneEvent();
+    }
+  }
+
   return (
     <div>
       <ul className="space-y-2">
@@ -63,12 +90,43 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
                         : "bg-transparent"
                 }`}
             >
-                <div className="font-medium truncate cursor-pointer block hover:underline" onClick={()=>setChosenLectureId(lecture.id)}>{lecture.title}</div>
-                <div className="text-xs text-gray-500 flex gap-1">
-                    {lecture.createdAt.toLocaleDateString()}
-                    <span><EditIcon className="w-3 cursor-pointer hover:text-black hover:dark:text-white" /></span>
-                    <span><TrashIcon className="w-3 cursor-pointer hover:text-black hover:dark:text-white" /></span>
-                </div>
+              {editingId === lecture.id ? 
+                (
+                  <input
+                    autoFocus
+                    className="font-medium text-sm border-b border-gray-400 bg-transparent outline-none w-full"
+                    value={editingTitle}
+                    onChange={(e) => setEditingTitle(e.target.value)}
+                    onBlur={() => setEditingId(null)} // cancel on blur
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                            // call your rename handler here
+                            handleFileUpdate(editingTitle, lecture.id, paperId);
+                            setEditingId(null);
+                        }
+                        if (e.key === "Escape") setEditingId(null);
+                    }}
+                />
+                ) : 
+                (
+                  <>
+                    <div className="font-medium truncate cursor-pointer block hover:underline" onClick={()=>setChosenLectureId(lecture.id)}>{lecture.title}</div>
+                    <div className="text-xs text-gray-500 flex gap-1">
+                        {lecture.createdAt.toLocaleDateString()}
+                        <span><EditIcon 
+                                className="w-3 cursor-pointer hover:text-black hover:dark:text-white" 
+                                onClick={()=>{
+                                  onClickEvent(); 
+                                  setEditingTitle(lecture.title);
+                                  setEditingId(lecture.id);
+                                  }}/></span>
+
+                        <span><TrashIcon className="w-3 cursor-pointer hover:text-black hover:dark:text-white" /></span>
+                    </div>
+                  </>
+                )
+              }
+                
             </li>
         ))}
 
@@ -79,7 +137,7 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
           if(!isUploading){
             onClickEvent(); 
             window.addEventListener("focus", ()=>{
-              if(!fileInputRef.current?.files?.length){
+              if(!fileInputRef.current?.files?.length && isUploading){
                 onDoneEvent();
               }
             }, {once:true});
