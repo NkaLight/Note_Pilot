@@ -10,6 +10,7 @@ const test = base.extend<{
     const { user } = await createIsolatedUser(context);
     const paper = await createIsolatedPapers(user.user_id); 
     const uploads = await createIsolatedUploads(user.user_id, paper.paper_id);
+    
     // Run the test with this user
     await Use({
       userId: user.user_id,

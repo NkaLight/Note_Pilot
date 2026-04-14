@@ -15,7 +15,7 @@ type Lecture = {
 
 export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>void; onDoneEvent:()=>void}) {
   const [isUploading, setIsUploading] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<number | boolean>(false);
   const [editingTitle, setEditingTitle] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState("");
@@ -53,20 +53,32 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
   }
 
   async function handleFileUpdate(newName:string, uploadId:number, paperId:string){
-    setIsLoading(true);
+    setIsLoading(uploadId);
     setError("");
     try{
       const form = new FormData();
       form.append("paperId", paperId);
       form.append("uploadId", String(uploadId));
       form.append("newFileName", newName);
-
+      const oldLecture  = lectures.filter(lectures => lectures.id === uploadId);
+      setLectures(prevState =>
+        prevState.map(lecture =>
+          lecture.id === uploadId ? 
+          {...lecture, title: newName} :
+          lecture
+        )
+      );
       const res = await fetch("/api/upload_v2", {method:"PUT", body:form});
-      const data = await res.json();
-      if(res.ok){
-        const lectureTitle = await data.lectureTitle;
-        const newLecture : Lecture = {id: lectures.length, title: lectureTitle, createdAt: new Date()};
-        setLectures(prevState => [...prevState, newLecture]);
+      if(!res.ok){
+        setError("Failed to update your lecture name");
+        //Reset the state
+        setLectures(prevState => 
+          prevState.map(lecture => 
+            lecture.id === uploadId ? 
+              {...lecture, title:oldLecture[0].title}:
+              lecture
+          )
+        );
       }
     }catch{
        setError("Error updating the lecture");
@@ -122,6 +134,7 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
                                   }}/></span>
 
                         <span><TrashIcon className="w-3 cursor-pointer hover:text-black hover:dark:text-white" /></span>
+                        <span>{isLoading === lecture.id && <LoadingCircles className={"w-5 m-0.5 p-0 ml-1 dark:text-white "}/>}</span>
                     </div>
                   </>
                 )
