@@ -82,7 +82,7 @@ test.describe("Upload ", ()=>{
     const input = page.getByTestId(`edit-lecture-input-${uploadContext.seedLecture.upload_id}`);
     await input.fill(newTitle);
 
-    const responsePromise = page.waitForResponse(r => r.url().includes('/api/upload_v2') && r.request().method() === 'PUT');
+    const responsePromise = page.waitForResponse(r => r.url().includes("/api/upload_v2") && r.request().method() === "PUT");
     await page.keyboard.press("Enter");
     await responsePromise;
 

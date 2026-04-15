@@ -22,7 +22,7 @@ test("Email exists - Click forgot passwowrd", async ({browser, testUser })=>{
     const page = await freshContext.newPage();
 
     await page.goto("/");
-    await page.waitForResponse(res => res.url().includes('/api/auth/me'));
+    await page.waitForResponse(res => res.url().includes("/api/auth/me"));
 
     await page.getByText("Login").click();
     await page.getByText("Forgot Password").click();
@@ -38,7 +38,7 @@ test("Email does not exist - Clicks forgot passwowrd", async ({browser})=>{
     const page = await freshContext.newPage();
 
     await page.goto("/");
-    await page.waitForResponse(res => res.url().includes('/api/auth/me'));
+    await page.waitForResponse(res => res.url().includes("/api/auth/me"));
 
     await page.getByText("Login").click();
 
