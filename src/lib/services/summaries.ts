@@ -54,10 +54,14 @@ Output ONLY valid markdown, no JSON, no code fences.
                 while(true){
                     const {done, value} = await reader.read();
                     if(done) break;
+
+                    /**Stream the bytes back to the client */
+                    controller.enqueue(value);
+
+                    /*Decode the data append to LLMText to be stored DB side for future use */
                     const raw  = textDecode.decode(value, {stream:true});
                     const lines = raw.split("\n").filter(l => l.startsWith("data: "));
                     for(const line of lines){
-                        controller.enqueue(value);
                         try{
                             const parsed:StreamChunk = JSON.parse(line.slice(6));
                             if(parsed.type === "delta") llmText+=parsed.text;

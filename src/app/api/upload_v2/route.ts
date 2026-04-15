@@ -49,7 +49,7 @@ export async function POST(req: Request) {
 
     //Send to DB
     const papId = parseInt(paperId, 10); // convert to int
-    await prisma.upload.create({
+    const result = await prisma.upload.create({
         data: {
             paper_id: papId,
             filename: lectureTitle,
@@ -60,6 +60,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       status: 200,
       paperId,
+      uploadId:result.upload_id,
       lectureTitle
     });
   } catch (err: any) {

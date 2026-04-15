@@ -1,7 +1,7 @@
 import { addProblemSet, getProblemSet } from "../db_access/problemset";
 import { getSourceText } from "../db_access/upload";
 import { ServiceType, DbError, ServiceError } from "../error";
-import { queryLLMStream, queryLLM, StreamChunk } from "../utils/ai-gateway";
+import { queryLLMStream, queryLLM } from "../utils/ai-gateway";
 
 export async function getQuestionsWithAnswers(uploadId:number, userId:number){
     const problemsets = await getProblemSet(uploadId, userId);
@@ -68,27 +68,15 @@ export async function evaluateAnswerStream(question, answer, userAnswer):Promise
             Student Answer: ${userAnswer}
             `;
     const systemPrompt = "You are an AI that outputs JSON only.";
-    let LLMText = ""; 
     const stream = await queryLLMStream(systemPrompt, evaluationPrompt, {type:ServiceType.AI_GENERATION});
     return new ReadableStream({
         async start(controller){
             const reader = stream.getReader();
-            const textCode = new TextDecoder();
             try{
                 while(true){
                     const {done, value} = await reader.read();
                     if(done){
                         break;
-                    }
-                    const raw = textCode.decode(value, {stream:true});
-                    const lines = raw.split("\n").filter((l)=> l.startsWith("data: "));
-                    for(const line of lines){
-                        try{
-                            const parsed:StreamChunk = JSON.parse(line.slice(6));
-                            if(parsed.type === "delta") LLMText += parsed.text;
-                        }catch{
-                            //do nothing
-                        }
                     }
                     controller.enqueue(value);
                 }

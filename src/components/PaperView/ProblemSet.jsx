@@ -45,7 +45,7 @@ export default function ProblemSet({ question, index, onAnswerChange }) {
       if(!res.ok || !res.body) throw new Error("Stream failed please try again");
       const reader = res.body.getReader();
       const textCoder = new TextDecoder();
-      let accumulated = '';
+      let accumulated = "";
 
       while(true){
         const {done, value} = await reader.read();

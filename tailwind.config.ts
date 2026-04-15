@@ -15,7 +15,7 @@ export default {
   ],
    plugins: [
     ({ addVariant }: { addVariant: (name: string, selector: string) => void }) => 
-      addVariant('is-open', '&.is-open')
+      addVariant("is-open", "&.is-open")
   ],
   theme: {
     extend: {

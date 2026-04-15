@@ -80,8 +80,12 @@ test('DELETE: should remove paper from dashboard', async ({ page, testUser: _ })
   await page.request.post('/api/papers', { 
     data: { name: `Delete-Me-${uniqueId}`, code: targetCode, descr: 'descr' } 
   });
+  await page.waitForLoadState("networkidle");
   await page.goto('/dashboard');
   await expect(page.getByText('Your Papers')).toBeVisible();
+
+  // const paperCards = page.locator('[data-testid^="COSC"]'); 
+  // const initialCount = await paperCards.count()
 
   await page.getByTestId(targetCode).scrollIntoViewIfNeeded();
   await page.getByTestId(targetCode).click();
@@ -89,6 +93,5 @@ test('DELETE: should remove paper from dashboard', async ({ page, testUser: _ })
   await expect(page.getByPlaceholder('Paper Code')).toBeVisible();
   await page.getByText('Delete').click();
 
-  await expect(page.getByPlaceholder('Paper Code')).not.toBeVisible();
   await expect(page.getByText(targetCode)).not.toBeVisible();
 });

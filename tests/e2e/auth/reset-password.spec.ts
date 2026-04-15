@@ -22,6 +22,8 @@ test("Email exists - Click forgot passwowrd", async ({browser, testUser })=>{
     const page = await freshContext.newPage();
 
     await page.goto("/");
+    await page.waitForResponse(res => res.url().includes('/api/auth/me'));
+
     await page.getByText("Login").click();
     await page.getByText("Forgot Password").click();
     await page.getByPlaceholder("yourEmail@example.com").fill(testUser.email);
@@ -36,7 +38,10 @@ test("Email does not exist - Clicks forgot passwowrd", async ({browser})=>{
     const page = await freshContext.newPage();
 
     await page.goto("/");
+    await page.waitForResponse(res => res.url().includes('/api/auth/me'));
+
     await page.getByText("Login").click();
+
     await page.getByText("Forgot Password").click();
     await page.getByPlaceholder("yourEmail@example.com").fill("nonExistentEmail@email.com");
     await page.getByRole("button", { name: "Submit" }).click();
@@ -54,6 +59,7 @@ test("Email link valid", async ({browser, testUser })=>{
 
     // Generate Magic Link Token (The "Email Ownership" Key)
     await page.goto(`/auth/reset_password?token=${rawToken}`);
+  
     // Log how long verify takes
     const start = Date.now();
     await page.waitForLoadState("networkidle");

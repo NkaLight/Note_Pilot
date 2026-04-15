@@ -23,7 +23,7 @@ export async function createIsolatedPapers(userId:number){
                 name: `PaperExample-unique${crypto.randomBytes(4).toString("hex")}`,
                 user_id:userId,
                 description:`DescriptionExample${crypto.randomBytes(4).toString("hex")}`,
-                code:`${crypto.randomBytes(4).toString()}`
+                code:`${crypto.randomBytes(4).toString("hex")}`
         }
     });
     await prisma.paper.createMany({
@@ -32,13 +32,13 @@ export async function createIsolatedPapers(userId:number){
                 name: `PaperExample-unique${crypto.randomBytes(4).toString("hex")}`,
                 user_id:userId,
                 description:`DescriptionExample${crypto.randomBytes(4).toString("hex")}`,
-                code:`${crypto.randomBytes(4).toString()}`
+                code:`${crypto.randomBytes(4).toString("hex")}`
             },
             {
                 name: `PaperExample-unique${crypto.randomBytes(4).toString("hex")}`,
                 user_id:userId,
                 description:`DescriptionExample${crypto.randomBytes(4).toString("hex")}`,
-                code:`${crypto.randomBytes(4).toString()}`
+                code:`${crypto.randomBytes(4).toString("hex")}`
             },
         ],
     });
@@ -59,4 +59,12 @@ export async function getPaperId(userId:number):Promise<number>{
         }
     });
     return data.paper_id;
+}
+
+export async function cleanUpPaper(userId:number){
+    await prisma.paper.deleteMany({
+        where:{
+            user_id:userId
+        }
+    });
 }
