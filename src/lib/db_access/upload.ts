@@ -83,3 +83,15 @@ export async function updateFileName(newFileName:string, uploadId:number, paperI
         }
     });
 }
+
+export async function deleteUpload(paperId:number, uploadId:number, user_id:number){
+    await prisma.upload.delete({
+        where:{
+            upload_id:uploadId,
+            paper_id: paperId,
+            paper:{
+                user_id:user_id
+            }
+        }
+    });
+}

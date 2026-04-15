@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
 import { getLectureTitle} from "@/lib/services/upload";
-import { updateFileName } from "@/lib/db_access/upload";
+import { updateFileName, deleteUpload } from "@/lib/db_access/upload";
 import { CanvasFactory } from "pdf-parse/worker";
 import { PDFParse } from "pdf-parse";
 import { getData } from "pdf-parse/worker";
@@ -90,5 +90,23 @@ export async function PUT(req:Request){
   }catch(error){
       console.error(error);
       return NextResponse.json({error: "Internal server erorr"}, {status:500});
+  }
+}
+
+export async function DELETE(req:Request){
+  const user = await getSessionUser();
+  if(!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try{
+    const formData = await req.formData();
+    const paperId = formData.get("paperId") as string | null;
+    const uploadId = formData.get("uploadId") as string | null;
+    if(!paperId || !uploadId){
+      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    }
+    await deleteUpload(Number(paperId), Number(uploadId), user.user_id);
+    return NextResponse.json({status:200, message:"Successful"});
+  }catch(error){
+    console.error(error);
+    return NextResponse.json({error: "Internal server erorr"}, {status:500});
   }
 }
