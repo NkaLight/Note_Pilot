@@ -79,6 +79,7 @@ Output ONLY valid markdown, no JSON, no code fences.
                 }else{
                     controller.enqueue(new ServiceError("Stream interupted", ServiceType.AI_GENERATION, 500));
                 }
+                controller.close();
             }
         },cancel(){
             stream.cancel();

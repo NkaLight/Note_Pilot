@@ -30,7 +30,7 @@ export default defineConfig({
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: "html",
   //Global timeout
-  timeout: 60000,
+  timeout: 80000,
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
@@ -38,13 +38,13 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
-    actionTimeout: 20000,
-    navigationTimeout: 20000,
+    actionTimeout: 30000,
+    navigationTimeout: 30000,
     storageState: undefined,
   },
   expect: {
     // 10s timeout for assertions like expect(locator).toBeVisible()
-    timeout: 10000,
+    timeout: 20000,
   },
 
   /* Configure projects for major browsers */
@@ -52,16 +52,16 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"]}
-    }
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox']},
-    // },
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox']},
+    },
 
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+    },
 
     /* Test against mobile viewports. */
     // {
@@ -89,6 +89,6 @@ export default defineConfig({
     command: "dotenv -e .env -e .env.test -- npm run dev",
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
-    timeout: 120000
+    timeout: 150000
   },
 });

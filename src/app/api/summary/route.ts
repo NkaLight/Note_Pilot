@@ -25,7 +25,7 @@ export async function POST(req:Request){
         const stream = await generateSummaries(Number(uploadId), user.user_id);
             return new Response(stream,{
                 headers:{
-                "Content-Type": "text/event-stream",
+                "Content-Type": "text/event-stream; charset=utf-8",
                 "Cache-Control": "no-cache",
                 }
             });
