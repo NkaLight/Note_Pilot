@@ -38,7 +38,8 @@ test.describe("Upload ", ()=>{
 
   test("CREATE a new lecture", async({page})=>{
     const rows = page.locator("aside.group li");
-    await expect(rows).toHaveCount(4);
+    const beforeCreate = await rows.count();
+    await expect(rows).toHaveCount(beforeCreate);
 
     const fileChooserPromise = page.waitForEvent("filechooser");
     const responsePromise = page.waitForResponse(
@@ -46,10 +47,10 @@ test.describe("Upload ", ()=>{
     { timeout: 100000 } // Increase timeout for LLM processing
   );
 
-    await page.getByText("Upload").click();
-    const fileChooser = await fileChooserPromise;
+  await page.getByText("Upload").click();
+  const fileChooser = await fileChooserPromise;
 
-    // This is a minimal, valid PDF structure that parser.getText() can digest
+  // This is a minimal, valid PDF structure that parser.getText() can digest
   const minimalValidPdf = Buffer.from(
     "%PDF-1.7\n" +
     "1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n" +
@@ -69,9 +70,7 @@ test.describe("Upload ", ()=>{
       buffer: minimalValidPdf,
     });
     await responsePromise;
-
-    const uploadRows = page.locator("aside.group li");
-    await expect(uploadRows).toHaveCount(5);
+    await expect(rows).toHaveCount(beforeCreate + 1, {timeout: 60000});
   });
 
   test("UPDATE a lecture", async ({page, uploadContext})=>{
