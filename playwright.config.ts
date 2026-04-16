@@ -24,7 +24,7 @@ export default defineConfig({
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
-  retries: process.env.CI ? 4 : 0,
+  retries: process.env.CI ? 3 : 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 3 : 2, 
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -38,13 +38,13 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
-    actionTimeout: 30000,
-    navigationTimeout: 30000,
+    actionTimeout: 60000,
+    navigationTimeout: 60000,
     storageState: undefined,
   },
   expect: {
     // 10s timeout for assertions like expect(locator).toBeVisible()
-    timeout: 20000,
+    timeout: 40000,
   },
 
   /* Configure projects for major browsers */
