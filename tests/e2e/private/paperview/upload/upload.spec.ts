@@ -43,7 +43,7 @@ test.describe("Upload ", ()=>{
     const fileChooserPromise = page.waitForEvent("filechooser");
     const responsePromise = page.waitForResponse(
     (r) => r.url().includes("/api/upload_v2") && r.request().method() === "POST",
-    { timeout: 40000 } // Increase timeout for LLM processing
+    { timeout: 100000 } // Increase timeout for LLM processing
   );
 
     await page.getByText("Upload").click();
