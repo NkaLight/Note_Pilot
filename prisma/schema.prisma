@@ -138,19 +138,20 @@ model term {
 }
 
 model upload {
-  upload_id     Int            @id @default(autoincrement())
+  upload_id     Int             @id @default(autoincrement())
   paper_id      Int
-  filename      String
-  storage_path  String
+  filename      String?
   file_type     String?
   text_content  String?
-  uploaded_at   DateTime       @default(now())
+  uploaded_at   DateTime?       @default(now())
+  status        String?         @default("PROCESSING")
   chat_message  chat_message[]
   flashcard_set flashcard_set?
   glossary      glossary?
   problem_set   problem_set?
   summary       summary?
-  paper         paper          @relation(fields: [paper_id], references: [paper_id], onDelete: Cascade, onUpdate: NoAction)
+  paper         paper           @relation(fields: [paper_id], references: [paper_id], onDelete: Cascade, onUpdate: NoAction)
+  upload_chunks upload_chunks[]
 }
 
 model reset_token {
@@ -160,4 +161,13 @@ model reset_token {
   user_id          Int?
   is_used          Boolean?          @default(false)
   application_user application_user? @relation(fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model upload_chunks {
+  id        String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  upload_id Int
+  embedding Unsupported("vector")?
+  content   String?
+  upload    upload                 @relation(fields: [upload_id], references: [upload_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_uploadid")
 }

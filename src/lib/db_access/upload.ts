@@ -84,6 +84,28 @@ export async function updateFileName(newFileName:string, uploadId:number, paperI
     });
 }
 
+export async function updateUploadStatus(newStatus="READY", uploadId:number){
+    await prisma.upload.update({
+        where:{
+            upload_id:uploadId
+        }, 
+        data:{
+            status:newStatus
+        }
+    });
+}
+
+export async function addTextContent(newText:string, uploadId:number){
+    await prisma.upload.update({
+        where:{
+            upload_id:uploadId
+        },
+        data:{
+            text_content:newText
+        }
+    });
+}
+
 export async function deleteUpload(paperId:number, uploadId:number, user_id:number){
     await prisma.upload.delete({
         where:{
@@ -92,6 +114,18 @@ export async function deleteUpload(paperId:number, uploadId:number, user_id:numb
             paper:{
                 user_id:user_id
             }
+        }
+    });
+}
+
+export async function createNewUpload(paperId:number){
+    return await prisma.upload.create({
+        data:{
+            paper_id:paperId,
+            file_type:"pdf",
+        },
+        select:{
+            upload_id:true
         }
     });
 }

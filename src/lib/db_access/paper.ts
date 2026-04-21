@@ -15,3 +15,15 @@ export async function getPapersByUserId() {
     return null;
   }
 }
+
+export async function verfiyPaperId(paperId:number, userId:number){
+  return await prisma.paper.findFirst({
+    select:{
+      paper_id:true
+    }, 
+    where:{
+      paper_id: paperId, 
+      user_id:userId,
+    }
+  });
+}
