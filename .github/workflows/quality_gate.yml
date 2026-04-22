@@ -34,7 +34,6 @@ jobs:
       run: npm run lint
     - name: Enable vector extension
       run: |
-        apt-get install -y postgresql-client \
         psql -h localhost -U postgres  -d test_db -c "CREATE EXTENSION IF NOT EXISTS vector;"
     - name: Sync DB
       run: npx prisma db push  
