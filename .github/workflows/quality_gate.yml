@@ -30,10 +30,10 @@ jobs:
         node-version: lts/*
     - name: Install dependencies
       run: npm ci
-      
+    - name: Linter
+      run: npm run lint
     - name: Sync DB
       run: npx prisma db push  
-
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     - name: Run Playwright tests
@@ -44,3 +44,4 @@ jobs:
         name: playwright-report
         path: playwright-report/
         retention-days: 30
+    
