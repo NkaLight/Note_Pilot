@@ -17,7 +17,7 @@ const test = base.extend<{
   },
 });
 
-test("Email exists - Click forgot passwowrd", async ({browser, testUser })=>{
+test("Email exists - Click forgot password", async ({browser, testUser })=>{
     const freshContext = await browser.newContext();
     const page = await freshContext.newPage();
 
@@ -33,7 +33,7 @@ test("Email exists - Click forgot passwowrd", async ({browser, testUser })=>{
     await freshContext.close();
 });
 
-test("Email does not exist - Clicks forgot passwowrd", async ({browser})=>{
+test("Email does not exist - Clicks forgot password", async ({browser})=>{
     const freshContext = await browser.newContext();
     const page = await freshContext.newPage();
 
@@ -120,6 +120,7 @@ test("Token expired", async ({browser, testUser})=>{
     await page.goto("/");
     await page.waitForLoadState("networkidle");
     await page.goto(`/auth/reset_password?token=${rawToken}`);
+    await expect(page.getByRole("heading", { name: "RESET PASSWORD" })).toBeHidden();
     await expect(page.getByText("Link expired please click forgot password again")).toBeVisible();
 
     await freshContext.close();

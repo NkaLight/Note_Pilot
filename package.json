@@ -11,7 +11,8 @@
     "lint:fix": "eslint --fix .",
     "lint:report": "eslint --output-file eslint-report.json --format json .",
     "setup_python": "node scripts/setup_python.js",
-    "test:e2e": "docker compose -f docker-compose.test.yml up -d --wait && dotenv -e .env -e .env.test -- npx playwright test",
+    "test:e2e":"npx playwright test",
+    "test:e2e:local": "docker rm -f note-pilot-RDB && docker compose -f docker-compose.test.yml up -d --wait && dotenv -e .env -e .env.test -- npx playwright test",
     "test:e2e:stop": "docker compose -f docker-compose.test.yml down --volumes",
     "test:e2e:changed": "docker compose -f docker-compose.test.yml up -d --wait && dotenv -e .env -e .env.test -- npx playwright test --only-changed=main"
   },

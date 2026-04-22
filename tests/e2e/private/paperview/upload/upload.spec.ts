@@ -70,6 +70,7 @@ test.describe("Upload ", ()=>{
       buffer: minimalValidPdf,
     });
     await responsePromise;
+    await page.locator("aside.group").hover();
     await expect(rows).toHaveCount(beforeCreate + 1, {timeout: 60000});
   });
 
