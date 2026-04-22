@@ -4,7 +4,6 @@ import { s3Client } from "@/lib/S3";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import {createNewUpload} from "@/lib/db_access/upload";
-import { nullable } from "zod";
 
 export async function getLectureTitle(text:string){
     const systmePrompt = "You are an model that returns just the title. Example: LECTURE 11: CLASSIFICATION I - DECISION TREES";

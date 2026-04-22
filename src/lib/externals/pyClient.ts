@@ -13,7 +13,7 @@ class PythonServiceClient {
 
   async ingest(uploadId: number) {
     console.error(`Fetching from Url: ${this.baseUrl}/ingest`);
-    console.error(`Secrete: `, this.secret);
+    console.error("Secrete: ", this.secret);
     const res = await fetch(`${this.baseUrl}/ingest`, {
       method: "POST",
       headers: {

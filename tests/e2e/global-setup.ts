@@ -10,7 +10,7 @@ async function globalSetup() {
   try{
     await prisma.$executeRawUnsafe("CREATE EXTENSION IF NOT EXISTS vector");
     console.log("Vector extension created successfully");
-    await prisma.$disconnect()
+    await prisma.$disconnect();
     execSync("npx prisma db push --accept-data-loss", {
     env: { 
       ...process.env, 
