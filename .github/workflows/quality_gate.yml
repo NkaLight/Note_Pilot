@@ -34,7 +34,9 @@ jobs:
       run: npm run lint
     - name: Enable vector extension
       run: |
-        psql -h localhost -U postgres  -d test_db -p password -c "CREATE EXTENSION IF NOT EXISTS vector;"
+        psql -h localhost -U postgres  -d test_db -c "CREATE EXTENSION IF NOT EXISTS vector;"
+      env:
+        PGPASSWORD: password
     - name: Sync DB
       run: npx prisma db push  
     - name: Install Playwright Browsers
