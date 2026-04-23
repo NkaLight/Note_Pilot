@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/auth";
-import { getLectureTitle} from "@/lib/services/upload";
 import { updateFileName, deleteUpload } from "@/lib/db_access/upload";
 
 export async function PUT(req:Request){
