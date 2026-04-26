@@ -51,6 +51,7 @@ export async function GET(request: NextRequest) {
     // Fetch chat messages for this upload
     const messages = await getChatMessages(Number(uploadId), user_id);
 
+
     return NextResponse.json({
       success: true,
       messages: messages.map(msg => ({
@@ -74,18 +75,22 @@ export async function POST(req:NextRequest){
   }
   const body = await req.json();
   const parsed = postChatSchema.safeParse(body);
-
+  console.error(parsed);
   if(!parsed.success){
     return NextResponse.json({error: parsed.error.flatten()}, {status:400});
   }
-  const chatResp = await streamChat(parsed.data.uploadId, user.user_id, parsed.data.content);
-
-  return new Response(chatResp,{
-    headers:{
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-    }
-  });
+  try{
+    const chatResp = await streamChat(parsed.data.uploadId, user.user_id, parsed.data.content);
+    return new Response(chatResp,{
+      headers:{
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+      }
+    });
+  }catch(error){
+    console.error(error);
+    return NextResponse.json({error:"Internal Server error"}, {status:500});
+  }
 }
 
 export async function DELETE(request: NextRequest) {

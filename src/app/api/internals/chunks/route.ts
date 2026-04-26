@@ -6,18 +6,18 @@ export async function POST(req:Request){
     if(secrete !== process.env.INTERNAL_SHARED_SECRETE){
         return NextResponse.json({error : "unAuthorized"}, {status: 401});
     }
-    const {uploadId, content, embedding} = await req.json();
-    if(!uploadId || !content || !embedding){
+    const {list} = await req.json();
+    if(!list){
         return NextResponse.json({error: "Invalid request"}, {status:400});
     }
-    if (!Array.isArray(embedding) || embedding.length !== 1024) {
+    if (!Array.isArray(list)) {
         return NextResponse.json(
             { error: "Invalid embedding dimensions. Expected 1024." }, 
             { status: 400 }
         );
     }
     try{
-        await uploadChunk(Number(uploadId), content, embedding);
+        await uploadChunk(list);
         return NextResponse.json({message:"Success"}, {status:201});
     }catch(error){
         console.error(error);

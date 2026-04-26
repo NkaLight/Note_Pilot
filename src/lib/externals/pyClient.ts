@@ -12,8 +12,6 @@ class PythonServiceClient {
   }
 
   async ingest(uploadId: number) {
-    console.error(`Fetching from Url: ${this.baseUrl}/ingest`);
-    console.error("Secrete: ", this.secret);
     const res = await fetch(`${this.baseUrl}/ingest`, {
       method: "POST",
       headers: {
@@ -28,6 +26,21 @@ class PythonServiceClient {
       throw new Error(`Python Ingest Failed: ${error}`);
     }
 
+    return res.json();
+  }
+  async generateVector(prompt:string){
+    const res = await fetch(`${this.baseUrl}/generatevector`, {
+      method: "POST",
+      headers:{
+        "Content-Type":"application/json", 
+        "x-internal-secret": String(this.secret), 
+      },
+      body:JSON.stringify({prompt})
+    });
+    if(!res.ok){
+      const error = await res.text();
+      throw new Error(`Error generating vector embeddings ${error}`);
+    }
     return res.json();
   }
 }

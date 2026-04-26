@@ -1,24 +1,26 @@
 import { queryLLMStream, StreamChunk } from "../utils/ai-gateway";
 import { getChatMessages, saveNewMessages } from "../db_access/chat_message";
 import { ServiceError, ServiceType } from "../error";
-import { getSourceText } from "../db_access/upload";
+import { similaritySearch } from "../db_access/chunk";
+import { pyClient } from "../externals/pyClient";
 
-export async function streamChat(uploadId:number ,userId: number, content: string):Promise<ReadableStream>{
+export async function streamChat(uploadId:number ,userId: number, prompt: string):Promise<ReadableStream>{
     const uploadIdNum = Number(uploadId);
-    const sourceText = await getSourceText(uploadIdNum, userId);
-    if (!sourceText) {
+    const context = await getContext(prompt, uploadIdNum, userId);
+    //const sourceText = await getSourceText(uploadIdNum, userId);
+    if (!context) {
         throw new ServiceError("Upload not found or access denied", ServiceType.CHAT_AI, 401);
     }
     const priorMessages = await getChatMessages(uploadIdNum, userId);
 
-    const systemPrompt = sourceText
+    const systemPrompt = context
     ? `You are a helpful study assistant. 
         Use the following lecture material to
-        answer questions:\n\n${sourceText.text_content}`
+        answer questions:\n\n${context}`
   : "You are a helpful study assistant.";
 
   let history: string =  priorMessages.map((m)=> m.content).join("");
-  history += content;
+  history += prompt;
 
     let LLMText = "";
     const stream = await queryLLMStream(systemPrompt, history, {type:ServiceType.CHAT_AI});
@@ -61,4 +63,10 @@ export async function streamChat(uploadId:number ,userId: number, content: strin
             stream.cancel();
         }
     });
+}
+
+async function getContext(prompt:string, uploadId:number, userId:number):Promise<string>{
+    const {vectors} = await  pyClient.generateVector(prompt);
+    const contextString = await similaritySearch(vectors, uploadId, userId);
+    return contextString;
 }

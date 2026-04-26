@@ -93,7 +93,6 @@ export default function ChatUI() {
     if (!input.trim() || !chosenLectureId) return;
     const userMessage: Message = { role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
-    setInput("");
     setBusy(true); 
     setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
     try {
@@ -104,7 +103,7 @@ export default function ChatUI() {
       body: JSON.stringify({ uploadId: chosenLectureId, content: input }),
      });
      if (!res.ok || !res.body) throw new Error("Stream failed");
-
+     setInput("");
      const reader = res.body.getReader();
      const textCoder = new TextDecoder();
       
