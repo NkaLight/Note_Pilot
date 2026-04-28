@@ -7,23 +7,25 @@ import { pyClient } from "../externals/pyClient";
 export async function streamChat(uploadId:number ,userId: number, prompt: string):Promise<ReadableStream>{
     const uploadIdNum = Number(uploadId);
     const context = await getContext(prompt, uploadIdNum, userId);
-    //const sourceText = await getSourceText(uploadIdNum, userId);
+    console.error(context);
     if (!context) {
         throw new ServiceError("Upload not found or access denied", ServiceType.CHAT_AI, 401);
     }
     const priorMessages = await getChatMessages(uploadIdNum, userId);
 
-    const systemPrompt = context
-    ? `You are a helpful study assistant. 
-        Use the following lecture material to
-        answer questions:\n\n${context}`
-  : "You are a helpful study assistant.";
+const systemPrompt = context
+  ? `You are a helpful study assistant.
+    Answer ONLY using the provided lecture material.
+    If the answer is not in the material, say "I don't know based on the uploaded course material please upload more content about the paper."
+    Lecture material:
+    ${context}`
+    : "You are a helpful study assistant. If no context is provided, say you don't have lecture material.";
 
-  let history: string =  priorMessages.map((m)=> m.content).join("");
-  history += prompt;
+    const history = priorMessages.map(m => `${m.role}: ${m.content}`).join("\n");
+    const fullPrompt = `${history}\nuser: ${prompt}`;
 
     let LLMText = "";
-    const stream = await queryLLMStream(systemPrompt, history, {type:ServiceType.CHAT_AI});
+    const stream = await queryLLMStream(systemPrompt, fullPrompt, {type:ServiceType.CHAT_AI});
     return new ReadableStream({
         async start(controller){
             const reader = stream.getReader();
@@ -67,6 +69,5 @@ export async function streamChat(uploadId:number ,userId: number, prompt: string
 
 async function getContext(prompt:string, uploadId:number, userId:number):Promise<string>{
     const {vectors} = await  pyClient.generateVector(prompt);
-    const contextString = await similaritySearch(vectors, uploadId, userId);
-    return contextString;
+    return await similaritySearch(vectors, uploadId, userId);
 }

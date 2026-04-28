@@ -51,7 +51,6 @@ export async function GET(request: NextRequest) {
     // Fetch chat messages for this upload
     const messages = await getChatMessages(Number(uploadId), user_id);
 
-
     return NextResponse.json({
       success: true,
       messages: messages.map(msg => ({
