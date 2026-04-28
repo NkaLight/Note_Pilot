@@ -44,7 +44,7 @@ const systemPrompt = context
                             const parsed:StreamChunk = JSON.parse(line.slice(6));
                             if(parsed.type === "delta")LLMText += parsed.text;
                             if(parsed.type === "done"){//Update DB side.
-                                await saveNewMessages(uploadId, userId, content, LLMText); 
+                                await saveNewMessages(uploadId, userId, context, LLMText); 
                             }
                         }catch{
                             //ignore
