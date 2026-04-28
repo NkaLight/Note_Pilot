@@ -23,7 +23,7 @@ export async function createIsolatedUploads(userId:number, paperId:number){
             {
                 filename:`UniqueFileName-${crypto.randomBytes(4).toString("hex")}`,
                 paper_id:paperId,
-                storage_path: `Upload StoragePath-${crypto.randomBytes(4).toString("hex")}`
+                status:"READY"
             }
     });
     await prisma.upload.createMany({
@@ -31,22 +31,21 @@ export async function createIsolatedUploads(userId:number, paperId:number){
             {
                 filename:`UniqueFileName-${crypto.randomBytes(4).toString("hex")}`,
                 paper_id:paperId,
-                storage_path: `Upload StoragePath-${crypto.randomBytes(4).toString("hex")}`
+                status:"READY"
             },
             {
                 filename:`UniqueFileName-${crypto.randomBytes(4).toString("hex")}`,
                 paper_id:paperId,
-                storage_path: `Upload StoragePath-${crypto.randomBytes(4).toString("hex")}`
+                status:"READY"
             },
             {
                 filename:`UniqueFileName-${crypto.randomBytes(4).toString("hex")}`,
                 paper_id:paperId,
-                storage_path: `Upload StoragePath-${crypto.randomBytes(4).toString("hex")}`
+                status:"READY"
             },
         ]
     });
     return firstUpload;
-    
 }
 
 export async function cleanupUploads(userId:number){

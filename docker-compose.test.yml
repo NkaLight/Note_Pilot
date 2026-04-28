@@ -2,7 +2,7 @@ name: note-pilot-test
 
 services:
   db:
-    image: postgres:15-alpine
+    image: ankane/pgvector:v0.5.1
     container_name: note-pilot-RDB
     ports: 
       - "5433:5432"

@@ -89,6 +89,6 @@ export default defineConfig({
     command: "dotenv -e .env -e .env.test -- npm run dev",
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
-    timeout: 150000
+    timeout: 120 * 1000
   },
 });

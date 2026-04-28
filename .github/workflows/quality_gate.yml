@@ -1,0 +1,52 @@
+name: Quality gate
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+    env:
+      DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db
+      DIRECT_URL: postgresql://postgres:password@localhost:5432/test_db
+      NODE_ENV: test
+      ACCESS_TOKEN_SECRET : 68f2RkJXoBb3Lv9HnIktWjEQLkGeSC1HgCBQYgsRwoZx5IVD3v/nOM455RwREH6HFygVfl0sPJj5TqOaQce2LA==
+      REFRESH_TOKEN_SECRET : DHIKLW2ofKX7FlnXlFZk5Efo6wU02XSTHeph8E3QtgRzMtjGrNBsqw2u0JS6FiLJ
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: lts/*
+    - name: Install dependencies
+      run: npm ci
+    - name: Linter
+      run: npm run lint
+    - name: Enable vector extension
+      run: |
+        psql -h localhost -U postgres  -d test_db -c "CREATE EXTENSION IF NOT EXISTS vector;"
+      env:
+        PGPASSWORD: password
+    - name: Sync DB
+      run: npx prisma db push  
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+    - name: Run Playwright tests
+      run: npm  run test:e2e
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30
+    

@@ -30,19 +30,41 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
     try {
       const form = new FormData();
       // Pass the paperId and file_content 
-      form.append("file", file);
       form.append("paperId", paperId);
 
-      // 1. API Call
-      const res = await fetch("/api/upload_v2", { method: "POST", body: form });
-      const data = await res.json();
+      const response = await fetch("/api/upload/init", {
+        method: "POST", 
+        body: form
+      });
+      if(!response.ok){
+        console.error("Error starting uploading initialization");
+        return;
+      }
+      const {uploadUrl,uploadId } = await response.json();
+      console.error(uploadUrl);
+      console.error("UploadId:", uploadId);
+      const uploadRes = await fetch(uploadUrl, {
+        method:"PUT",
+        body: file 
+      });
+      if(!uploadRes.ok){
+        console.error("Error uploading file to AWS");
+        return;
+      }
 
+      //Generate Lecture title
+      form.append("uploadId", uploadId);
+      const res = await fetch("/api/upload/complete", {
+        method:"POST", 
+        body: form
+      });
+      const data = await res.json();
       if (!res.ok) {
         setError(data.error || "Upload failed. Please try again.");
       } else {
         // 2. Success - Reset form and notify parent
-        const lectureTitle = await data.lectureTitle;
-        const newLecture : Lecture = {id: data.uploadId, title: lectureTitle, createdAt: new Date()};
+        const lectureTitle = await data.title;
+        const newLecture : Lecture = {id: uploadId, title: lectureTitle, createdAt: new Date()};
         setLectures(prevState => [...prevState, newLecture]);
       }
     } catch {
@@ -73,6 +95,7 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
     }catch{
       setError("Error updating deleting the lecture");
       setLectures(oldList);
+      setIsLoading(false);
     }
   };
 
@@ -135,10 +158,10 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
                     value={editingTitle}
                     onChange={(e) => setEditingTitle(e.target.value)}
                     onBlur={() => setEditingId(null)} // cancel on blur
-                    onKeyDown={(e) => {
+                    onKeyDown={async(e) => {
                         if (e.key === "Enter") {
                             // call your rename handler here
-                            handleFileUpdate(editingTitle, lecture.id, paperId);
+                            await handleFileUpdate(editingTitle, lecture.id, paperId);
                             setEditingId(null);
                         }
                         if (e.key === "Escape") setEditingId(null);
