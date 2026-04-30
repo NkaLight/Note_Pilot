@@ -23,7 +23,7 @@ export async function verfiyPaperId(paperId:number, userId:number){
     }, 
     where:{
       paper_id: paperId, 
-      user_id:userId,
+      user_id:userId
     }
   });
 }

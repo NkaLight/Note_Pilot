@@ -15,11 +15,12 @@ export async function POST(req:Request){
         if(!isValid) return new NextResponse("Unauthorized", {status:401});
 
         //Call the Python service.
-        const {context} = await pyClient.ingest(uploadId);
+        const {context} = await pyClient.ingest(String(uploadId));
         if(!context){
             console.error("error getting the context.");
             return NextResponse.json({error:"Error generating the lecture title"}, {status:500});
         }
+        console.error(`Generating the lecture title from context ${context.length}`);
         const lectureTitle:string = await getLectureTitle(context);
         await updateFileName(lectureTitle, uploadId, paperId, user.user_id);
         return NextResponse.json({title: lectureTitle}, {status:200});

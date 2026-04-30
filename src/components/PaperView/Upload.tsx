@@ -24,49 +24,43 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
   const fileInputRef = useRef(null);
   const paperId = useParams().paperId?.toString();
   // Handler for when a file is selected
-  async function handleFileUpload(file: File) {
+  async function handleFileUpload(files: File[]) {
     setIsUploading(true);
     setError("");
     try {
-      const form = new FormData();
-      // Pass the paperId and file_content 
-      form.append("paperId", paperId);
-
-      const response = await fetch("/api/upload/init", {
-        method: "POST", 
-        body: form
-      });
-      if(!response.ok){
-        console.error("Error starting uploading initialization");
-        return;
-      }
-      const {uploadUrl,uploadId } = await response.json();
-      console.error(uploadUrl);
-      console.error("UploadId:", uploadId);
-      const uploadRes = await fetch(uploadUrl, {
-        method:"PUT",
-        body: file 
-      });
-      if(!uploadRes.ok){
-        console.error("Error uploading file to AWS");
-        return;
-      }
-
-      //Generate Lecture title
-      form.append("uploadId", uploadId);
-      const res = await fetch("/api/upload/complete", {
-        method:"POST", 
-        body: form
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Upload failed. Please try again.");
-      } else {
-        // 2. Success - Reset form and notify parent
-        const lectureTitle = await data.title;
-        const newLecture : Lecture = {id: uploadId, title: lectureTitle, createdAt: new Date()};
-        setLectures(prevState => [...prevState, newLecture]);
-      }
+      await Promise.all(files.map(async (file)=>{
+        const form = new FormData();
+        form.append("paperId", paperId);
+        const response = await fetch("/api/upload/init", {
+          method:"POST",
+          body: form
+        });
+        if(!response.ok){
+          console.error("Error initializing upload process");
+          return;
+        }
+        const {uploadUrl, uploadId } = await response.json();
+        const uploadRes = await fetch(uploadUrl, {
+          method: "PUT", 
+          body: file
+        });
+        if(!uploadRes.ok){
+          console.error("Erorr uploading the pdf to S3");
+        }
+        const completeForm = new FormData();
+        completeForm.append("paperId", paperId);
+        completeForm.append("uploadId", uploadId);
+        const completeRes = await fetch("/api/upload/complete", {
+          method:"POST", 
+          body: completeForm
+        });
+        if(!completeRes.ok){
+          console.error("Error fetching the lecture title");
+        }
+        const {title} = await completeRes.json();
+        const newLecture : Lecture = {id: uploadId, title: title, createdAt: new Date()};
+        setLectures(prevState => [newLecture, ...prevState]);
+      }));
     } catch {
       setError("Network or server error during upload.");
     } finally {
@@ -96,6 +90,9 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
       setError("Error updating deleting the lecture");
       setLectures(oldList);
       setIsLoading(false);
+    }finally{
+      setIsLoading(false);
+      onDoneEvent();
     }
   };
 
@@ -227,14 +224,15 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
           id="file-upload-input"
           type="file"
           ref={fileInputRef}
+          multiple
           // Update accepted file types as needed
           accept=".pdf" 
           className="hidden"
           disabled={isUploading}
           onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-              handleFileUpload(file);
+            const files = Array.from(e.target.files || []);
+            if (files.length > 0) {
+              handleFileUpload(files);
               e.target.value = ""; // Clear input for next selection
             }
           }}

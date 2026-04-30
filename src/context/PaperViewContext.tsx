@@ -25,6 +25,8 @@ type PaperViewContextType = {
   setChatMessages: (messages: Message[]) => void;
   setCode:(code:string)=>void;
   code:string, 
+  paperId:number, 
+  setPaperId:(id:number)=>void;
 }
 
 const PaperViewContext = createContext<PaperViewContextType>({
@@ -37,7 +39,9 @@ const PaperViewContext = createContext<PaperViewContextType>({
   chatMessages:null,
   setChatMessages:()=>{},
   setCode:()=>{},
-  code:null
+  code:null,
+  paperId:null, 
+  setPaperId:()=>{}
 });
 
 export const usePaperViewContext = ()=> useContext(PaperViewContext);
@@ -45,17 +49,20 @@ export const usePaperViewContext = ()=> useContext(PaperViewContext);
 export const PaperViewProvider = ({
     children, 
     initialLectures,
-    paperCode 
+    paperCode,
+    initialPaperId
 }: { 
     children: ReactNode;
     initialLectures: Lecture[];
     paperCode:string;
+    initialPaperId:number;
 }) => {
   const [code, setCode] = useState<string>(paperCode);
   const [lectures, setLectures] = useState<Lecture[]>(initialLectures);
   const [chosenLectureId, setChosenLectureId] = useState<number | null>(null);
   const [selectedLectureIds, setSelectedLectureIds] = useState<number[]>([]);
   const [chatMessages, setChatMessages] = useState<Message[]|null>(null);
+  const [paperId, setPaperId] = useState<number>(initialPaperId);
 
   useEffect(() => {
   setChatMessages([]);
@@ -73,7 +80,9 @@ export const PaperViewProvider = ({
         chatMessages,
         setChatMessages,
         code,
-        setCode
+        setCode,
+        paperId,
+        setPaperId
       }}
     >
       {children}

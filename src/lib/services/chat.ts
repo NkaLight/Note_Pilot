@@ -4,13 +4,14 @@ import { ServiceError, ServiceType } from "../error";
 import { similaritySearch } from "../db_access/chunk";
 import { pyClient } from "../externals/pyClient";
 
-export async function streamChat(uploadId:number ,userId: number, prompt: string):Promise<ReadableStream>{
+export async function streamChat(uploadId:number ,userId: number, prompt: string, paperId:number):Promise<ReadableStream>{
     const uploadIdNum = Number(uploadId);
-    const context = await getContext(prompt, uploadIdNum, userId);
-    console.error(context);
+    const context = await getContext(prompt, paperId, userId);
     if (!context) {
-        throw new ServiceError("Upload not found or access denied", ServiceType.CHAT_AI, 401);
+        //throw new ServiceError("Upload not found or access denied", ServiceType.CHAT_AI, 401);
+        console.error("No context found due to access being denied or upload not found");
     }
+    console.error(context);
     const priorMessages = await getChatMessages(uploadIdNum, userId);
 
 const systemPrompt = context
@@ -67,7 +68,7 @@ const systemPrompt = context
     });
 }
 
-async function getContext(prompt:string, uploadId:number, userId:number):Promise<string>{
+async function getContext(prompt:string, paperId:number, userId:number):Promise<string>{
     const {vectors} = await  pyClient.generateVector(prompt);
-    return await similaritySearch(vectors, uploadId, userId);
+    return await similaritySearch(vectors, paperId, userId);
 }

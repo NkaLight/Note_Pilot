@@ -7,11 +7,12 @@ import StudyLayout from "@/components/PaperView/StudyLayout";
 interface Props {
   children: ReactNode;
   initialLectures: Lecture[];
+  initialPaperId:number;
 }
 
-export default function ClientProviderWrapper({ children, initialLectures }: Props) {
+export default function ClientProviderWrapper({ children, initialLectures, initialPaperId }: Props) {
   return (
-    <PaperViewProvider initialLectures={initialLectures} paperCode={null}>
+    <PaperViewProvider initialLectures={initialLectures} paperCode={null} initialPaperId={initialPaperId}>
       <StudyLayout>
         {children}
       </StudyLayout>

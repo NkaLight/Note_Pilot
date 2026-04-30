@@ -6,13 +6,13 @@ export async function PATCH(req:Request){
     if(secrete !== process.env.INTERNAL_SHARED_SECRETE){
         return NextResponse.json({error : "unAuthorized"}, {status: 401});
     }
-    const body = await req.json();
-    const {method, uploadId, textContent, status} = body;
     try{
+        const body = await req.json();
+        const {method, uploadId, textContent, status} = body;
         if(method === "textContent"){
-            await addTextContent(textContent, uploadId);
+            await addTextContent(textContent, Number(uploadId));
         }else if(method === "status"){
-            await updateUploadStatus(status, uploadId);
+            await updateUploadStatus(status, Number(uploadId));
         }else{
             return NextResponse.json({error:"Invalid request"}, {status:400});
         }

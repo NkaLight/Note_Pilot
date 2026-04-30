@@ -17,7 +17,7 @@ export default async function PaperViewLayout({ children, params,}: PaperViewLay
     const initialLectures = status === "ok" ? await getLecturesForPaper(paper_id, user.user_id): []; 
 
     return (
-        <ClientProviderWrapper initialLectures={initialLectures} >
+        <ClientProviderWrapper initialLectures={initialLectures} initialPaperId={Number(paperId)} >
             {children}
         </ClientProviderWrapper>
     );

@@ -11,7 +11,7 @@ class PythonServiceClient {
     this.secret = process.env.INTERNAL_SHARED_SECRETE!;
   }
 
-  async ingest(uploadId: number) {
+  async ingest(uploadId: string) {
     const res = await fetch(`${this.baseUrl}/ingest`, {
       method: "POST",
       headers: {
