@@ -1,7 +1,7 @@
 import { ServiceType } from "../error";
 import { queryLLM } from "../utils/ai-gateway";
 import { s3Client } from "@/lib/S3";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import {createNewUpload} from "@/lib/db_access/upload";
 
@@ -24,3 +24,13 @@ export async function initUpload(paperId:number){
   const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 60 });
   return {uploadId, signedUrl};
 }
+
+export async function getDownloadPdfUrl(uploadId:number){
+  const command  = new GetObjectCommand({
+    Bucket: process.env.S3_BUCKET_NAME, 
+    Key: `${uploadId}.pdf`
+  });
+  const signedUrl = await getSignedUrl(s3Client, command, {expiresIn: 180});
+  return {signedUrl};
+}
+

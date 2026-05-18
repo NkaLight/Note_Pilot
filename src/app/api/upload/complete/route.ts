@@ -6,7 +6,7 @@ import { pyClient } from "@/lib/externals/pyClient";
 
 export async function POST(req:Request){
     const {user} = await getSessionUser();
-    if(!user.user_id) return new NextResponse("Unauthorized", {status:401});
+    if(!user?.user_id) return new NextResponse("Unauthorized", {status:401});
     const formData = await req.formData();
     try{
         const uploadId = Number(formData.get("uploadId"));
@@ -22,7 +22,7 @@ export async function POST(req:Request){
         }
         console.error(`Generating the lecture title from context ${context.length}`);
         const lectureTitle:string = await getLectureTitle(context);
-        await updateFileName(lectureTitle, uploadId, paperId, user.user_id);
+        await updateFileName(lectureTitle, uploadId, user?.user_id);
         return NextResponse.json({title: lectureTitle}, {status:200});
     }catch(error){
         console.error(error);

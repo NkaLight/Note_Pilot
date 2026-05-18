@@ -1,5 +1,6 @@
 import { prisma } from "../db";
 import { Prisma } from "@prisma/client";
+import { verifyPaperId } from "./paper";
 
 export async function uploadChunk(list:any){
  const values = list.map(c => {
@@ -12,7 +13,8 @@ export async function uploadChunk(list:any){
  `;
 }
 
-export async function similaritySearch(promptVector:any, paperId:number, userId:number){
+export async function similaritySearch(promptVector:any, paperId:number, userId:number):Promise<string>{
+   if(!await verifyPaperId(paperId, userId))return"";
    const vectorString = `[${promptVector.join(",")}]`;
    const result = await prisma.$queryRaw<{ content: string }[]>`
       SELECT content, embedding OPERATOR(public.<=>) ${vectorString}::public.vector as distance 
@@ -24,4 +26,5 @@ export async function similaritySearch(promptVector:any, paperId:number, userId:
       LIMIT 5;
       `;
   return result.map(row => row.content).join("\n\n");
+
 }

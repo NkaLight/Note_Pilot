@@ -5,7 +5,7 @@ import { usePaperViewContext } from "@/context/PaperViewContext";
 import { useParams } from "next/navigation";
 import { UploadIcon } from "../Icons/FIleIcon";
 import LoadingCircles from "../LoadingCircles";
-import {CheckIcon, EditIcon, TrashIcon, XIcon } from "lucide-react";
+import {CheckIcon, EditIcon, TrashIcon, XIcon, EyeClosed, EyeIcon } from "lucide-react";
 
 type Lecture = {
   id: number;
@@ -13,13 +13,14 @@ type Lecture = {
   createdAt: Date;
 };
 
-export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>void; onDoneEvent:()=>void}) {
+export default function Upload({onClickEvent, onDoneEvent,renderPdf, stopRenderPdf }:{onClickEvent:()=>void; onDoneEvent:()=>void; renderPdf:(lectureId:number, paperId:number)=>void; stopRenderPdf:()=>void}) {
   const [isUploading, setIsUploading] = useState(false);
   const [isLoading, setIsLoading] = useState<number | boolean>(false);
   const [editingTitle, setEditingTitle] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState<number|null>(null);
+  const [viewPdfId, setViewPdfId] = useState<number|null>(null);
   const {lectures, setChosenLectureId, setLectures, chosenLectureId, code} = usePaperViewContext();
   const fileInputRef = useRef(null);
   const paperId = useParams().paperId?.toString();
@@ -69,6 +70,10 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
     }
   }
 
+  async function handleFileStream(uploadId:number, paperId:string){
+
+  }
+
   async function handleDelete(uploadId:number, paperId:string){
     setIsLoading(uploadId);
     setError("");
@@ -84,7 +89,7 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
       form.append("paperId", paperId);
       form.append("uploadId", String(uploadId));
 
-      const res = await fetch("/api/upload_v2", {method:"DELETE", body:form });
+      const res = await fetch(`/api/upload_v2/${uploadId}`, {method:"DELETE", body:form });
       if(!res.ok) throw new Error();
     }catch{
       setError("Error updating deleting the lecture");
@@ -101,8 +106,6 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
     setError("");
     try{
       const form = new FormData();
-      form.append("paperId", paperId);
-      form.append("uploadId", String(uploadId));
       form.append("newFileName", newName);
       const oldLecture  = lectures.filter(lectures => lectures.id === uploadId);
       setLectures(prevState =>
@@ -112,7 +115,7 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
           lecture
         )
       );
-      const res = await fetch("/api/upload_v2", {method:"PUT", body:form});
+      const res = await fetch(`/api/upload_v2/${uploadId}`, {method:"PUT", body:form});
       if(!res.ok){
         setError("Failed to update your lecture name");
         //Reset the state
@@ -180,24 +183,25 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
                                   }}/></span>
 
                         <span><TrashIcon 
-                                className="w-3 cursor-pointer hover:text-black hover:dark:text-white"
+                                className="w-3 cursor-pointer hover:text-black hover:dark:text-white p-0 m-0"
                                 data-testid={`delete-lecture-btn-${lecture.id}`}
                                 onClick={()=>{
                                   onClickEvent();
                                   setDeletingId(lecture.id);
                                 }}
                                 /></span>
-                        <span>{isLoading === lecture.id && <LoadingCircles className={"w-5 m-0.5 p-0 ml-1 dark:text-white "}/>}</span>
-                        <span>{deletingId === lecture.id && <CheckIcon className={"w-3 cursor-pointer hover:text-black hover:dark:text-white"} data-testid={`confirm-delete-lecture-btn-${lecture.id}`} onClick={()=>{
+                        {isLoading === lecture.id && <span><LoadingCircles className={"w-5 m-0.5 p-0 ml-1 dark:text-white "}/></span>}
+                        {deletingId === lecture.id && <span><CheckIcon className={"w-3 cursor-pointer hover:text-black hover:dark:text-white"} data-testid={`confirm-delete-lecture-btn-${lecture.id}`} onClick={()=>{
                           onClickEvent();
                           handleDelete(lecture.id, paperId);
-                        }}/>}</span>
-                        <span>{deletingId === lecture.id && <XIcon className={"w-3 cursor-pointer hover:text-black hover:dark:text-white"} onClick={()=> {setDeletingId(null); onDoneEvent();}}/>}</span>
+                        }}/></span>}
+                        {deletingId === lecture.id && <span><XIcon className={"w-3 cursor-pointer hover:text-black hover:dark:text-white"} onClick={()=> {setDeletingId(null); onDoneEvent();}}/></span>}
+                        {viewPdfId === lecture.id && <span><EyeIcon  onClick={() =>{setViewPdfId(null); stopRenderPdf();}} className="w-3 cursor-pointer hover:text-black hover:dark:text-white"/></span>}
+                        {viewPdfId !== lecture.id && <span><EyeClosed onClick={()=>{setViewPdfId(lecture.id); renderPdf(lecture.id, Number(paperId));}} className="w-3 cursor-pointer hover:text-black hover:dark:text-white"/></span>}
                     </div>
                   </>
                 )
               }
-                
             </li>
         ))}
 

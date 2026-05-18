@@ -21,12 +21,12 @@ type ApiFlashcard = { question_front: string; answer_back: string };
 
 export default function FlashcardsPage() {
   // Flashcards state
-   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
+  const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const { chosenLectureId, setCode } = usePaperViewContext();
   const paperCode = useSearchParams().get("paper_code");
-  setCode(paperCode);
+  
   
   async function makeFlashcardsFromUpload(uploadId: number) {
     setErr(null);
@@ -78,6 +78,7 @@ export default function FlashcardsPage() {
       }
     };
     syncFlashCards();
+    setCode(paperCode);
   }, [chosenLectureId]);
 
   return (

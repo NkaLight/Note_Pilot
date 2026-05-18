@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
 import { uploadChunk } from "@/lib/db_access/chunk";
+import type { NextRequest } from "next/server";
 
-export async function POST(req:Request){
-    const secrete = req.headers.get("x-internal-secret");
+export async function POST(req:NextRequest){
+    const headersList = await headers();
+    const secrete = headersList.get("x-internal-secret");
     if(secrete !== process.env.INTERNAL_SHARED_SECRETE){
         return NextResponse.json({error : "unAuthorized"}, {status: 401});
     }

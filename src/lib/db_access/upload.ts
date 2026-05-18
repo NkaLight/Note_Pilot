@@ -67,16 +67,14 @@ export async function getLecturesForPaper(paperId:number, userId:number):Promise
         throw new DbError(`Error getLecturesForPaper DbError \n\n${error}\n\n`);
     }
 }
-export async function updateFileName(newFileName:string, uploadId:number, paperId:number, userId:number){
+export async function updateFileName(newFileName:string, uploadId:number, userId:number){
     await prisma.upload.update({
         data:{
             filename:newFileName,
         },
         where:{
             upload_id:uploadId,
-            paper_id:paperId,
             paper:{
-                paper_id:paperId,
                 user_id:userId
             }
 
@@ -106,11 +104,10 @@ export async function addTextContent(newText:string, uploadId:number){
     });
 }
 
-export async function deleteUpload(paperId:number, uploadId:number, user_id:number){
+export async function deleteUpload(uploadId:number, user_id:number){
     await prisma.upload.delete({
         where:{
             upload_id:uploadId,
-            paper_id: paperId,
             paper:{
                 user_id:user_id
             }
