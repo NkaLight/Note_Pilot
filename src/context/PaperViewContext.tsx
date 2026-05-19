@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, ReactNode, useContext, useState, useEffect } from "react";
+import React, { createContext, ReactNode, useContext, useState, useEffect, SetStateAction } from "react";
 
 export type Lecture = {
   id: number;
@@ -15,6 +15,8 @@ export type Message = {
 
 type PaperViewContextType = {
   // New state for this context
+  paperId:number|null;
+  setPaperId:React.Dispatch<React.SetStateAction<number|null>>;
   lectures: Lecture[];
   setLectures: React.Dispatch<React.SetStateAction<Lecture[]>>;
   chosenLectureId: number | null;
@@ -28,6 +30,8 @@ type PaperViewContextType = {
 }
 
 const PaperViewContext = createContext<PaperViewContextType>({
+  paperId: null, 
+  setPaperId:()=>{},
   lectures: [],
   setLectures: () => {},
   chosenLectureId: null,
@@ -37,7 +41,7 @@ const PaperViewContext = createContext<PaperViewContextType>({
   chatMessages:null,
   setChatMessages:()=>{},
   setCode:()=>{},
-  code:null,
+  code:null
 });
 
 export const usePaperViewContext = ()=> useContext(PaperViewContext);
@@ -45,17 +49,18 @@ export const usePaperViewContext = ()=> useContext(PaperViewContext);
 export const PaperViewProvider = ({
     children, 
     initialLectures,
-    initialPaperId, 
+    initialPaperId,
     paperCode 
 }: { 
     children: ReactNode;
     initialLectures: Lecture[];
-    initialPaperId: number|null;
+    initialPaperId:number|null;
     paperCode:string;
 }) => {
   const [code, setCode] = useState<string>(paperCode);
   const [lectures, setLectures] = useState<Lecture[]>(initialLectures);
-  const [chosenLectureId, setChosenLectureId] = useState<number | null>(initialPaperId);
+  const [paperId, setPaperId] = useState<null|number>(initialPaperId);
+  const [chosenLectureId, setChosenLectureId] = useState<number | null>(null);
   const [selectedLectureIds, setSelectedLectureIds] = useState<number[]>([]);
   const [chatMessages, setChatMessages] = useState<Message[]|null>(null);
 
@@ -66,6 +71,8 @@ export const PaperViewProvider = ({
   return (
     <PaperViewContext.Provider 
       value={{ 
+        paperId, 
+        setPaperId,
         lectures, 
         setLectures, 
         chosenLectureId, 

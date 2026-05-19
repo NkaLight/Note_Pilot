@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["pdf-parse", "@napi-rs/canvas", "pdfjs-dist"],
+  logging: {
+    browserToTerminal:false,
+    serverFunctions: true,
+  },
   async rewrites(){
     return [
       {
@@ -15,3 +19,5 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+

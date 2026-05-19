@@ -23,7 +23,6 @@ export default function PdfViewer({ signedUrl }: { signedUrl: string }) {
 
     return () => observer.disconnect();
   }, []);
-
   return (
     <div ref={container} className="w-full h-full overflow-y-auto">
       {width > 0 && (                         // ← don't render until measured

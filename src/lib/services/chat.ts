@@ -7,6 +7,7 @@ import { pyClient } from "../externals/pyClient";
 export async function streamChat(uploadId:number ,userId: number, prompt: string, paperId:number):Promise<ReadableStream>{
     const uploadIdNum = Number(uploadId);
     const context = await getContext(prompt, paperId, userId);
+    console.log("Trying to stream chat.");
     if (!context) {
         //throw new ServiceError("Upload not found or access denied", ServiceType.CHAT_AI, 401);
         console.error("No context found due to access being denied or upload not found");

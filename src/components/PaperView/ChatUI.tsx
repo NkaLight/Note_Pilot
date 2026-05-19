@@ -33,7 +33,7 @@ export default function ChatUI() {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
-  const {chosenLectureId, paperId } = usePaperViewContext();
+  const {chosenLectureId} = usePaperViewContext();
   const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -100,7 +100,7 @@ export default function ChatUI() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ uploadId: chosenLectureId, content: input, paperId: Number(paperId) }),
+      body: JSON.stringify({ uploadId: chosenLectureId, content: input}),
      });
      if (!res.ok || !res.body) throw new Error("Stream failed");
      setInput("");
