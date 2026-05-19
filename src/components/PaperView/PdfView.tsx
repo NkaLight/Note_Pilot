@@ -25,11 +25,16 @@ export default function PdfViewer({ signedUrl }: { signedUrl: string }) {
   }, []);
   return (
     <div ref={container} className="w-full h-full overflow-y-auto">
-      {width > 0 && (                         // ← don't render until measured
+      {width > 0 && (
         <Document
           file={signedUrl}
           onLoadSuccess={({ numPages }) => setNumPages(numPages)}
           onLoadError={console.error}
+          loading={(<div className="text-center py-4">
+                        <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        <p className="text-sm text-gray-600 mt-1">Almost done...</p>
+                    </div>)
+                  }
         >
           {Array.from({ length: numPages }).map((_, i) => (
             <Page pageNumber={i + 1} width={width} key={i} />

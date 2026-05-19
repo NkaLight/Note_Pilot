@@ -17,7 +17,6 @@ export default async function PaperViewLayout({ children, params,}: PaperViewLay
     const initialLectures = status === "ok" ? await getLecturesForPaper(paper_id, user.user_id): []; 
     const initialPaperId = paperId ? Number(paperId) : null;
 
-    console.error(`The current PaperID: ${initialPaperId}`);
     return (
         <ClientProviderWrapper initialLectures={initialLectures} initialPaperId={initialPaperId}>
             {children}

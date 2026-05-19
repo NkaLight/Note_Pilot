@@ -21,6 +21,7 @@ export default function StudyLayout({ children }: StudyLayoutProps) {
     const uploadContainerRef = useRef<HTMLDivElement>(null);
     const [showPDF, setShowPDF] = useState<boolean>(false);
     const [pdfUrl, setPdfUrl] = useState<string|null>(null);
+    const [loadingPdf, setIsLoadingPdf] = useState<boolean>(false);
 
     const onPointerMove = (e:React.PointerEvent<HTMLDivElement>) =>{
         if(!isResizing || !containerRef.current) return null;
@@ -56,14 +57,20 @@ export default function StudyLayout({ children }: StudyLayoutProps) {
 
     const renderPdf = async (uploadId:number)=>{
       //api/upload_v2/[id] GET
-      const res = await fetch(`/api/upload_v2/${uploadId}`, {
-        method:"GET"
-      });
-      const data = await res.json();
-      
-      const {downloadUrl} = data;
-      setPdfUrl(downloadUrl);
-      setShowPDF(true);
+      setIsLoadingPdf(true);
+      try{
+        const res = await fetch(`/api/upload_v2/${uploadId}`, {
+          method:"GET"
+        });
+        const data = await res.json();
+        const {downloadUrl} = data;
+        setPdfUrl(downloadUrl);
+        setShowPDF(true);
+        }catch(error){
+          console.error(error);
+        }finally{
+          setIsLoadingPdf(false);
+        }
     };
     const stopRenderPdf = ()=>{
       setShowPDF(false);
@@ -92,9 +99,17 @@ export default function StudyLayout({ children }: StudyLayoutProps) {
         <div className="w-full h-full">
           {children}
         </div>
+        {loadingPdf && (
+          <div className="absolute inset-0 z-20 bg-white dark:bg-gray-900">
+            <div className="text-center py-4">
+                <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                <p className="text-sm text-gray-600 mt-1">Loading Pdf...</p>
+            </div>
+          </div>
+        )}
         {showPDF &&(
           <div className="absolute inset-0 z-20 bg-white dark:bg-gray-900">
-            <PdfViewer signedUrl={pdfUrl} />
+            <PdfViewer signedUrl={pdfUrl}/>
           </div>
         )}
       </main>
