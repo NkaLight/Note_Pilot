@@ -38,8 +38,6 @@ export async function queryLLM(systemPrompt: string, userPrompt: string, options
     });
 
     if (!resp.ok) {
-      console.error(resp);
-      console.error(resp.text);
       throw new ServiceError(`AI Provider Error: ${resp.status}`, type, 502);
     }
 

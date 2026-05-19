@@ -77,7 +77,7 @@ export async function POST(req:NextRequest){
   const parsed = postChatSchema.safeParse(body);
   if(!parsed.success){
     console.error(`Parsed error ${body}`);
-    console.error(`Parsed error ${req}`);
+    console.error(`Parsed error ${req.text}`);
     return NextResponse.json({error: parsed.error.flatten()}, {status:400});
   }
   try{

@@ -33,7 +33,7 @@ export default function ChatUI() {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
-  const {chosenLectureId} = usePaperViewContext();
+  const {chosenLectureId, paperId } = usePaperViewContext();
   const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -95,12 +95,13 @@ export default function ChatUI() {
     setMessages((prev) => [...prev, userMessage]);
     setBusy(true); 
     setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+    console.log(`Sending this {uploadId: ${chosenLectureId}, content: ${input}, paperId: ${paperId}}`);
     try {
       const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ uploadId: chosenLectureId, content: input}),
+      body: JSON.stringify({ uploadId: chosenLectureId, content: input, paperId: Number(paperId) }),
      });
      if (!res.ok || !res.body) throw new Error("Stream failed");
      setInput("");
