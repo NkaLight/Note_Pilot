@@ -58,7 +58,11 @@ export async function POST(req: Request) {
     if (!parsed.success)
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     const uploadId = parsed.data.uploadId ?? null;
-
+    if(!uploadId){
+      console.error("UploadId is null or invalid");
+      return NextResponse.json({ error:"Invalid request"}, {status:400});
+    }
+    console.error(`Calling make flashcards {uploadId: ${uploadId}, user.user_id: ${user.user_id}}`);
     const flashcards = await generateFlashCardsSet(uploadId, user.user_id);
  
     return NextResponse.json({ flashcards}, {status:200});

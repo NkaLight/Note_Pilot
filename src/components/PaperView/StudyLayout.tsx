@@ -3,6 +3,9 @@ import React, { useState, useRef } from "react";
 import ChatUI from "@/components/PaperView/ChatUI";
 import Upload from "@/components/PaperView/Upload";
 import {FileIconPlus} from "@/components/Icons/FIleIcon";
+import dynamic from "next/dynamic";
+
+const PdfViewer = dynamic(() => import("./PdfView"), { ssr: false });
 
 interface StudyLayoutProps {
   children: React.ReactNode; // Generated content such as flashcards etc.
@@ -16,6 +19,9 @@ export default function StudyLayout({ children }: StudyLayoutProps) {
     const [isResizing, setIsResizing] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const uploadContainerRef = useRef<HTMLDivElement>(null);
+    const [showPDF, setShowPDF] = useState<boolean>(false);
+    const [pdfUrl, setPdfUrl] = useState<string|null>(null);
+    const [loadingPdf, setIsLoadingPdf] = useState<boolean>(false);
 
     const onPointerMove = (e:React.PointerEvent<HTMLDivElement>) =>{
         if(!isResizing || !containerRef.current) return null;
@@ -39,12 +45,36 @@ export default function StudyLayout({ children }: StudyLayoutProps) {
         setIsResizing(true);
     };
     const keepUploadUIVisible = ()=>{
+      if (!uploadContainerRef.current) return;
       uploadContainerRef.current.style.width = "13vw";
       uploadContainerRef.current.style.opacity = "1";
     };
     const releaseUploadUI = ()=>{
+      if (!uploadContainerRef.current) return;
       uploadContainerRef.current.style.width = "";
       uploadContainerRef.current.style.opacity = "";
+    };
+
+    const renderPdf = async (uploadId:number)=>{
+      //api/upload_v2/[id] GET
+      setIsLoadingPdf(true);
+      try{
+        const res = await fetch(`/api/upload_v2/${uploadId}`, {
+          method:"GET"
+        });
+        const data = await res.json();
+        const {downloadUrl} = data;
+        setPdfUrl(downloadUrl);
+        setShowPDF(true);
+        }catch(error){
+          console.error(error);
+        }finally{
+          setIsLoadingPdf(false);
+        }
+    };
+    const stopRenderPdf = ()=>{
+      setShowPDF(false);
+      setPdfUrl(null);
     };
 
   return (
@@ -65,10 +95,24 @@ export default function StudyLayout({ children }: StudyLayoutProps) {
       />
 
       {/* (3) Middle Content (The Unique Part) */}
-      <main className="flex-grow overflow-y-auto mt-19 mb-5 pr-10">
-        {children}
+      <main className="flex-grow overflow-y-auto mt-19 mb-5 pr-10 relative">
+        <div className="w-full h-full">
+          {children}
+        </div>
+        {loadingPdf && (
+          <div className="absolute inset-0 z-20 bg-white dark:bg-gray-900">
+            <div className="text-center py-4">
+                <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                <p className="text-sm text-gray-600 mt-1">Loading Pdf...</p>
+            </div>
+          </div>
+        )}
+        {showPDF &&(
+          <div className="absolute inset-0 z-20 bg-white dark:bg-gray-900">
+            <PdfViewer signedUrl={pdfUrl}/>
+          </div>
+        )}
       </main>
-
       {/* (4) Upload Panel */}
       <aside className="group relative">
         <div ref={uploadContainerRef} 
@@ -77,7 +121,7 @@ export default function StudyLayout({ children }: StudyLayoutProps) {
             ">
           <div className="flex mt-4 text-white">FILES: <span><FileIconPlus className="h-4 p-0 m-0 mt-1 ml-1 text-white"/></span></div>
           <hr className="mb-8 mt-5"/>
-          <Upload onClickEvent={()=> keepUploadUIVisible()} onDoneEvent={()=> releaseUploadUI()}/>
+          <Upload onClickEvent={()=> keepUploadUIVisible()} onDoneEvent={()=> releaseUploadUI()} renderPdf={renderPdf} stopRenderPdf={stopRenderPdf}/>
         </div>
       </aside>
     </div>

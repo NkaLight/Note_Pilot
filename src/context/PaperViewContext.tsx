@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, ReactNode, useContext, useState, useEffect } from "react";
+import React, { createContext, ReactNode, useContext, useState, useEffect} from "react";
 
 export type Lecture = {
   id: number;
@@ -15,6 +15,8 @@ export type Message = {
 
 type PaperViewContextType = {
   // New state for this context
+  paperId:number;
+  setPaperId:React.Dispatch<React.SetStateAction<number|null>>;
   lectures: Lecture[];
   setLectures: React.Dispatch<React.SetStateAction<Lecture[]>>;
   chosenLectureId: number | null;
@@ -28,6 +30,8 @@ type PaperViewContextType = {
 }
 
 const PaperViewContext = createContext<PaperViewContextType>({
+  paperId: null, 
+  setPaperId:()=>{},
   lectures: [],
   setLectures: () => {},
   chosenLectureId: null,
@@ -45,14 +49,17 @@ export const usePaperViewContext = ()=> useContext(PaperViewContext);
 export const PaperViewProvider = ({
     children, 
     initialLectures,
+    initialPaperId,
     paperCode 
 }: { 
     children: ReactNode;
     initialLectures: Lecture[];
+    initialPaperId:number;
     paperCode:string;
 }) => {
   const [code, setCode] = useState<string>(paperCode);
   const [lectures, setLectures] = useState<Lecture[]>(initialLectures);
+  const [paperId, setPaperId] = useState<number>(initialPaperId);
   const [chosenLectureId, setChosenLectureId] = useState<number | null>(null);
   const [selectedLectureIds, setSelectedLectureIds] = useState<number[]>([]);
   const [chatMessages, setChatMessages] = useState<Message[]|null>(null);
@@ -64,6 +71,8 @@ export const PaperViewProvider = ({
   return (
     <PaperViewContext.Provider 
       value={{ 
+        paperId, 
+        setPaperId,
         lectures, 
         setLectures, 
         chosenLectureId, 

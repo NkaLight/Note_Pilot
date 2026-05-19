@@ -1,6 +1,6 @@
 import { ServiceError, ServiceType } from "@/lib/error";
 
-const DEFAULT_MODEL = "nvidia/nemotron-nano-9b-v2:free";
+const DEFAULT_MODEL = "openrouter/free";
 const API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 interface LLMOptions {
@@ -52,22 +52,6 @@ export async function queryLLM(systemPrompt: string, userPrompt: string, options
     throw new ServiceError(err.message || "AI Network Failure", type, 503);
   }
 }
-
-// export async function queryLLMStream(systemPrompt:string, userPrompt:string, options:LLMOptions){
-//   const { model = DEFAULT_MODEL, temperature, type } = options;
-//   try{
-//     const resp = await fetch(API_URL, {
-//       method:"POST", 
-//       headers:{
-//         "Content-Type": "application/json",
-//         "Authorization":`Bearer ${process.env.NVIDIA_AI_API}`,
-//         "HTTP-Referer": process.env.APP_URL || "http://localhost:3000",
-//         "X-Title": "Note Pilot",
-//       }
-//     })
-//   }
-
-// }
 
 export type StreamChunk =
   | { type: "delta"; text: string }

@@ -1,13 +1,11 @@
 import { queryLLMStream, StreamChunk } from "../utils/ai-gateway";
 import { getChatMessages, saveNewMessages } from "../db_access/chat_message";
 import { ServiceError, ServiceType } from "../error";
-import { similaritySearch } from "../db_access/chunk";
-import { pyClient } from "../externals/pyClient";
+import { getContext } from "./context";
 
-export async function streamChat(uploadId:number ,userId: number, prompt: string):Promise<ReadableStream>{
+export async function streamChat(uploadId:number ,userId: number, userInput: string, paperId:number):Promise<ReadableStream>{
     const uploadIdNum = Number(uploadId);
-    const context = await getContext(prompt, uploadIdNum, userId);
-    console.error(context);
+    const context = await getContext(userInput, paperId, userId);
     if (!context) {
         throw new ServiceError("Upload not found or access denied", ServiceType.CHAT_AI, 401);
     }
@@ -22,7 +20,7 @@ const systemPrompt = context
     : "You are a helpful study assistant. If no context is provided, say you don't have lecture material.";
 
     const history = priorMessages.map(m => `${m.role}: ${m.content}`).join("\n");
-    const fullPrompt = `${history}\nuser: ${prompt}`;
+    const fullPrompt = `${history}\nuser: ${userInput}`;
 
     let LLMText = "";
     const stream = await queryLLMStream(systemPrompt, fullPrompt, {type:ServiceType.CHAT_AI});
@@ -44,13 +42,12 @@ const systemPrompt = context
                             const parsed:StreamChunk = JSON.parse(line.slice(6));
                             if(parsed.type === "delta")LLMText += parsed.text;
                             if(parsed.type === "done"){//Update DB side.
-                                await saveNewMessages(uploadId, userId, context, LLMText); 
+                                await saveNewMessages(uploadId, userId, userInput, LLMText); 
                             }
                         }catch{
                             //ignore
                         }
                     } 
-
                     controller.enqueue(value);
                 }
                 controller.close();
@@ -65,9 +62,4 @@ const systemPrompt = context
             stream.cancel();
         }
     });
-}
-
-async function getContext(prompt:string, uploadId:number, userId:number):Promise<string>{
-    const {vectors} = await  pyClient.generateVector(prompt);
-    return await similaritySearch(vectors, uploadId, userId);
 }

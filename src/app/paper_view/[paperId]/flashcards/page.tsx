@@ -1,13 +1,3 @@
-// src/app/flashcards/page.tsx
-/**
- * FlashcardsPage
- *
- * WHAT IT DOES
- * -Renders the FlashCards blob. 
- * - on Mount, we perform GET request to /api/flashcards, on flashcards.length == 0:
- *      Generate the flashcards and return the flashcards to be rendered. 
- *
- */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -21,12 +11,11 @@ type ApiFlashcard = { question_front: string; answer_back: string };
 
 export default function FlashcardsPage() {
   // Flashcards state
-   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
+  const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const { chosenLectureId, setCode } = usePaperViewContext();
+  const { chosenLectureId} = usePaperViewContext();
   const paperCode = useSearchParams().get("paper_code");
-  setCode(paperCode);
   
   async function makeFlashcardsFromUpload(uploadId: number) {
     setErr(null);
@@ -78,7 +67,7 @@ export default function FlashcardsPage() {
       }
     };
     syncFlashCards();
-  }, [chosenLectureId]);
+  }, [chosenLectureId, paperCode]);
 
   return (
     <>

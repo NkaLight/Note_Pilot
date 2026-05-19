@@ -5,7 +5,7 @@ import { usePaperViewContext } from "@/context/PaperViewContext";
 import { useParams } from "next/navigation";
 import { UploadIcon } from "../Icons/FIleIcon";
 import LoadingCircles from "../LoadingCircles";
-import {CheckIcon, EditIcon, TrashIcon, XIcon } from "lucide-react";
+import {CheckIcon, EditIcon, TrashIcon, XIcon, EyeClosed, EyeIcon } from "lucide-react";
 
 type Lecture = {
   id: number;
@@ -13,60 +13,55 @@ type Lecture = {
   createdAt: Date;
 };
 
-export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>void; onDoneEvent:()=>void}) {
+export default function Upload({onClickEvent, onDoneEvent,renderPdf, stopRenderPdf }:{onClickEvent:()=>void; onDoneEvent:()=>void; renderPdf:(lectureId:number, paperId:number)=>void; stopRenderPdf:()=>void}) {
   const [isUploading, setIsUploading] = useState(false);
   const [isLoading, setIsLoading] = useState<number | boolean>(false);
   const [editingTitle, setEditingTitle] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState<number|null>(null);
+  const [viewPdfId, setViewPdfId] = useState<number|null>(null);
   const {lectures, setChosenLectureId, setLectures, chosenLectureId, code} = usePaperViewContext();
   const fileInputRef = useRef(null);
   const paperId = useParams().paperId?.toString();
   // Handler for when a file is selected
-  async function handleFileUpload(file: File) {
+  async function handleFileUpload(files: File[]) {
     setIsUploading(true);
     setError("");
     try {
-      const form = new FormData();
-      // Pass the paperId and file_content 
-      form.append("paperId", paperId);
-
-      const response = await fetch("/api/upload/init", {
-        method: "POST", 
-        body: form
-      });
-      if(!response.ok){
-        console.error("Error starting uploading initialization");
-        return;
-      }
-      const {uploadUrl,uploadId } = await response.json();
-      console.error(uploadUrl);
-      console.error("UploadId:", uploadId);
-      const uploadRes = await fetch(uploadUrl, {
-        method:"PUT",
-        body: file 
-      });
-      if(!uploadRes.ok){
-        console.error("Error uploading file to AWS");
-        return;
-      }
-
-      //Generate Lecture title
-      form.append("uploadId", uploadId);
-      const res = await fetch("/api/upload/complete", {
-        method:"POST", 
-        body: form
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Upload failed. Please try again.");
-      } else {
-        // 2. Success - Reset form and notify parent
-        const lectureTitle = await data.title;
-        const newLecture : Lecture = {id: uploadId, title: lectureTitle, createdAt: new Date()};
-        setLectures(prevState => [...prevState, newLecture]);
-      }
+      await Promise.all(files.map(async (file)=>{
+        const form = new FormData();
+        form.append("paperId", paperId);
+        const response = await fetch("/api/upload/init", {
+          method:"POST",
+          body: form
+        });
+        if(!response.ok){
+          console.error("Error initializing upload process");
+          return;
+        }
+        const {uploadUrl, uploadId } = await response.json();
+        const uploadRes = await fetch(uploadUrl, {
+          method: "PUT", 
+          body: file
+        });
+        if(!uploadRes.ok){
+          console.error("Erorr uploading the pdf to S3");
+        }
+        const completeForm = new FormData();
+        completeForm.append("paperId", paperId);
+        completeForm.append("uploadId", uploadId);
+        const completeRes = await fetch("/api/upload/complete", {
+          method:"POST", 
+          body: completeForm
+        });
+        if(!completeRes.ok){
+          console.error("Error fetching the lecture title");
+        }
+        const {title} = await completeRes.json();
+        const newLecture : Lecture = {id: uploadId, title: title, createdAt: new Date()};
+        setLectures(prevState => [newLecture, ...prevState]);
+      }));
     } catch {
       setError("Network or server error during upload.");
     } finally {
@@ -90,22 +85,23 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
       form.append("paperId", paperId);
       form.append("uploadId", String(uploadId));
 
-      const res = await fetch("/api/upload_v2", {method:"DELETE", body:form });
+      const res = await fetch(`/api/upload_v2/${uploadId}`, {method:"DELETE", body:form });
       if(!res.ok) throw new Error();
     }catch{
       setError("Error updating deleting the lecture");
       setLectures(oldList);
       setIsLoading(false);
+    }finally{
+      setIsLoading(false);
+      onDoneEvent();
     }
   };
 
-  async function handleFileUpdate(newName:string, uploadId:number, paperId:string){
+  async function handleFileUpdate(newName:string, uploadId:number){
     setIsLoading(uploadId);
     setError("");
     try{
       const form = new FormData();
-      form.append("paperId", paperId);
-      form.append("uploadId", String(uploadId));
       form.append("newFileName", newName);
       const oldLecture  = lectures.filter(lectures => lectures.id === uploadId);
       setLectures(prevState =>
@@ -115,7 +111,7 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
           lecture
         )
       );
-      const res = await fetch("/api/upload_v2", {method:"PUT", body:form});
+      const res = await fetch(`/api/upload_v2/${uploadId}`, {method:"PUT", body:form});
       if(!res.ok){
         setError("Failed to update your lecture name");
         //Reset the state
@@ -161,7 +157,7 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
                     onKeyDown={async(e) => {
                         if (e.key === "Enter") {
                             // call your rename handler here
-                            await handleFileUpdate(editingTitle, lecture.id, paperId);
+                            await handleFileUpdate(editingTitle, lecture.id);
                             setEditingId(null);
                         }
                         if (e.key === "Escape") setEditingId(null);
@@ -183,27 +179,27 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
                                   }}/></span>
 
                         <span><TrashIcon 
-                                className="w-3 cursor-pointer hover:text-black hover:dark:text-white"
+                                className="w-3 cursor-pointer hover:text-black hover:dark:text-white p-0 m-0"
                                 data-testid={`delete-lecture-btn-${lecture.id}`}
                                 onClick={()=>{
                                   onClickEvent();
                                   setDeletingId(lecture.id);
                                 }}
                                 /></span>
-                        <span>{isLoading === lecture.id && <LoadingCircles className={"w-5 m-0.5 p-0 ml-1 dark:text-white "}/>}</span>
-                        <span>{deletingId === lecture.id && <CheckIcon className={"w-3 cursor-pointer hover:text-black hover:dark:text-white"} data-testid={`confirm-delete-lecture-btn-${lecture.id}`} onClick={()=>{
+                        {isLoading === lecture.id && <span><LoadingCircles className={"w-5 m-0.5 p-0 ml-1 dark:text-white "}/></span>}
+                        {deletingId === lecture.id && <span><CheckIcon className={"w-3 cursor-pointer hover:text-black hover:dark:text-white"} data-testid={`confirm-delete-lecture-btn-${lecture.id}`} onClick={()=>{
                           onClickEvent();
                           handleDelete(lecture.id, paperId);
-                        }}/>}</span>
-                        <span>{deletingId === lecture.id && <XIcon className={"w-3 cursor-pointer hover:text-black hover:dark:text-white"} onClick={()=> {setDeletingId(null); onDoneEvent();}}/>}</span>
+                        }}/></span>}
+                        {deletingId === lecture.id && <span><XIcon className={"w-3 cursor-pointer hover:text-black hover:dark:text-white"} onClick={()=> {setDeletingId(null); onDoneEvent();}}/></span>}
+                        {viewPdfId === lecture.id && <span><EyeIcon  onClick={() =>{setViewPdfId(null); stopRenderPdf();}} className="w-3 cursor-pointer hover:text-black hover:dark:text-white"/></span>}
+                        {viewPdfId !== lecture.id && <span><EyeClosed onClick={()=>{setViewPdfId(lecture.id); renderPdf(lecture.id, Number(paperId));}} className="w-3 cursor-pointer hover:text-black hover:dark:text-white"/></span>}
                     </div>
                   </>
                 )
               }
-                
             </li>
         ))}
-
       </ul>
       <div 
         className="flex mt-1 ml-4 size-3 cursor-pointer dark:text-white text-black"
@@ -227,14 +223,15 @@ export default function Upload({onClickEvent, onDoneEvent}:{onClickEvent:()=>voi
           id="file-upload-input"
           type="file"
           ref={fileInputRef}
+          multiple
           // Update accepted file types as needed
           accept=".pdf" 
           className="hidden"
           disabled={isUploading}
           onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-              handleFileUpload(file);
+            const files = Array.from(e.target.files || []);
+            if (files.length > 0) {
+              handleFileUpload(files);
               e.target.value = ""; // Clear input for next selection
             }
           }}

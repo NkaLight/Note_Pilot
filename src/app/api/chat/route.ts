@@ -22,6 +22,7 @@ const getChatSchema = z.object({
 const postChatSchema = z.object({
   uploadId: z.number(),
   content: z.string(),
+  paperId: z.number()
 });
 
 const deleteChatSchema = z.object({
@@ -74,12 +75,13 @@ export async function POST(req:NextRequest){
   }
   const body = await req.json();
   const parsed = postChatSchema.safeParse(body);
-  console.error(parsed);
   if(!parsed.success){
+    console.error(`Parsed error ${body}`);
+    console.error(`Parsed error ${req.text}`);
     return NextResponse.json({error: parsed.error.flatten()}, {status:400});
   }
   try{
-    const chatResp = await streamChat(parsed.data.uploadId, user.user_id, parsed.data.content);
+    const chatResp = await streamChat(parsed.data.uploadId, user.user_id, parsed.data.content, parsed.data.paperId);
     return new Response(chatResp,{
       headers:{
         "Content-Type": "text/event-stream",
@@ -87,7 +89,7 @@ export async function POST(req:NextRequest){
       }
     });
   }catch(error){
-    console.error(error);
+    console.error(`Error querying the LLM ${error}`);
     return NextResponse.json({error:"Internal Server error"}, {status:500});
   }
 }
