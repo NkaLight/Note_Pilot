@@ -19,7 +19,7 @@ export default function PdfViewer({ signedUrl }: { signedUrl: string }) {
     });
 
     observer.observe(container.current);
-    setWidth(container.current.clientWidth); // initial measurement
+    setWidth(container.current.clientWidth);
 
     return () => observer.disconnect();
   }, []);
