@@ -10,7 +10,6 @@ export async function POST(req:Request){
     const formData = await req.formData();
     try{
         const uploadId = Number(formData.get("uploadId"));
-        const paperId = Number(formData.get("paperId"));
         const isValid = await verifyUploadId(uploadId, user.user_id);
         if(!isValid) return new NextResponse("Unauthorized", {status:401});
 

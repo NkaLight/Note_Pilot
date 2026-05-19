@@ -95,7 +95,6 @@ export default function ChatUI() {
     setMessages((prev) => [...prev, userMessage]);
     setBusy(true); 
     setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
-    console.log(`Sending this {uploadId: ${chosenLectureId}, content: ${input}, paperId: ${paperId}}`);
     try {
       const res = await fetch("/api/chat", {
       method: "POST",

@@ -21,7 +21,6 @@ export default function StudyLayout({ children }: StudyLayoutProps) {
     const uploadContainerRef = useRef<HTMLDivElement>(null);
     const [showPDF, setShowPDF] = useState<boolean>(false);
     const [pdfUrl, setPdfUrl] = useState<string|null>(null);
-    console.log(pdfUrl);
 
     const onPointerMove = (e:React.PointerEvent<HTMLDivElement>) =>{
         if(!isResizing || !containerRef.current) return null;
@@ -55,14 +54,13 @@ export default function StudyLayout({ children }: StudyLayoutProps) {
       uploadContainerRef.current.style.opacity = "";
     };
 
-    const renderPdf = async (uploadId:number, paperId:number)=>{
+    const renderPdf = async (uploadId:number)=>{
       //api/upload_v2/[id] GET
-      console.log("RENDERED PDF FROM StudyLayout");
       const res = await fetch(`/api/upload_v2/${uploadId}`, {
         method:"GET"
       });
       const data = await res.json();
-      console.log("Got download URL:", data); // ← add this
+      
       const {downloadUrl} = data;
       setPdfUrl(downloadUrl);
       setShowPDF(true);

@@ -18,7 +18,6 @@ export default function FlashcardsPage() {
   const paperCode = useSearchParams().get("paper_code");
   
   async function makeFlashcardsFromUpload(uploadId: number) {
-    console.log(`Make flashards function called ${uploadId}`);
     setErr(null);
     try {
       const res = await fetch("/api/flashcards", {

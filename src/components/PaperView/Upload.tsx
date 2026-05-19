@@ -70,10 +70,6 @@ export default function Upload({onClickEvent, onDoneEvent,renderPdf, stopRenderP
     }
   }
 
-  async function handleFileStream(uploadId:number, paperId:string){
-
-  }
-
   async function handleDelete(uploadId:number, paperId:string){
     setIsLoading(uploadId);
     setError("");
@@ -101,7 +97,7 @@ export default function Upload({onClickEvent, onDoneEvent,renderPdf, stopRenderP
     }
   };
 
-  async function handleFileUpdate(newName:string, uploadId:number, paperId:string){
+  async function handleFileUpdate(newName:string, uploadId:number){
     setIsLoading(uploadId);
     setError("");
     try{
@@ -161,7 +157,7 @@ export default function Upload({onClickEvent, onDoneEvent,renderPdf, stopRenderP
                     onKeyDown={async(e) => {
                         if (e.key === "Enter") {
                             // call your rename handler here
-                            await handleFileUpdate(editingTitle, lecture.id, paperId);
+                            await handleFileUpdate(editingTitle, lecture.id);
                             setEditingId(null);
                         }
                         if (e.key === "Escape") setEditingId(null);
@@ -204,7 +200,6 @@ export default function Upload({onClickEvent, onDoneEvent,renderPdf, stopRenderP
               }
             </li>
         ))}
-
       </ul>
       <div 
         className="flex mt-1 ml-4 size-3 cursor-pointer dark:text-white text-black"

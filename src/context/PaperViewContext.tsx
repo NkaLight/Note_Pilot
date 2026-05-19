@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, ReactNode, useContext, useState, useEffect, SetStateAction } from "react";
+import React, { createContext, ReactNode, useContext, useState, useEffect} from "react";
 
 export type Lecture = {
   id: number;
