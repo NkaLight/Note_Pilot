@@ -56,7 +56,6 @@ export const pyClient = globalForPy.pyClient || new PythonServiceClient();
 
 if (process.env.NODE_ENV !== "production") globalForPy.pyClient = pyClient;
 
-
 // headers: {
 //   "Content-Type": "application/json",
 //   "x-internal-secret": String(this.secret),
