@@ -1,14 +1,16 @@
 const PY_BASE_URL = process.env.NODE_ENV === "production" 
-    ? "http://3.25.135.61:8000" 
-    : "http://127.0.0.1:8000";
+    ? "https://ndlnk218-vector-embeddings.hf.space" 
+    : "http://localhost:8000";
 
 class PythonServiceClient {
   private baseUrl: string;
   private secret: string;
+  private huggingFaceKey: string;
 
   constructor() {
     this.baseUrl = PY_BASE_URL;
     this.secret = process.env.INTERNAL_SHARED_SECRETE!;
+    this.huggingFaceKey = process.env.HF_TOKEN_EXT_API_ACCESS;
   }
 
   async ingest(uploadId: string) {
@@ -17,6 +19,7 @@ class PythonServiceClient {
       headers: {
         "Content-Type": "application/json",
         "x-internal-secret": String(this.secret),
+        "Authorization":`Bearer  ${this.huggingFaceKey}`
       },
       body: JSON.stringify({ uploadId }),
     });
@@ -34,6 +37,7 @@ class PythonServiceClient {
       headers:{
         "Content-Type":"application/json", 
         "x-internal-secret": String(this.secret), 
+        "Authorization":`Bearer  ${this.huggingFaceKey}`
       },
       body:JSON.stringify({prompt})
     });
@@ -51,3 +55,11 @@ const globalForPy = global as unknown as { pyClient: PythonServiceClient };
 export const pyClient = globalForPy.pyClient || new PythonServiceClient();
 
 if (process.env.NODE_ENV !== "production") globalForPy.pyClient = pyClient;
+
+
+// headers: {
+//   "Content-Type": "application/json",
+//   "x-internal-secret": String(this.secret),
+//   // Only add this line if your space visibility is set to "Private"
+//   "Authorization": `Bearer ${process.env.HF_ACCESS_TOKEN}`, 
+// },
