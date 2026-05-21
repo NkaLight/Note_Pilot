@@ -45,4 +45,12 @@ Originally, the project utilized a simple HTTP-only cookie validated against the
 ### Current major limitation
 For generating vector embeddings when files are uploaded and when a user sends a new message through the chat interface, I am utilizing python microservice. The goal is to have the microservice deployed in the cheapest manner and currently its deployed as an ECS on AWS.
 
-Currrently it works locally, to demo this you will have to: - run git clone on this repo. 
+Currrently it works locally, to demo this you will have to:
+- run git clone on this repo.
+  ```
+  git clone https://github.com/NkaLight/Note_Pilot.git
+  ``` 
+- run git clone on the python microservice too
+  ```
+    git clone 
+  ``` 

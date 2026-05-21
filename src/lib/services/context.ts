@@ -14,6 +14,6 @@ import { pyClient } from "../externals/pyClient";
  * @returns text context from performing vector similarity search on the userInput
  */
 export async function getContext(userInput:string, paperId:number, userId:number):Promise<string>{
-    const {vectors} = await  pyClient.generateVector(userInput);
+    const {vectors} = await pyClient.generateVector(userInput);
     return await similaritySearch(vectors, paperId, userId);
 }

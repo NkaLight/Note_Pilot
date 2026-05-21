@@ -23,7 +23,7 @@ export function FlashcardBlock({flashcards, loading, error}:Props){
             <div className="text-center py-4">
                 <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                 <p className="text-sm text-gray-600 mt-1">Loading flashcards...</p>
-          </div>
+            </div>
         );
     }
     if(error){

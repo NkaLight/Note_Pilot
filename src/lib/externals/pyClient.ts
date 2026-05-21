@@ -14,22 +14,24 @@ class PythonServiceClient {
   }
 
   async ingest(uploadId: string) {
-    const res = await fetch(`${this.baseUrl}/ingest`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-internal-secret": String(this.secret),
-        "Authorization":`Bearer  ${this.huggingFaceKey}`
-      },
-      body: JSON.stringify({ uploadId }),
-    });
-
-    if (!res.ok) {
-      const error = await res.text();
+    try{
+      const res = await fetch(`${this.baseUrl}/ingest`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-internal-secret": String(this.secret), 
+          "Authorization":`Bearer ${this.huggingFaceKey}`
+        },
+        body: JSON.stringify({ uploadId }),
+      });
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(`Python Ingest Failed: ${error}`);
+      }
+      return res.json();
+    }catch(error){
       throw new Error(`Python Ingest Failed: ${error}`);
     }
-
-    return res.json();
   }
   async generateVector(prompt:string){
     const res = await fetch(`${this.baseUrl}/generatevector`, {
@@ -37,9 +39,10 @@ class PythonServiceClient {
       headers:{
         "Content-Type":"application/json", 
         "x-internal-secret": String(this.secret), 
-        "Authorization":`Bearer  ${this.huggingFaceKey}`
+        "Authorization":`Bearer ${this.huggingFaceKey}`
       },
-      body:JSON.stringify({prompt})
+      body:JSON.stringify({prompt}),
+      signal: AbortSignal.timeout(60_000)
     });
     if(!res.ok){
       const error = await res.text();
