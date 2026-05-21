@@ -18,7 +18,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
         return NextResponse.json({status:500, error:"Internal server error"});
     }
 }
-export async function PUT({req, params}:{req:NextRequest, params: Promise<{id:string}>}){
+export async function PUT( req: NextRequest, { params }: { params: Promise<{ id: string }> }){
     const {user} = await getSessionUser();
     const userId:number = Number(user?.user_id);
     if(!userId) return NextResponse.json({status:401, error:"Unauthorized"});
