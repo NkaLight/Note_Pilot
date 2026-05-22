@@ -1,6 +1,6 @@
 const PY_BASE_URL = process.env.NODE_ENV === "production" 
     ? "https://ndlnk218-vector-embeddings.hf.space" 
-    : "http://localhost:8000";
+    : "http://127.0.0.1:8000";
 
 class PythonServiceClient {
   private baseUrl: string;
@@ -52,16 +52,9 @@ class PythonServiceClient {
   }
 }
 
-// Singleton logic for Next.js Hot Reloading
 const globalForPy = global as unknown as { pyClient: PythonServiceClient };
 
+if (process.env.NODE_ENV !== "production") {
+  globalForPy.pyClient = new PythonServiceClient(); // always fresh in dev
+}
 export const pyClient = globalForPy.pyClient || new PythonServiceClient();
-
-if (process.env.NODE_ENV !== "production") globalForPy.pyClient = pyClient;
-
-// headers: {
-//   "Content-Type": "application/json",
-//   "x-internal-secret": String(this.secret),
-//   // Only add this line if your space visibility is set to "Private"
-//   "Authorization": `Bearer ${process.env.HF_ACCESS_TOKEN}`, 
-// },

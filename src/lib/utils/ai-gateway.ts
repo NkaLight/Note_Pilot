@@ -60,7 +60,7 @@ export type StreamChunk =
 
 export async function queryLLMStream(
   systemPrompt: string,
-  userPrompt:string,
+  userPrompt:string| {role:string, content:string}[],
   options: LLMOptions
 ){
   const {model = DEFAULT_MODEL, temperature = 0.7, type,} = options;

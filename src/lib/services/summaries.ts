@@ -74,12 +74,11 @@ Output ONLY valid markdown, no JSON, no code fences.
                 };
                 controller.close();
             }catch(e){
-                if(e instanceof ServiceError){
-                    controller.enqueue(e);
-                }else{
-                    controller.enqueue(new ServiceError("Stream interupted", ServiceType.AI_GENERATION, 500));
+                if (e instanceof ServiceError) {
+                    controller.error(e);
+                } else {
+                    controller.error(new ServiceError("Stream interrupted", ServiceType.CHAT_AI, 500));
                 }
-                controller.close();
             }
         },cancel(){
             stream.cancel();

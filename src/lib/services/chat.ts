@@ -1,29 +1,22 @@
 import { queryLLMStream, StreamChunk } from "../utils/ai-gateway";
 import { getChatMessages, saveNewMessages } from "../db_access/chat_message";
 import { ServiceError, ServiceType } from "../error";
-import { getContext } from "./context";
+import { getContextHyDE } from "./context";
+import { SYSTEM_PROMPT_CHAT } from "../prompts/rules"; 
 
 export async function streamChat(uploadId:number ,userId: number, userInput: string, paperId:number):Promise<ReadableStream>{
-    const uploadIdNum = Number(uploadId);
-    const context = await getContext(userInput, paperId, userId);
+    const priorMessages = (await getChatMessages(uploadId, userId)).map(m=>({role:m.role as "user"|"assistant", content: m.content}));
+    const {context, filteredHistory} = await getContextHyDE(userInput, paperId, userId, priorMessages);
     if (!context) {
         throw new ServiceError("Upload not found or access denied", ServiceType.CHAT_AI, 401);
     }
-    const priorMessages = await getChatMessages(uploadIdNum, userId);
-
-const systemPrompt = context
-  ? `You are a helpful study assistant.
-    Answer ONLY using the provided lecture material.
-    If the answer is not in the material, say "I don't know based on the uploaded course material please upload more content about the paper."
-    Lecture material:
-    ${context}`
-    : "You are a helpful study assistant. If no context is provided, say you don't have lecture material.";
-
-    const history = priorMessages.map(m => `${m.role}: ${m.content}`).join("\n");
-    const fullPrompt = `${history}\nuser: ${userInput}`;
-
+    const systemPrompt = SYSTEM_PROMPT_CHAT(context);
+    const messages = [
+        ...filteredHistory, 
+        {"role": "user", "content": userInput}
+    ];
     let LLMText = "";
-    const stream = await queryLLMStream(systemPrompt, fullPrompt, {type:ServiceType.CHAT_AI});
+    const stream = await queryLLMStream(systemPrompt, messages, {type:ServiceType.CHAT_AI});
     return new ReadableStream({
         async start(controller){
             const reader = stream.getReader();
