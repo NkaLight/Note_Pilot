@@ -20,54 +20,25 @@ export async function getQuestionsWithAnswers(uploadId:number, userId:number){
     }
 }
 
-export async function evaluateAnswer(question, answer, userAnswer){
-    const evaluationPrompt = `
-            You are an exam evaluator. Compare the student's answer with the correct answer and provide constructive feedback.
-            
-            Return your response as valid JSON in this exact format:
-            {
-                "feedback": "Detailed feedback explaining what was good and what could be improved...",
-                "score": 0.85
-            }
-            
-            The score should be between 0 and 1, where 1 is perfect.
-            
-            Question: ${question}
-            Correct Answer: ${answer}
-            Student Answer: ${userAnswer}
-            `;
-    const systemPrompt = "You are an AI that outputs JSON only.";
-    const jsonText = await queryLLM(systemPrompt, evaluationPrompt, {type:ServiceType.AI_GENERATION});
-    try{
-        const parsed = JSON.parse(jsonText);
-        return{
-            feedback: parsed.feedback || "Unable to generate feedback", 
-            score: parsed.score || 0 
-        };
-    }catch(err){
-        if (err instanceof ServiceError || err instanceof DbError) throw err;
-        throw new ServiceError("Invalid AI response format", ServiceType.AI_GENERATION);
-    }
-
-}
-
 export async function evaluateAnswerStream(question, answer, userAnswer):Promise<ReadableStream>{
     const evaluationPrompt = `
-            You are an exam evaluator. Compare the student's answer with the correct answer and provide constructive feedback.
-            
-            Return your response as valid JSON in this exact format:
-            {
-                "feedback": "Detailed feedback explaining what was good and what could be improved...",
-                "score": 0.85
-            }
-            
-            The score should be between 0 and 1, where 1 is perfect.
-            
-            Question: ${question}
-            Correct Answer: ${answer}
-            Student Answer: ${userAnswer}
-            `;
-    const systemPrompt = "You are an AI that outputs JSON only.";
+        Compare the student's answer with the correct answer and return JSON only.
+
+        Rules:
+        - If the student's answer is irrelevant or too vague, score 0.
+
+        Return format:
+        {
+        "feedback": "...",
+        "score": 0.85,
+        "missed_concepts": ["concept1", "concept2"]
+        }
+
+        Question: ${question}
+        Correct Answer: ${answer}
+        Student Answer: ${userAnswer}
+        `;
+    const systemPrompt = "You are an AI that outputs JSON only. You are an automated evaluation system, not a person. Output factual, source-attributed assessments only";
     const stream = await queryLLMStream(systemPrompt, evaluationPrompt, {type:ServiceType.AI_GENERATION});
     return new ReadableStream({
         async start(controller){

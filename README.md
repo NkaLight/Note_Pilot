@@ -3,7 +3,7 @@
 ![E2E Tests](https://github.com/NkaLight/Note_Pilot/actions/workflows/playwright.yml/badge.svg)
 
 ## Description:
-Note pilot is a study dashboard focused on helping users learn faster and more efficiently using LLMs in a more safer and reliable manner. Unlike regular chatbot sessions, lecture pdfs are used to generate study content based on those specific lectures such as flash-cards, exam style questions, summaries etc. 
+Note pilot is a study dashboard focused on helping users learn faster and more efficiently using LLMs in a reliable manner. Unlike regular chatbot sessions, lecture pdfs are used to generate study content based on those specific lectures such as flash-cards, exam style questions, summaries etc. 
 
 
 
@@ -32,25 +32,19 @@ https://note-pilot-nu.vercel.app
 - Unit: Jest
 
 # Architecture
+The application consists of a number of moving parts:
+- **Next.js** application hosted on Vercel
+- **Python microservice** hosted on HuggingFace Space
+  - Python microservice performs the pdf-to-text extraction(the fastest of all the libs), chunking and vectorization on upload pdf and user query. Before I used AWS ECS so I can say I used AWS but then AWS charged me $0.2 last month so I switched to this free service.
+- **Embedding model** hosted on the google servers AI-studio
+  - Vectorizes the chunks.
+- **LLM reflex agent** hosted on OpenRouter.(OpenRouter picks and chooses whichever model to use)
+  - Consumes the built prompt with all the necessary context and returns text data to be rendered by Next.js application.
 
-### Authentication & Authorization
-Originally, the project utilized a simple HTTP-only cookie validated against the database on every request. To improve scalability and latency, the system uses a **Hybrid JWT Model**:
-* **Access Token:** Short-lived JWT validated server-side for speed.
-* **Refresh Token:** Long-lived token used to rotate access tokens, maintaining security without sacrificing user experience.
-
-### Study Material generation
-* **User uploads lecture pdf:** text data is extracted and stored in a relational database. This data is used as context when prompting the LLM, for the various features delivered.
+The application is designed to be as agnostic as possible as to which LLM is used as for my use case the value of how good the model performs is more tied to prompting techniques and RAG strategies.    
 
 
 ### Current major limitation
-For generating vector embeddings when files are uploaded and when a user sends a new message through the chat interface, I am utilizing python microservice. The goal is to have the microservice deployed in the cheapest manner and currently its deployed as an ECS on AWS.
+I have setup configs for getting a simple RAG setup working which you can test on the application hosted [here](https://note-pilot-nu.vercel.app). Whilst I have moved from naive context fetching directly from user input to Hypothetical Document Embeddings **I still lack an empirical evaluation framework**. Upstream adjustments (like switching to HyDE, decreasing/increasing vector dimensions, switching to dynamic chunking based on lecture sections) are all currently **guided by theoretical benchmarks from literature** rather than **deterministic, project-specific metrics**.
 
-Currrently it works locally, to demo this you will have to:
-- run git clone on this repo.
-  ```
-  git clone https://github.com/NkaLight/Note_Pilot.git
-  ``` 
-- run git clone on the python microservice too
-  ```
-    git clone 
-  ``` 
+The **GOAL** now is to integrate an evaluation framework (such as RAGAS, TruLens or establish my own) to quantitatively measure context precision, context recall, and faithfulness against user queries.
