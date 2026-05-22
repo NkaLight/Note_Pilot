@@ -4,21 +4,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { streamChat } from "@/lib/services/chat";
 import { z } from "zod";
 
-/**
- * Chat API endpoints for persistent chat message management
- * 
- * WHAT IT DOES:
- * GET: Retrieve chat history for specific uploads
- * POST: Save new chat messages to database
- * DELETE: Clear chat history for specific uploads
- * Links chat messages to uploads and users for persistence
- */
-
-// Validation schemas
 const getChatSchema = z.object({
   uploadId: z.coerce.number(),
 });
-
 const postChatSchema = z.object({
   uploadId: z.number(),
   content: z.string(),
@@ -76,8 +64,6 @@ export async function POST(req:NextRequest){
   const body = await req.json();
   const parsed = postChatSchema.safeParse(body);
   if(!parsed.success){
-    console.error(`Parsed error ${body}`);
-    console.error(`Parsed error ${req.text}`);
     return NextResponse.json({error: parsed.error.flatten()}, {status:400});
   }
   try{
