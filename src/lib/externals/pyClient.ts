@@ -54,7 +54,5 @@ class PythonServiceClient {
 
 const globalForPy = global as unknown as { pyClient: PythonServiceClient };
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPy.pyClient = new PythonServiceClient(); // always fresh in dev
-}
 export const pyClient = globalForPy.pyClient || new PythonServiceClient();
+if (process.env.NODE_ENV !== "production") globalForPy.pyClient = pyClient;
